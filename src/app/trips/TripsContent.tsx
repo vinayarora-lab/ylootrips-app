@@ -1,15 +1,18 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { ArrowUpRight, Filter, Search, Loader2 } from 'lucide-react';
+import { ArrowUpRight, Filter, Search, Loader2, Sparkles } from 'lucide-react';
+import Link from 'next/link';
 import TripCard from '@/components/TripCard';
 import { api } from '@/lib/api';
 import { Trip } from '@/types';
+import { useVisitor } from '@/context/VisitorContext';
 
 // Default categories (will be replaced by dynamic ones from API)
 const defaultCategories = ['All', 'Trekking', 'Tour', 'Adventure', 'Camping', 'International', 'Beach', 'Honeymoon'];
 
 export default function TripsContent() {
+    const { visitor } = useVisitor();
     const [trips, setTrips] = useState<Trip[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -123,15 +126,62 @@ export default function TripsContent() {
         fetchTrips(nextPage, true);
     };
 
+    // Foreigners see only India trips (hide 'International' outbound category)
+    const displayedTrips = visitor === 'foreigner'
+        ? trips.filter((t) => (t.category || '').toLowerCase() !== 'international')
+        : trips;
+
+    // Also hide the 'International' category pill from the filter bar for foreigners
+    const displayedCategories = visitor === 'foreigner'
+        ? categories.filter((c) => c.toLowerCase() !== 'international')
+        : categories;
+
     return (
         <>
+            {/* Visitor context banner */}
+            {visitor === 'foreigner' && (
+                <div className="bg-secondary/10 border-b border-secondary/20 py-3">
+                    <div className="section-container flex items-center gap-2 text-sm text-secondary">
+                        <span>🌍</span>
+                        <span>Showing India trips curated for international visitors</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Featured Itineraries Bar */}
+            <div className="bg-secondary/5 border-b border-secondary/15 py-3">
+                <div className="section-container">
+                    <div className="flex flex-nowrap items-center gap-2 md:gap-3 overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0">
+                        <div className="flex items-center gap-1.5 shrink-0 text-xs font-semibold uppercase tracking-widest text-secondary/70 pr-2 border-r border-secondary/20">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Curated Tours</span>
+                        </div>
+                        {[
+                            { label: '10-Day Golden Triangle', href: '/tours/golden-triangle-10-day', from: 'From $1,400' },
+                            { label: '14-Day Kerala & South India', href: '/tours/kerala-south-india-14-day', from: 'From $1,900' },
+                            { label: '7-Day Rajasthan Heritage', href: '/tours/rajasthan-heritage-7-day', from: 'From $950' },
+                        ].map((tour) => (
+                            <Link
+                                key={tour.href}
+                                href={tour.href}
+                                className="shrink-0 flex items-center gap-2 px-3 py-1.5 bg-white border border-secondary/20 hover:border-secondary hover:bg-secondary/5 transition-all group"
+                            >
+                                <span className="text-xs font-medium text-primary whitespace-nowrap">{tour.label}</span>
+                                <span className="text-[10px] text-secondary/70 whitespace-nowrap hidden sm:inline">{tour.from}</span>
+                                <ArrowUpRight className="w-3 h-3 text-secondary/50 group-hover:text-secondary transition-colors shrink-0" />
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
             {/* Filters Section - compact on mobile so trip cards are visible */}
             <section className="py-4 md:py-8 border-b border-primary/10 bg-cream md:sticky md:top-20 z-30">
                 <div className="section-container">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6">
                         {/* Categories - single-row horizontal scroll on mobile, wrap on desktop */}
                         <div className="flex flex-nowrap md:flex-wrap gap-2 md:gap-3 overflow-x-auto md:overflow-visible pb-1 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
-                            {categories.map((category) => (
+                            {displayedCategories.map((category) => (
                                 <button
                                     key={category}
                                     onClick={() => handleCategoryClick(category)}
@@ -187,7 +237,7 @@ export default function TripsContent() {
                         <p className="text-primary/60">
                             {loading ? 'Loading...' : (
                                 <>
-                                    Showing <span className="font-medium text-primary">{trips.length}</span>
+                                    Showing <span className="font-medium text-primary">{displayedTrips.length}</span>
                                     {totalElements > trips.length && (
                                         <> of <span className="font-medium text-primary">{totalElements}</span></>
                                     )}
@@ -204,9 +254,9 @@ export default function TripsContent() {
                                 <div key={i} className="h-[500px] bg-cream-dark animate-pulse rounded-lg" />
                             ))}
                         </div>
-                    ) : trips.length > 0 ? (
+                    ) : displayedTrips.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                            {trips.map((trip, index) => (
+                            {displayedTrips.map((trip, index) => (
                                 <TripCard key={trip.id} trip={trip} index={index} />
                             ))}
                         </div>

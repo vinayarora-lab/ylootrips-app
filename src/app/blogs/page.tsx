@@ -23,6 +23,49 @@ interface Blog {
 
 const categories = ['All', 'Destinations', 'Philosophy', 'Responsible Travel', 'Tips', 'Food & Culture', 'Guides'];
 
+const staticGuides = [
+  {
+    title: 'Best Time to Visit India — Month by Month Guide 2025',
+    description: 'When is the best time to visit India? Month-by-month breakdown of weather, festivals, crowds, and prices. Find your perfect travel window.',
+    href: '/blogs/best-time-to-visit-india',
+    image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=600&q=80',
+    tag: 'Travel Planning',
+    read: '8 min read',
+  },
+  {
+    title: 'First Time in India? Complete 2025 Guide for International Travelers',
+    description: 'Everything you need before visiting India — visa, safety, money, food, transport, and the best places to start.',
+    href: '/blogs/first-time-india-guide',
+    image: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=600&q=80',
+    tag: 'Beginners Guide',
+    read: '12 min read',
+  },
+  {
+    title: 'India vs Thailand: Which Should You Visit First?',
+    description: 'Cost, safety, food, beaches, culture — an honest head-to-head comparison to help you decide.',
+    href: '/blogs/india-vs-thailand',
+    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=600&q=80',
+    tag: 'Destination Compare',
+    read: '7 min read',
+  },
+  {
+    title: 'Solo Female Travel in India: Honest Safety Guide 2025',
+    description: 'Safe cities, transport tips, dress code, accommodation advice, and how to handle unwanted attention — the guide no one else writes.',
+    href: '/blogs/solo-female-travel-india',
+    image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=600&q=80',
+    tag: 'Solo Travel',
+    read: '10 min read',
+  },
+  {
+    title: 'How to Plan a 2-Week India Trip on a $2,000 Budget',
+    description: 'Full budget breakdown, where to save vs splurge, and a complete 14-day Delhi → Agra → Jaipur → Rajasthan itinerary.',
+    href: '/blogs/2-week-india-trip-budget',
+    image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=600&q=80',
+    tag: 'Budget Travel',
+    read: '8 min read',
+  },
+];
+
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,6 +127,54 @@ export default function BlogsPage() {
               >
                 {category}
               </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Static India Travel Guides — always visible */}
+      <section className="py-14 md:py-20 bg-cream">
+        <div className="section-container">
+          <div className="mb-10">
+            <p className="text-caption uppercase tracking-[0.3em] text-secondary mb-3">India Travel Guides</p>
+            <h2 className="font-display text-display-lg text-primary">
+              Essential reads for <span className="italic">first-time visitors</span>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {staticGuides.map((guide) => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                className="group block bg-cream-light border border-primary/8 overflow-hidden hover:shadow-lg transition-all duration-500"
+              >
+                <div className="relative h-52 overflow-hidden">
+                  <Image
+                    src={guide.image}
+                    alt={guide.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-primary/20" />
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 bg-accent text-primary text-[10px] uppercase tracking-widest font-medium">
+                      {guide.tag}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h3 className="font-display text-lg text-primary group-hover:text-secondary transition-colors mb-2 leading-snug">
+                    {guide.title}
+                  </h3>
+                  <p className="text-sm text-primary/55 leading-relaxed mb-4 line-clamp-2">
+                    {guide.description}
+                  </p>
+                  <div className="flex items-center justify-between text-caption text-primary/40 uppercase tracking-wider">
+                    <span>YlooTrips Editorial</span>
+                    <span>{guide.read}</span>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>

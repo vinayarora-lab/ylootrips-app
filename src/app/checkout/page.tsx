@@ -5,13 +5,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar, Users, MapPin, Lock, CheckCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Trip } from '@/types';
-import { formatPrice } from '@/lib/utils';
+import { formatPriceWithCurrency } from '@/lib/utils';
 import PaymentMethods from '@/components/PaymentMethods';
 import TrustBadges from '@/components/TrustBadges';
+import CheckoutStepper from '@/components/CheckoutStepper';
+import { useCurrency } from '@/context/CurrencyContext';
+import { useVisitor } from '@/context/VisitorContext';
 
 function CheckoutContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { currency } = useCurrency();
+    const { visitor } = useVisitor();
+    const fp = (p: number) => formatPriceWithCurrency(p, currency);
 
     const tripId = searchParams.get('tripId');
     const guests = Number(searchParams.get('guests')) || 1;
@@ -182,7 +188,16 @@ function CheckoutContent() {
         <div className="min-h-screen bg-cream py-8 md:py-16">
             <div className="section-container">
                 <div className="max-w-5xl mx-auto">
-                    <h1 className="font-display text-2xl sm:text-3xl md:text-display-xl mb-6 md:mb-8 pt-6 md:pt-8">Complete Your Booking</h1>
+                    <h1 className="font-display text-2xl sm:text-3xl md:text-display-xl mb-2 pt-6 md:pt-8">Complete Your Booking</h1>
+                    {visitor === 'foreigner' && (
+                        <p className="text-secondary mb-4 flex items-center gap-2">
+                            <span>💳</span>
+                            <span>International cards accepted · Prices shown in {currency}</span>
+                        </p>
+                    )}
+
+                    {/* Progress stepper */}
+                    <CheckoutStepper currentStep={2} />
 
                     <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
                         <div className="lg:col-span-2">
@@ -310,6 +325,12 @@ function CheckoutContent() {
                                 </section>
 
                                 <section>
+                                    {visitor === 'foreigner' && (
+                                        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 text-sm text-blue-800 rounded">
+                                            <p className="font-medium mb-1">💳 International Payment Info</p>
+                                            <p className="text-blue-700">Payment is processed securely in INR via our payment gateway. Your bank will automatically convert to your local currency at the current exchange rate. No surcharges from our side — Visa, Mastercard, and Amex accepted.</p>
+                                        </div>
+                                    )}
                                     <PaymentMethods
                                         selectedMethod={formData.paymentMethod}
                                         onMethodChange={(method) => {
@@ -324,8 +345,9 @@ function CheckoutContent() {
                                         selectedEmi={selectedEmi}
                                         onEmiChange={(emi) => setSelectedEmi(emi)}
                                         onHalfPaymentCardTypeChange={(cardType) => setHalfPaymentCardType(cardType)}
+                                        isInternational={visitor === 'foreigner'}
                                     />
-                                    <TrustBadges />
+                                    <TrustBadges isInternational={visitor === 'foreigner'} />
                                 </section>
 
                                 <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:gap-4 pt-6">
@@ -353,21 +375,21 @@ function CheckoutContent() {
                                     {trip.originalPrice && trip.originalPrice > trip.price && (
                                         <div className="flex justify-between text-body-lg text-text-secondary">
                                             <span className="line-through">Original Price</span>
-                                            <span className="line-through">{formatPrice(trip.originalPrice)} × {formData.numberOfGuests}</span>
+                                            <span className="line-through">{fp(trip.originalPrice)} × {formData.numberOfGuests}</span>
                                         </div>
                                     )}
 
                                     {/* Current Trip Price */}
                                     <div className="flex justify-between text-body-lg">
                                         <span>Trip Price</span>
-                                        <span className="font-medium">{formatPrice(trip.price)} × {formData.numberOfGuests}</span>
+                                        <span className="font-medium">{fp(trip.price)} × {formData.numberOfGuests}</span>
                                     </div>
 
                                     {/* Show savings if original price was higher */}
                                     {trip.originalPrice && trip.originalPrice > trip.price && (
                                         <div className="flex justify-between text-body-sm text-success">
                                             <span>You Save</span>
-                                            <span>-{formatPrice((trip.originalPrice - trip.price) * formData.numberOfGuests)}</span>
+                                            <span>-{fp((trip.originalPrice - trip.price) * formData.numberOfGuests)}</span>
                                         </div>
                                     )}
 
@@ -375,27 +397,31 @@ function CheckoutContent() {
                                     {discountPercent > 0 && (
                                         <div className="flex justify-between text-body-lg text-success">
                                             <span>Payment Discount ({discountPercent}%)</span>
-                                            <span>-{formatPrice(discountAmount)}</span>
+                                            <span>-{fp(discountAmount)}</span>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="pt-6 border-t border-primary/10 mb-6">
+                                <div className="pt-6 border-t border-primary/10 mb-3">
                                     <div className="flex justify-between items-center">
                                         <span className="text-lg md:text-xl font-light">Total</span>
-                                        <span className="text-2xl md:text-3xl font-light">{formatPrice(totalPrice)}</span>
+                                        <span className="text-2xl md:text-3xl font-light">{fp(totalPrice)}</span>
                                     </div>
+                                    <p className="text-xs text-green-700 font-medium mt-1 flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                                        No hidden fees · all taxes included
+                                    </p>
                                 </div>
 
-                                <div className="space-y-3 text-body-sm text-text-secondary">
+                                <div className="space-y-2 text-body-sm text-text-secondary mb-3">
                                     <div className="flex items-start gap-2">
                                         <CheckCircle size={16} className="text-success mt-1 shrink-0" />
                                         <span>Instant confirmation</span>
                                     </div>
-                                    {/* <div className="flex items-start gap-2">
+                                    <div className="flex items-start gap-2">
                                         <CheckCircle size={16} className="text-success mt-1 shrink-0" />
-                                        <span>Free cancellation up to 24 hours</span>
-                                    </div> */}
+                                        <span>Free cancellation up to 7 days before departure</span>
+                                    </div>
                                     <div className="flex items-start gap-2">
                                         <CheckCircle size={16} className="text-success mt-1 shrink-0" />
                                         <span>24/7 customer support</span>

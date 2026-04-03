@@ -9,6 +9,7 @@ import DestinationCard from '@/components/DestinationCard';
 import EmptyStateCustomPlan from '@/components/EmptyStateCustomPlan';
 import { api } from '@/lib/api';
 import { Destination } from '@/types';
+import { useVisitor } from '@/context/VisitorContext';
 
 interface PageContent {
   hero: { eyebrow: string; title: string; subtitle: string; imageUrl: string };
@@ -17,6 +18,7 @@ interface PageContent {
 const regions = ['All Regions', 'Asia', 'Europe', 'Africa', 'Americas'];
 
 function DestinationsContent() {
+  const { visitor } = useVisitor();
   const [pageContent, setPageContent] = useState<PageContent | null>(null);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,8 +55,13 @@ function DestinationsContent() {
     fetchDestinations();
   }, []);
 
+  // Foreigners see only India destinations; Indians see everything
+  const visitorFiltered = visitor === 'foreigner'
+    ? destinations.filter((d) => !d.country || d.country === 'India')
+    : destinations;
+
   const filteredDestinations =
-    activeRegion === 'All Regions' ? destinations : destinations.filter((d) => d.region === activeRegion);
+    activeRegion === 'All Regions' ? visitorFiltered : visitorFiltered.filter((d) => d.region === activeRegion);
   const featuredDestination = filteredDestinations[0];
 
   return (
@@ -66,10 +73,10 @@ function DestinationsContent() {
         backgroundImage={pageContent?.hero?.imageUrl}
       />
 
-      {/* Scope: All (stay) | Domestic | International (links to distinct pages) */}
+      {/* Scope tabs — International outbound tab hidden for foreign visitors */}
       <section className="py-4 md:py-6 border-b border-primary/10 bg-cream">
         <div className="section-container">
-          <div className="flex flex-wrap gap-2 sm:gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
             <span className="px-4 py-2 md:px-6 md:py-3 text-xs md:text-caption uppercase tracking-widest bg-primary text-cream">
               All
             </span>
@@ -77,14 +84,21 @@ function DestinationsContent() {
               href="/destinations/domestic"
               className="px-4 py-2 md:px-6 md:py-3 text-xs md:text-caption uppercase tracking-widest bg-cream-dark text-primary hover:bg-primary/10 transition-all"
             >
-              Domestic
+              {visitor === 'foreigner' ? 'India Regions' : 'Domestic'}
             </Link>
-            <Link
-              href="/destinations/international"
-              className="px-4 py-2 md:px-6 md:py-3 text-xs md:text-caption uppercase tracking-widest bg-cream-dark text-primary hover:bg-primary/10 transition-all"
-            >
-              International
-            </Link>
+            {visitor !== 'foreigner' && (
+              <Link
+                href="/destinations/international"
+                className="px-4 py-2 md:px-6 md:py-3 text-xs md:text-caption uppercase tracking-widest bg-cream-dark text-primary hover:bg-primary/10 transition-all"
+              >
+                International
+              </Link>
+            )}
+            {visitor === 'foreigner' && (
+              <span className="ml-2 text-caption text-secondary/70 italic">
+                Showing India destinations only
+              </span>
+            )}
           </div>
         </div>
       </section>

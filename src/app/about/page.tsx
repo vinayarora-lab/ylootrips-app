@@ -1,7 +1,20 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight, Users, Award, Globe, Heart } from 'lucide-react';
 import PageHero from '@/components/PageHero';
+
+export const metadata: Metadata = {
+  title: 'About YlooTrips — India\'s Trusted Travel Experts Since 2012',
+  description: 'YlooTrips has been crafting bespoke India journeys since 2012. 25,000+ happy travelers, 98% satisfaction rate, and guides who know every hidden gem. Learn our story.',
+  keywords: 'about YlooTrips, India travel company, best India travel agency, trusted India tour operator, India travel experts',
+  openGraph: {
+    title: 'About YlooTrips | India\'s Trusted Travel Experts',
+    description: 'Crafting bespoke India journeys since 2012. 25,000+ happy travelers, 98% satisfaction rate.',
+    url: 'https://www.ylootrips.com/about',
+  },
+  alternates: { canonical: 'https://www.ylootrips.com/about' },
+};
 
 const team = [
   {

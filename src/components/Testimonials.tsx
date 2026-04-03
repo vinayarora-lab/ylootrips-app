@@ -64,17 +64,21 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
                             </p>
                             
                             <div className="flex items-center gap-3">
-                                {(testimonial.userImage || testimonial.userAvatar) && (
+                                {(testimonial.userImage || testimonial.userAvatar) ? (
                                     <img
                                         src={(testimonial.userImage || testimonial.userAvatar) as string}
                                         alt={testimonial.userName}
-                                        className="w-12 h-12 rounded-full object-cover border border-border"
+                                        className="w-12 h-12 rounded-full object-cover border border-border shrink-0"
                                     />
+                                ) : (
+                                    <div className="w-12 h-12 rounded-full bg-primary text-cream flex items-center justify-center text-lg font-semibold shrink-0">
+                                        {testimonial.userName?.charAt(0)?.toUpperCase() || '?'}
+                                    </div>
                                 )}
-                                <div className="font-medium text-foreground mb-1">
-                                    {testimonial.userName}
-                                </div>
                                 <div>
+                                    <div className="font-medium text-foreground mb-1">
+                                        {testimonial.userName}
+                                    </div>
                                     {testimonial.userTitle && (
                                         <div className="text-sm text-text-secondary font-light">
                                             {testimonial.userTitle}

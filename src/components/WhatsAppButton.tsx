@@ -1,36 +1,41 @@
 'use client';
 
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Clock } from 'lucide-react';
 
 interface WhatsAppButtonProps {
-    phoneNumber?: string;
-    message?: string;
+  phoneNumber?: string;
+  message?: string;
 }
 
 export default function WhatsAppButton({
-    phoneNumber = '918427831127',
-    message = 'Hi! I am interested in booking a trip. Can you help me?'
+  phoneNumber = '918427831127',
+  message = 'Hi! I am interested in booking an India trip. Can you help me plan a custom itinerary?',
 }: WhatsAppButtonProps) {
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${phoneNumber.replace(/\D/g, '')}?text=${encodedMessage}`;
+  const encodedMessage = encodeURIComponent(message);
+  const whatsappUrl = `https://wa.me/${phoneNumber.replace(/\D/g, '')}?text=${encodedMessage}`;
 
-    return (
-        <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="fixed bottom-20 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 group inline-flex items-center justify-center"
-            aria-label="Chat on WhatsApp"
-        >
-            <MessageCircle size={28} className="fill-white" />
+  return (
+    <a
+      href={whatsappUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Chat on WhatsApp — we reply within 1 hour"
+      className="fixed bottom-24 right-5 z-50 group flex flex-col items-end gap-2"
+    >
+      {/* Reply-time badge — shows on hover */}
+      <div className="flex items-center gap-1.5 bg-white text-gray-700 text-xs font-medium px-3 py-1.5 rounded-full shadow-lg border border-gray-100 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none whitespace-nowrap">
+        <Clock size={12} className="text-green-500 shrink-0" />
+        <span>We reply within <strong>1 hour</strong></span>
+      </div>
 
-            {/* Tooltip */}
-            <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white text-gray-800 px-3 py-2 rounded-lg shadow-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                Chat with us
-            </span>
+      {/* Main button */}
+      <div className="relative bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center gap-2">
+        <MessageCircle size={24} className="fill-white shrink-0" />
+        <span className="text-sm font-semibold pr-1 hidden sm:block">Chat with us</span>
 
-            {/* Pulse animation */}
-            <span className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-25 pointer-events-none"></span>
-        </a>
-    );
+        {/* Pulse ring */}
+        <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20 pointer-events-none" />
+      </div>
+    </a>
+  );
 }

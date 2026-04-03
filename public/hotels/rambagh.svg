@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none">
+  <rect width="200" height="100" fill="white"/>
+  <text x="100" y="30" font-family="Georgia, serif" font-size="8" fill="#b8960c" text-anchor="middle" letter-spacing="4">✦ JAIPUR ✦</text>
+  <text x="100" y="54" font-family="Georgia, serif" font-size="19" font-style="italic" fill="#1a1714" text-anchor="middle">Rambagh</text>
+  <line x1="35" y1="60" x2="165" y2="60" stroke="#b8960c" stroke-width="0.8"/>
+  <text x="100" y="73" font-family="Arial, sans-serif" font-size="7" fill="#888" text-anchor="middle" letter-spacing="3">PALACE</text>
+  <text x="100" y="84" font-family="Arial, sans-serif" font-size="6" fill="#b8960c" text-anchor="middle" letter-spacing="2">A TAJ HOTEL</text>
+</svg>

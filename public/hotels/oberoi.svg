@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none">
+  <rect width="200" height="100" fill="white"/>
+  <text x="100" y="38" font-family="Georgia, serif" font-size="10" fill="#888" text-anchor="middle" letter-spacing="6">THE</text>
+  <text x="100" y="62" font-family="Georgia, serif" font-size="22" fill="#1a1714" text-anchor="middle" letter-spacing="3">OBEROI</text>
+  <line x1="55" y1="68" x2="145" y2="68" stroke="#b8960c" stroke-width="0.8"/>
+  <text x="100" y="79" font-family="Arial, sans-serif" font-size="7" fill="#888" text-anchor="middle" letter-spacing="3">HOTELS &amp; RESORTS</text>
+</svg>

@@ -4,7 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Clock, Star, ArrowUpRight } from 'lucide-react';
 import { Trip } from '@/types';
-import { formatPrice, calculateDiscount } from '@/lib/utils';
+import { formatPriceWithCurrency, calculateDiscount } from '@/lib/utils';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface TripCardProps {
     trip: Trip;
@@ -12,10 +13,19 @@ interface TripCardProps {
     variant?: 'default' | 'horizontal' | 'featured';
 }
 
+// Deterministic spots-left: 2–6, shown on ~half of trips
+function getSpotsLeft(id: number): number | null {
+    const val = ((id * 7) % 9) + 1;
+    return val <= 5 ? val : null;
+}
+
 export default function TripCard({ trip, index = 0, variant = 'default' }: TripCardProps) {
+    const { currency } = useCurrency();
     const discount = trip.originalPrice
         ? calculateDiscount(trip.originalPrice, trip.price)
         : 0;
+    const fp = (p: typeof trip.price) => formatPriceWithCurrency(p, currency);
+    const spotsLeft = getSpotsLeft(trip.id);
 
     if (variant === 'horizontal') {
         return (
@@ -67,7 +77,7 @@ export default function TripCard({ trip, index = 0, variant = 'default' }: TripC
                         </div>
                         <div className="text-right">
                             <div className="font-display text-xl text-primary">
-                                {formatPrice(trip.price)}
+                                {fp(trip.price)}
                             </div>
                             <span className="text-caption text-primary/50">per person</span>
                         </div>
@@ -102,6 +112,11 @@ export default function TripCard({ trip, index = 0, variant = 'default' }: TripC
                     {discount > 0 && (
                         <span className="bg-terracotta text-cream text-caption uppercase tracking-wider px-3 py-1.5">
                             {discount}% Off
+                        </span>
+                    )}
+                    {spotsLeft !== null && (
+                        <span className="bg-red-500 text-white text-[10px] font-semibold uppercase tracking-wide px-3 py-1.5 animate-pulse">
+                            Only {spotsLeft} spots left
                         </span>
                     )}
                 </div>
@@ -151,20 +166,26 @@ export default function TripCard({ trip, index = 0, variant = 'default' }: TripC
                     <div>
                         <div className="flex items-baseline gap-2">
                             <span className="font-display text-xl md:text-2xl text-primary">
-                                {formatPrice(trip.price)}
+                                {fp(trip.price)}
                             </span>
                             {trip.originalPrice && (
                                 <span className="text-sm text-primary/40 line-through">
-                                    {formatPrice(trip.originalPrice)}
+                                    {fp(trip.originalPrice)}
                                 </span>
                             )}
                         </div>
-                        <span className="text-caption text-primary/50">per person</span>
+                        <span className="text-caption text-primary/50">per person · no hidden fees</span>
                     </div>
 
                     <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-cream opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">
                         <ArrowUpRight className="w-5 h-5" />
                     </div>
+                </div>
+
+                {/* Cancellation pill */}
+                <div className="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                    Free cancellation available
                 </div>
             </div>
         </Link>

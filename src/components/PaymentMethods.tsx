@@ -3,6 +3,8 @@
 import { CreditCard, Smartphone, Building2, QrCode, CheckCircle, Calendar, Percent, TrendingUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useCurrency } from '@/context/CurrencyContext';
+import { formatPriceWithCurrency } from '@/lib/utils';
 
 interface EmiOption {
     tenure: number;
@@ -23,9 +25,12 @@ interface PaymentMethodsProps {
     selectedEmi?: EmiOption | null;
     onEmiChange?: (emi: EmiOption | null) => void;
     onHalfPaymentCardTypeChange?: (cardType: 'credit' | 'debit') => void;
+    isInternational?: boolean;
 }
 
-export default function PaymentMethods({ selectedMethod, onMethodChange, amount, bookingReference, selectedEmi, onEmiChange, onHalfPaymentCardTypeChange }: PaymentMethodsProps) {
+export default function PaymentMethods({ selectedMethod, onMethodChange, amount, bookingReference, selectedEmi, onEmiChange, onHalfPaymentCardTypeChange, isInternational }: PaymentMethodsProps) {
+    const { currency } = useCurrency();
+    const fa = (n: number) => formatPriceWithCurrency(n, currency);
     const [showQRCode, setShowQRCode] = useState(false);
     const [emiOptions, setEmiOptions] = useState<EmiOption[]>([]);
     const [showEmi, setShowEmi] = useState(false);
@@ -98,7 +103,33 @@ export default function PaymentMethods({ selectedMethod, onMethodChange, amount,
         }
     };
 
-    const paymentMethods = [
+    const internationalPaymentMethods = [
+        {
+            id: 'credit_card',
+            name: 'International Credit Card',
+            icon: CreditCard,
+            discount: 3,
+            description: 'Visa, Mastercard, Amex — all international cards accepted',
+            badge: 'Recommended',
+        },
+        {
+            id: 'debit_card',
+            name: 'International Debit Card',
+            icon: CreditCard,
+            discount: 3,
+            description: 'Visa, Mastercard international debit cards',
+        },
+        {
+            id: 'half_payment',
+            name: 'Pay 50% Now',
+            icon: CreditCard,
+            discount: 0,
+            description: 'Reserve your trip with 50% deposit • Pay rest before travel',
+            badge: 'Flexible',
+        },
+    ];
+
+    const domesticPaymentMethods = [
         {
             id: 'upi',
             name: 'UPI',
@@ -129,6 +160,8 @@ export default function PaymentMethods({ selectedMethod, onMethodChange, amount,
             badge: 'Flexible',
         },
     ];
+
+    const paymentMethods = isInternational ? internationalPaymentMethods : domesticPaymentMethods;
 
     const formatCardNumber = (value: string) => {
         const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
@@ -171,6 +204,18 @@ export default function PaymentMethods({ selectedMethod, onMethodChange, amount,
                 <CreditCard size={28} className="text-secondary shrink-0" />
                 Payment Method
             </h2>
+
+            {/* International payment banner */}
+            {isInternational && (
+                <div className="p-4 bg-secondary/5 border border-secondary/20 rounded-lg flex items-start gap-3">
+                    <span className="text-2xl">🌍</span>
+                    <div>
+                        <p className="font-medium text-primary">International Payments Welcome</p>
+                        <p className="text-sm text-primary/60 mt-1">We accept all major international credit and debit cards. Payments processed securely in USD via our payment gateway.</p>
+                    </div>
+                </div>
+            )}
+
 
             {/* Payment Method Selection */}
             <div className="space-y-3">
@@ -226,10 +271,10 @@ export default function PaymentMethods({ selectedMethod, onMethodChange, amount,
                             <div>
                                 <h4 className="font-semibold text-amber-800">Pay 50% Now, Complete Later</h4>
                                 <p className="text-sm text-amber-700 mt-1">
-                                    You'll pay <strong>₹{(amount / 2).toLocaleString('en-IN')}</strong> now to reserve your trip.
+                                    You'll pay <strong>{fa(amount / 2)}</strong> now to reserve your trip.
                                 </p>
                                 <p className="text-sm text-amber-700 mt-1">
-                                    Remaining <strong>₹{(amount / 2).toLocaleString('en-IN')}</strong> must be paid <strong>2 hours before your travel date</strong>.
+                                    Remaining <strong>{fa(amount / 2)}</strong> must be paid <strong>2 hours before your travel date</strong>.
                                 </p>
                                 <p className="text-xs text-amber-600 mt-2">
                                     We'll send you a reminder email before the due date.
@@ -308,7 +353,7 @@ export default function PaymentMethods({ selectedMethod, onMethodChange, amount,
                             <div className="text-center">
                                 <CreditCard size={32} className={!showEmi ? 'text-secondary mx-auto mb-2' : 'text-primary/40 mx-auto mb-2'} />
                                 <p className="font-medium text-body-lg">Pay Full Amount</p>
-                                <p className="text-2xl font-bold mt-2">₹{amount.toLocaleString('en-IN')}</p>
+                                <p className="text-2xl font-bold mt-2">{fa(amount)}</p>
                                 <p className="text-body-sm text-success mt-1">3% discount applied</p>
                             </div>
                             {!showEmi && (
@@ -333,7 +378,7 @@ export default function PaymentMethods({ selectedMethod, onMethodChange, amount,
                             <div className="text-center">
                                 <Calendar size={32} className={showEmi ? 'text-secondary mx-auto mb-2' : 'text-primary/40 mx-auto mb-2'} />
                                 <p className="font-medium text-body-lg">Pay with EMI</p>
-                                <p className="text-2xl font-bold mt-2">₹{Math.ceil(amount / 3).toLocaleString('en-IN')}<span className="text-sm font-normal">/mo</span></p>
+                                <p className="text-2xl font-bold mt-2">{fa(Math.ceil(amount / 3))}<span className="text-sm font-normal">/mo</span></p>
                                 <p className="text-body-sm text-text-secondary mt-1">Credit Cards Only</p>
                             </div>
                             {showEmi && (
@@ -376,13 +421,13 @@ export default function PaymentMethods({ selectedMethod, onMethodChange, amount,
                                                 </div>
                                                 <p className="text-body-sm text-text-secondary">
                                                     {emi.noCost
-                                                        ? `₹${emi.monthlyAmount?.toLocaleString('en-IN')}/month × ${emi.tenure} = ₹${emi.totalAmount?.toLocaleString('en-IN')}`
-                                                        : `₹${emi.monthlyAmount?.toLocaleString('en-IN')}/month × ${emi.tenure} = ₹${emi.totalAmount?.toLocaleString('en-IN')} (incl. ₹${emi.interestAmount?.toLocaleString('en-IN')} interest)`
+                                                        ? `${fa(emi.monthlyAmount || 0)}/month × ${emi.tenure} = ${fa(emi.totalAmount || 0)}`
+                                                        : `${fa(emi.monthlyAmount || 0)}/month × ${emi.tenure} = ${fa(emi.totalAmount || 0)} (incl. ${fa(emi.interestAmount || 0)} interest)`
                                                     }
                                                 </p>
                                             </div>
                                             <span className="text-xl font-bold text-secondary">
-                                                ₹{emi.monthlyAmount?.toLocaleString('en-IN')}
+                                                {fa(emi.monthlyAmount || 0)}
                                             </span>
                                         </div>
                                     );
@@ -398,7 +443,7 @@ export default function PaymentMethods({ selectedMethod, onMethodChange, amount,
                             {selectedEmi?.noCost && (
                                 <div className="bg-success/10 border border-success/20 p-3 rounded-lg mt-4">
                                     <p className="text-body-sm text-success">
-                                        ✓ No-Cost EMI - You pay exactly ₹{selectedEmi.totalAmount?.toLocaleString('en-IN')} with 0% interest
+                                        ✓ No-Cost EMI - You pay exactly {fa(selectedEmi.totalAmount || 0)} with 0% interest
                                     </p>
                                 </div>
                             )}
@@ -445,7 +490,7 @@ export default function PaymentMethods({ selectedMethod, onMethodChange, amount,
                                 </div>
                                 <div className="bg-primary/5 p-4 rounded-lg w-full mt-2">
                                     <p className="text-caption text-text-secondary mb-1">Amount</p>
-                                    <p className="text-body-lg font-semibold">₹{amount.toLocaleString('en-IN')}</p>
+                                    <p className="text-body-lg font-semibold">{fa(amount)}</p>
                                 </div>
                             </div>
                             <div className="bg-accent/10 p-4 rounded-lg">

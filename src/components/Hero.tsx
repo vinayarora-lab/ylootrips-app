@@ -3,8 +3,9 @@
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowUpRight, ArrowRight, ChevronDown, Volume2, VolumeX } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, ChevronDown, Volume2, VolumeX, Shield, CreditCard, Clock } from 'lucide-react';
 import AdCarousel from '@/components/AdCarousel';
+import { useVisitor } from '@/context/VisitorContext';
 
 interface HeroProps {
     content?: {
@@ -24,20 +25,24 @@ interface HeroProps {
 }
 
 export default function Hero({ content, stats }: HeroProps) {
+    const { visitor } = useVisitor();
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
     const heroRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
 
-    // Fallback content if not provided
-    const eyebrow = content?.eyebrow || 'Curated Journeys for the Soul';
-    const title = content?.title || "Discover the World's Hidden Treasures";
-    const subtitle = content?.subtitle || 'We craft transformative travel experiences that connect you with authentic cultures, breathtaking landscapes, and unforgettable moments.';
+    // Fallback content — foreigners see India-specific hero
+    const isForeigner = visitor === 'foreigner';
+    const eyebrow = content?.eyebrow || (isForeigner ? 'Curated India Journeys for International Travelers' : 'Curated Journeys for the Soul');
+    const title = content?.title || (isForeigner ? 'Discover Incredible India' : "Discover the World's Hidden Treasures");
+    const subtitle = content?.subtitle || (isForeigner
+        ? 'Expert-guided tours across India\'s most iconic destinations. Book online, pay securely in USD with your international card.'
+        : 'We craft transformative travel experiences that connect you with authentic cultures, breathtaking landscapes, and unforgettable moments.');
     const imageUrl = content?.imageUrl || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&q=80';
-    const ctaText = content?.ctaText || 'Start Your Journey';
-    const ctaLink = content?.ctaLink || '/contact';
-    const secondaryCtaText = content?.secondaryCtaText || 'Explore Destinations';
-    const secondaryCtaLink = content?.secondaryCtaLink || '/destinations';
+    const ctaText = content?.ctaText || (isForeigner ? 'Explore India Trips' : 'Start Your Journey');
+    const ctaLink = content?.ctaLink || (isForeigner ? '/trips' : '/contact');
+    const secondaryCtaText = content?.secondaryCtaText || (isForeigner ? 'View Itineraries' : 'Explore Destinations');
+    const secondaryCtaLink = content?.secondaryCtaLink || (isForeigner ? '/tours/golden-triangle-10-day' : '/destinations');
 
     // Default stats if not provided
     const displayStats = stats && stats.length > 0 ? stats : [
@@ -191,6 +196,28 @@ export default function Hero({ content, stats }: HeroProps) {
                             <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
+
+                    {/* Foreigner trust signals below CTAs */}
+                    {isForeigner && (
+                        <div
+                            className="flex flex-wrap items-center gap-4 pt-4 animate-fade-up"
+                            style={{ animationDelay: '0.5s' }}
+                        >
+                            <div className="flex items-center gap-1.5 text-cream/70 text-sm">
+                                <CreditCard className="w-4 h-4 text-accent" />
+                                <span>Visa · Mastercard · Amex accepted</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-cream/70 text-sm">
+                                <Shield className="w-4 h-4 text-accent" />
+                                <span>Secure USD payments</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-cream/70 text-sm">
+                                <Clock className="w-4 h-4 text-accent" />
+                                <span>Reply within 1 hour</span>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </div>
 

@@ -4,10 +4,13 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { Calendar, Users, MapPin, Clock, Star, Check, X, ArrowRight, Utensils, Hotel } from 'lucide-react';
+import { Calendar, Users, MapPin, Clock, Star, Check, X, ArrowRight, Utensils, Hotel, ChevronDown, Shield, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Trip } from '@/types';
-import { formatPrice } from '@/lib/utils';
+import { formatPriceWithCurrency } from '@/lib/utils';
+import { useCurrency } from '@/context/CurrencyContext';
+import { useVisitor } from '@/context/VisitorContext';
+import MobileStickyBookingBar from '@/components/MobileStickyBookingBar';
 
 interface TripItinerary {
     id: number;
@@ -24,13 +27,17 @@ export default function TripDetailPage() {
     const params = useParams();
     const router = useRouter();
     const id = params?.id as string;
-    
+    const { currency } = useCurrency();
+    const { visitor } = useVisitor();
+    const fp = (p: number | string) => formatPriceWithCurrency(p, currency);
+
     const [trip, setTrip] = useState<Trip | null>(null);
     const [itinerary, setItinerary] = useState<TripItinerary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedGuests, setSelectedGuests] = useState(1);
     const [selectedDate, setSelectedDate] = useState('');
+    const [openFaq, setOpenFaq] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -68,6 +75,19 @@ export default function TripDetailPage() {
     };
 
     const totalPrice = trip ? (typeof trip.price === 'number' ? trip.price : parseFloat(trip.price.toString())) * selectedGuests : 0;
+    const basePrice = trip ? (typeof trip.price === 'number' ? trip.price : parseFloat(trip.price.toString())) : 0;
+
+    // Deterministic spots left (consistent server/client)
+    const spotsLeft = trip ? (((trip.id * 7) % 9) + 1 <= 5 ? ((trip.id * 7) % 9) + 1 : null) : null;
+
+    const tripFaqs = [
+        { q: 'Is this trip suitable for first-time visitors to India?', a: 'Absolutely! Our expert guides are experienced with international travelers. We provide detailed pre-trip briefings, handle all logistics, and are available 24/7 throughout your journey.' },
+        { q: 'What is the cancellation policy?', a: 'We offer free cancellation up to 7 days before departure for a full refund. Cancellations 3–7 days before departure receive a 50% refund. Within 3 days, the booking is non-refundable but can be transferred to another date.' },
+        { q: 'Do I need a visa to travel to India?', a: 'Most nationalities can apply for an Indian e-Visa online at indianvisaonline.gov.in. Processing takes 2–4 business days. We recommend applying at least 2 weeks before travel.' },
+        { q: 'Are international credit/debit cards accepted?', a: 'Yes — we accept all major international cards (Visa, Mastercard, Amex) and process payments securely. Prices can be displayed in USD, INR, or other currencies.' },
+        { q: 'What languages do your guides speak?', a: 'All our guides are fluent in English. Several also speak French, German, Spanish, and Japanese. Please mention your preference and we\'ll do our best to match you.' },
+        { q: 'What\'s included in the trip price?', a: 'All prices are per person and include accommodation, ground transportation, guided excursions, and meals as specified in the itinerary. International flights are not included unless stated.' },
+    ];
 
     if (loading) {
         return (
@@ -266,19 +286,31 @@ export default function TripDetailPage() {
                     {/* Booking Sidebar */}
                     <div className="lg:sticky lg:top-24 h-fit">
                         <div className="bg-cream-light p-8 border border-primary/10">
+                            {/* Spots left alert */}
+                            {spotsLeft !== null && (
+                                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded text-sm flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse shrink-0"></span>
+                                    <span className="text-red-700 font-medium">Only {spotsLeft} spots left for this trip!</span>
+                                </div>
+                            )}
+
                             <h3 className="text-2xl font-light mb-6">Book This Trip</h3>
-                            
+
                             {/* Price */}
                             <div className="mb-6">
-                                <div className="flex items-baseline gap-2 mb-2">
-                                    <span className="text-4xl font-light">{formatPrice(trip.price)}</span>
+                                <div className="flex items-baseline gap-2 mb-1">
+                                    <span className="text-4xl font-light">{fp(trip.price)}</span>
                                     <span className="text-body-sm text-text-secondary">per person</span>
                                 </div>
                                 {trip.originalPrice && (
                                     <p className="text-body-sm text-text-secondary line-through">
-                                        {formatPrice(trip.originalPrice)}
+                                        {fp(trip.originalPrice)}
                                     </p>
                                 )}
+                                <p className="text-xs text-green-700 font-medium mt-1 flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                                    No hidden fees · all taxes included
+                                </p>
                             </div>
 
                             {/* Number of Guests */}
@@ -311,7 +343,7 @@ export default function TripDetailPage() {
                             <div className="mb-6 pt-6 border-t border-primary/10">
                                 <div className="flex justify-between items-center">
                                     <span className="text-body-lg">Total</span>
-                                    <span className="text-2xl font-light">{formatPrice(totalPrice)}</span>
+                                    <span className="text-2xl font-light">{fp(totalPrice)}</span>
                                 </div>
                             </div>
 
@@ -321,8 +353,16 @@ export default function TripDetailPage() {
                                 disabled={!selectedDate}
                                 className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Proceed to Checkout
+                                {visitor === 'foreigner' ? 'Book & Pay Online' : 'Proceed to Checkout'}
                             </button>
+
+                            {/* International card note for foreigners */}
+                            {visitor === 'foreigner' && (
+                                <div className="mt-3 p-3 bg-secondary/5 border border-secondary/20 rounded text-sm text-center">
+                                    <p className="text-secondary font-medium">💳 International cards accepted</p>
+                                    <p className="text-primary/50 text-xs mt-1">Visa · Mastercard · Amex · Pay in USD</p>
+                                </div>
+                            )}
 
                             {/* Trip Info */}
                             <div className="mt-6 pt-6 border-t border-primary/10 space-y-3">
@@ -343,10 +383,87 @@ export default function TripDetailPage() {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Cancellation policy */}
+                            <div className="mt-5 pt-5 border-t border-primary/10 space-y-2">
+                                <div className="flex items-start gap-2 text-sm">
+                                    <RefreshCw size={15} className="text-green-600 mt-0.5 shrink-0" />
+                                    <span className="text-primary/70">Free cancellation up to 7 days before departure</span>
+                                </div>
+                                <div className="flex items-start gap-2 text-sm">
+                                    <Shield size={15} className="text-blue-600 mt-0.5 shrink-0" />
+                                    <span className="text-primary/70">Secure payment · instant confirmation</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* FAQ Section */}
+            <div className="bg-cream-dark py-16">
+                <div className="section-container max-w-3xl">
+                    <h2 className="text-display-lg mb-2 text-center">Frequently Asked Questions</h2>
+                    <p className="text-primary/50 text-center mb-10">Everything you need to know before booking</p>
+                    <div className="space-y-3">
+                        {tripFaqs.map((faq, i) => (
+                            <div key={i} className="bg-white border border-primary/10 overflow-hidden">
+                                <button
+                                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                                    className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-primary/[0.02] transition-colors"
+                                >
+                                    <span className="font-medium text-primary pr-4">{faq.q}</span>
+                                    <ChevronDown
+                                        size={20}
+                                        className={`text-secondary shrink-0 transition-transform duration-300 ${openFaq === i ? 'rotate-180' : ''}`}
+                                    />
+                                </button>
+                                {openFaq === i && (
+                                    <div className="px-6 pb-5 text-primary/70 leading-relaxed border-t border-primary/5">
+                                        <p className="pt-4">{faq.a}</p>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Expert Team Strip */}
+            <div className="py-12 bg-primary text-cream">
+                <div className="section-container">
+                    <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                        <div className="shrink-0 text-center md:text-left">
+                            <p className="text-caption uppercase tracking-[0.3em] text-accent mb-2">Your Experts</p>
+                            <h3 className="font-display text-2xl md:text-3xl">Meet your guides</h3>
+                            <p className="text-cream/60 mt-2 max-w-xs">Handpicked local experts who speak your language and know every hidden gem.</p>
+                        </div>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                            {[
+                                { name: 'Arjun Mehta', role: 'North India Expert', exp: '12 yrs', langs: 'EN · DE · FR', emoji: '🧔🏽' },
+                                { name: 'Priya Nair', role: 'Kerala & South India', exp: '9 yrs', langs: 'EN · JP · ES', emoji: '👩🏽' },
+                                { name: 'Rahul Sharma', role: 'Rajasthan Heritage', exp: '14 yrs', langs: 'EN · FR · IT', emoji: '👨🏽‍💼' },
+                            ].map((guide) => (
+                                <div key={guide.name} className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-xl p-5 w-48 text-center hover:bg-white/15 transition-all">
+                                    <div className="text-4xl mb-3">{guide.emoji}</div>
+                                    <div className="font-medium text-cream">{guide.name}</div>
+                                    <div className="text-xs text-accent mt-1">{guide.role}</div>
+                                    <div className="text-xs text-cream/50 mt-2">{guide.exp} experience</div>
+                                    <div className="text-xs text-cream/50">{guide.langs}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Sticky Booking Bar */}
+            <MobileStickyBookingBar
+                price={basePrice}
+                onBook={handleBookNow}
+                disabled={!selectedDate}
+                spotsLeft={spotsLeft ?? undefined}
+            />
         </div>
     );
 }

@@ -4,12 +4,14 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { formatPrice } from '@/lib/utils';
+import { formatPriceWithCurrency } from '@/lib/utils';
+import { useCurrency } from '@/context/CurrencyContext';
 import PaintSplashBg from '@/components/PaintSplashBg';
 
 function PaymentSuccessContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { currency } = useCurrency();
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
@@ -143,7 +145,15 @@ function PaymentSuccessContent() {
 
                 // Check payment status
                 if (bookingData.paymentStatus === 'PAID' || status === 'success') {
-                    // Payment successful - show success page
+                    // Payment successful - send confirmation email
+                    const customerEmail = bookingData.customerEmail || bookingData.email;
+                    if (customerEmail) {
+                        fetch('/api/send-confirmation', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ to: customerEmail, booking: bookingData }),
+                        }).catch((e) => console.warn('Email send failed:', e));
+                    }
                     setError(null);
                 } else {
                     setError('Payment verification failed. Payment status: ' + (bookingData.paymentStatus || 'Unknown'));
@@ -323,7 +333,7 @@ function PaymentSuccessContent() {
                             <div className="flex justify-between pt-4 border-t border-primary/10">
                                 <span className="text-xl font-light">Amount Paid</span>
                                 <span className="text-2xl font-light">
-                                    {formatPrice(booking.finalAmount || booking.totalAmount)}
+                                    {formatPriceWithCurrency(booking.finalAmount || booking.totalAmount, currency)}
                                 </span>
                             </div>
                             {booking.paymentStatus && (

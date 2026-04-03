@@ -1,6 +1,6 @@
-import { Shield, Lock, CreditCard, CheckCircle } from 'lucide-react';
+import { Shield, Lock, CreditCard, CheckCircle, Globe } from 'lucide-react';
 
-export default function TrustBadges() {
+export default function TrustBadges({ isInternational }: { isInternational?: boolean }) {
     return (
         <div className="bg-cream-light border border-primary/10 rounded-lg p-4 mt-6">
             <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
@@ -16,11 +16,17 @@ export default function TrustBadges() {
                     <span className="text-sm">Safe Payment</span>
                 </div>
 
-                {/* EMI Available */}
-                <div className="flex items-center gap-2 text-text-secondary">
-                    <CreditCard size={18} className="text-purple-600" />
-                    <span className="text-sm">EMI Available</span>
-                </div>
+                {isInternational ? (
+                    <div className="flex items-center gap-2 text-text-secondary">
+                        <Globe size={18} className="text-purple-600" />
+                        <span className="text-sm">International Cards</span>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2 text-text-secondary">
+                        <CreditCard size={18} className="text-purple-600" />
+                        <span className="text-sm">EMI Available</span>
+                    </div>
+                )}
 
                 {/* Verified */}
                 <div className="flex items-center gap-2 text-text-secondary">
@@ -37,12 +43,24 @@ export default function TrustBadges() {
                 <div className="flex items-center gap-1 px-2 py-1 bg-white rounded border border-gray-200">
                     <span className="text-xs font-bold text-red-600">MC</span>
                 </div>
-                <div className="flex items-center gap-1 px-2 py-1 bg-white rounded border border-gray-200">
-                    <span className="text-xs font-bold text-orange-600">RuPay</span>
-                </div>
-                <div className="flex items-center gap-1 px-2 py-1 bg-white rounded border border-gray-200">
-                    <span className="text-xs font-bold text-green-600">UPI</span>
-                </div>
+                {isInternational ? (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-white rounded border border-gray-200">
+                        <span className="text-xs font-bold text-blue-900">AMEX</span>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-white rounded border border-gray-200">
+                        <span className="text-xs font-bold text-orange-600">RuPay</span>
+                    </div>
+                )}
+                {isInternational ? (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-white rounded border border-gray-200">
+                        <span className="text-xs font-bold text-green-700">USD</span>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-white rounded border border-gray-200">
+                        <span className="text-xs font-bold text-green-600">UPI</span>
+                    </div>
+                )}
             </div>
         </div>
     );

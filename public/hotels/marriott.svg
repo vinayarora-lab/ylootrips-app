@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none">
+  <rect width="200" height="100" fill="white"/>
+  <text x="100" y="62" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="#CC0000" text-anchor="middle">M</text>
+  <text x="100" y="82" font-family="Arial, sans-serif" font-size="8" fill="#555" text-anchor="middle" letter-spacing="5">MARRIOTT</text>
+</svg>

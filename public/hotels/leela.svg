@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none">
+  <rect width="200" height="100" fill="white"/>
+  <text x="100" y="58" font-family="Georgia, serif" font-size="36" font-style="italic" fill="#8b1a1a" text-anchor="middle">Leela</text>
+  <line x1="40" y1="66" x2="160" y2="66" stroke="#8b1a1a" stroke-width="0.8"/>
+  <text x="100" y="79" font-family="Arial, sans-serif" font-size="7" fill="#888" text-anchor="middle" letter-spacing="4">PALACES &amp; RESORTS</text>
+</svg>

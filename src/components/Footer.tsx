@@ -17,6 +17,12 @@ export default function Footer() {
       { name: 'Curated Experiences', href: '/trips' },
       { name: 'Boutique Stays', href: '/hotels' },
       { name: 'The Journal', href: '/blogs' },
+      { name: 'India Travel Guide', href: '/india-travel-guide' },
+    ],
+    tours: [
+      { name: '10-Day Golden Triangle', href: '/tours/golden-triangle-10-day' },
+      { name: '14-Day Kerala & South India', href: '/tours/kerala-south-india-14-day' },
+      { name: '7-Day Rajasthan Heritage', href: '/tours/rajasthan-heritage-7-day' },
     ],
     company: [
       { name: 'Our Story', href: '/about' },
@@ -75,18 +81,13 @@ export default function Footer() {
 
             {/* Links Columns */}
             <div className="lg:col-span-7">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
                 <div>
-                  <h4 className="text-caption uppercase tracking-[0.2em] text-accent mb-6">
-                    Explore
-                  </h4>
+                  <h4 className="text-caption uppercase tracking-[0.2em] text-accent mb-6">Explore</h4>
                   <ul className="space-y-4">
                     {footerLinks.explore.map((link) => (
                       <li key={link.name}>
-                        <Link
-                          href={link.href}
-                          className="text-cream/60 hover:text-cream transition-colors text-sm"
-                        >
+                        <Link href={link.href} className="text-cream/60 hover:text-cream transition-colors text-sm">
                           {link.name}
                         </Link>
                       </li>
@@ -95,16 +96,24 @@ export default function Footer() {
                 </div>
 
                 <div>
-                  <h4 className="text-caption uppercase tracking-[0.2em] text-accent mb-6">
-                    Company
-                  </h4>
+                  <h4 className="text-caption uppercase tracking-[0.2em] text-accent mb-6">Tours</h4>
+                  <ul className="space-y-4">
+                    {footerLinks.tours.map((link) => (
+                      <li key={link.name}>
+                        <Link href={link.href} className="text-cream/60 hover:text-cream transition-colors text-sm">
+                          {link.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-caption uppercase tracking-[0.2em] text-accent mb-6">Company</h4>
                   <ul className="space-y-4">
                     {footerLinks.company.map((link) => (
                       <li key={link.name}>
-                        <Link
-                          href={link.href}
-                          className="text-cream/60 hover:text-cream transition-colors text-sm"
-                        >
+                        <Link href={link.href} className="text-cream/60 hover:text-cream transition-colors text-sm">
                           {link.name}
                         </Link>
                       </li>
@@ -113,16 +122,11 @@ export default function Footer() {
                 </div>
 
                 <div>
-                  <h4 className="text-caption uppercase tracking-[0.2em] text-accent mb-6">
-                    Legal
-                  </h4>
+                  <h4 className="text-caption uppercase tracking-[0.2em] text-accent mb-6">Legal</h4>
                   <ul className="space-y-4">
                     {footerLinks.legal.map((link) => (
                       <li key={link.name}>
-                        <Link
-                          href={link.href}
-                          className="text-cream/60 hover:text-cream transition-colors text-sm"
-                        >
+                        <Link href={link.href} className="text-cream/60 hover:text-cream transition-colors text-sm">
                           {link.name}
                         </Link>
                       </li>

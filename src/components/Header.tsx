@@ -35,9 +35,8 @@ export default function Header() {
     const navLinks = [
         { name: 'Domestic', href: '/destinations/domestic' },
         { name: 'International', href: '/destinations/international' },
-        { name: 'Stays', href: '/hotels' },
-        { name: 'Trips', href: '/trips' },
         { name: 'Events', href: '/events' },
+        { name: 'Blogs', href: '/blogs' },
         { name: 'About', href: '/about' },
     ];
 

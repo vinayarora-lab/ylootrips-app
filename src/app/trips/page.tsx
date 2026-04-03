@@ -1,8 +1,21 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import PageHero from '@/components/PageHero';
 import { api } from '@/lib/api';
 import TripsContent from './TripsContent';
+
+export const metadata: Metadata = {
+  title: 'India Trip Packages — Tours, Treks & Cultural Experiences',
+  description: 'Browse 150+ curated India trip packages — Golden Triangle, Kerala backwaters, Rajasthan, Himalayan treks, wildlife safaris, and more. Book online with instant confirmation.',
+  keywords: 'India trip packages, India tour packages 2025, India travel itinerary, best India tours, India trekking packages, India cultural tours, India wildlife safari',
+  openGraph: {
+    title: 'India Trip Packages | YlooTrips',
+    description: '150+ curated India tours — from Golden Triangle to Kerala backwaters. Book online with instant confirmation.',
+    url: 'https://www.ylootrips.com/trips',
+  },
+  alternates: { canonical: 'https://www.ylootrips.com/trips' },
+};
 
 interface PageContent {
     hero: {

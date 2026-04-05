@@ -2,10 +2,19 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Clock, Star, ArrowUpRight } from 'lucide-react';
+import { MapPin, Clock, Star, ArrowUpRight, ShoppingCart } from 'lucide-react';
 import { Trip } from '@/types';
 import { formatPriceWithCurrency, calculateDiscount } from '@/lib/utils';
 import { useCurrency } from '@/context/CurrencyContext';
+import { useVisitor } from '@/context/VisitorContext';
+
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80';
+
+const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.currentTarget;
+    target.srcset = '';
+    target.src = FALLBACK_IMAGE;
+};
 
 interface TripCardProps {
     trip: Trip;
@@ -21,6 +30,8 @@ function getSpotsLeft(id: number): number | null {
 
 export default function TripCard({ trip, index = 0, variant = 'default' }: TripCardProps) {
     const { currency } = useCurrency();
+    const { visitor } = useVisitor();
+    const bookNowHref = visitor === 'foreigner' ? '/tours' : `/checkout?tripId=${trip.id}`;
     const discount = trip.originalPrice
         ? calculateDiscount(trip.originalPrice, trip.price)
         : 0;
@@ -37,10 +48,11 @@ export default function TripCard({ trip, index = 0, variant = 'default' }: TripC
                 {/* Image */}
                 <div className="relative w-full md:w-72 aspect-landscape md:aspect-square overflow-hidden shrink-0">
                     <Image
-                        src={trip.imageUrl}
+                        src={trip.imageUrl || FALLBACK_IMAGE}
                         alt={trip.title}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={handleImgError}
                     />
                     {discount > 0 && (
                         <div className="absolute top-3 left-3 bg-terracotta text-cream text-caption uppercase tracking-wider px-3 py-1.5">
@@ -88,18 +100,18 @@ export default function TripCard({ trip, index = 0, variant = 'default' }: TripC
     }
 
     return (
-        <Link
-            href={`/trips/${trip.id}`}
-            className="group block bg-cream-light overflow-hidden transition-all duration-500 hover:shadow-xl"
+        <div
+            className="group bg-cream-light overflow-hidden transition-all duration-500 hover:shadow-xl flex flex-col"
             style={{ animationDelay: `${index * 100}ms` }}
         >
-            {/* Image Container */}
-            <div className="relative aspect-portrait overflow-hidden">
+            {/* Image Container — clicking image goes to detail */}
+            <Link href={`/trips/${trip.id}`} className="block relative aspect-portrait overflow-hidden shrink-0">
                 <Image
-                    src={trip.imageUrl}
+                    src={trip.imageUrl || FALLBACK_IMAGE}
                     alt={trip.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    onError={handleImgError}
                 />
 
                 {/* Badges */}
@@ -129,65 +141,78 @@ export default function TripCard({ trip, index = 0, variant = 'default' }: TripC
 
                 {/* Category */}
                 <div className="absolute bottom-4 left-4">
-                    <span className="bg-cream/90 blur-overlay px-4 py-2 text-caption uppercase tracking-widest text-primary">
+                    <span className="bg-cream/90 backdrop-blur-sm px-4 py-2 text-caption uppercase tracking-widest text-primary">
                         {trip.category}
                     </span>
                 </div>
-            </div>
+            </Link>
 
             {/* Content */}
-            <div className="p-4 md:p-6 space-y-3 md:space-y-4">
-                {/* Location */}
-                <div className="flex items-center gap-2 text-secondary/60">
-                    <MapPin className="w-4 h-4" />
-                    <span className="text-caption uppercase tracking-wider">{trip.destination}</span>
-                </div>
-
-                {/* Title */}
-                <h3 className="font-display text-xl md:text-2xl text-primary group-hover:text-secondary transition-colors line-clamp-2">
-                    {trip.title}
-                </h3>
-
-                {/* Meta */}
-                <div className="flex items-center gap-4 text-sm text-primary/60">
+            <div className="p-4 md:p-5 space-y-3 flex flex-col flex-1">
+                {/* Location + duration row */}
+                <div className="flex items-center justify-between text-sm text-primary/55">
                     <div className="flex items-center gap-1.5">
-                        <Clock className="w-4 h-4" />
-                        <span>{trip.duration}</span>
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span className="text-caption uppercase tracking-wider">{trip.destination}</span>
                     </div>
-                    {trip.difficulty && (
-                        <span className="px-2 py-0.5 bg-sage/10 text-sage-dark text-caption uppercase">
-                            {trip.difficulty}
-                        </span>
-                    )}
-                </div>
-
-                {/* Price Row */}
-                <div className="pt-3 md:pt-4 border-t border-primary/10 flex items-center justify-between">
-                    <div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="font-display text-xl md:text-2xl text-primary">
-                                {fp(trip.price)}
-                            </span>
-                            {trip.originalPrice && (
-                                <span className="text-sm text-primary/40 line-through">
-                                    {fp(trip.originalPrice)}
-                                </span>
-                            )}
-                        </div>
-                        <span className="text-caption text-primary/50">per person · no hidden fees</span>
-                    </div>
-
-                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-cream opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">
-                        <ArrowUpRight className="w-5 h-5" />
+                    <div className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span className="text-caption">{trip.duration}</span>
                     </div>
                 </div>
 
-                {/* Cancellation pill */}
-                <div className="flex items-center gap-1.5 text-xs text-green-700 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                {/* Title — links to detail */}
+                <Link href={`/trips/${trip.id}`} className="block">
+                    <h3 className="font-display text-xl text-primary hover:text-secondary transition-colors line-clamp-2 leading-snug">
+                        {trip.title}
+                    </h3>
+                </Link>
+
+                {trip.difficulty && (
+                    <span className="inline-block px-2 py-0.5 bg-primary/5 text-primary/55 text-caption uppercase tracking-wide text-[10px]">
+                        {trip.difficulty}
+                    </span>
+                )}
+
+                {/* Push price + buttons to bottom */}
+                <div className="flex-1" />
+
+                {/* Price */}
+                <div className="pt-3 border-t border-primary/10">
+                    <div className="flex items-baseline gap-2 mb-0.5">
+                        <span className="font-display text-xl text-primary">{fp(trip.price)}</span>
+                        {trip.originalPrice && (
+                            <span className="text-sm text-primary/35 line-through">{fp(trip.originalPrice)}</span>
+                        )}
+                    </div>
+                    <span className="text-[10px] text-primary/45 uppercase tracking-widest">per person · no hidden fees</span>
+                </div>
+
+                {/* CTA row — Book Now + View Details */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                    <Link
+                        href={bookNowHref}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center justify-center gap-1.5 bg-primary text-cream px-3 py-2.5 text-xs uppercase tracking-widest hover:bg-secondary transition-colors font-semibold"
+                    >
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        Book Now
+                    </Link>
+                    <Link
+                        href={`/trips/${trip.id}`}
+                        className="flex items-center justify-center gap-1.5 border border-primary/20 text-primary px-3 py-2.5 text-xs uppercase tracking-widest hover:bg-primary hover:text-cream transition-all"
+                    >
+                        Details
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                    </Link>
+                </div>
+
+                {/* Free cancellation */}
+                <div className="flex items-center gap-1.5 text-[11px] text-green-700 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
                     Free cancellation available
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }

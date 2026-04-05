@@ -9,9 +9,23 @@ export const metadata: Metadata = {
   description: "Discover Kerala's backwaters, Munnar tea estates, spice gardens, and ancient temples on this 14-day South India tour. Houseboat cruise, Ayurveda massage, and more. Get a quote.",
   keywords: "Kerala tour package, South India tour, Kerala backwaters tour, Munnar tea estate, Kerala houseboat, India south tour 14 days",
   openGraph: {
-    title: "14-Day Kerala & South India Tour | YlooTrips",
+    title: "14-Day Kerala & South India Tour | YlooTrips — India Travel Experts",
     description: "Kerala backwaters, Munnar tea estates, ancient temples, and a houseboat cruise on Alleppey. The ultimate South India experience in 14 days.",
     url: "https://www.ylootrips.com/tours/kerala-south-india-14-day",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1200&q=80",
+        width: 1200,
+        height: 630,
+        alt: "Kerala backwaters houseboat — 14-day South India tour with YlooTrips",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "14-Day Kerala & South India Tour | YlooTrips",
+    description: "Kerala backwaters, Munnar tea estates, and a houseboat cruise. The ultimate South India experience.",
+    images: ["https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1200&q=80"],
   },
   alternates: { canonical: "https://www.ylootrips.com/tours/kerala-south-india-14-day" },
 };

@@ -1,37 +1,73 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { ArrowUpRight, Filter, Search, Loader2, Sparkles } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { ArrowUpRight, Filter, Search, Loader2, Sparkles, X, SlidersHorizontal, MessageCircle, Globe } from 'lucide-react';
 import Link from 'next/link';
 import TripCard from '@/components/TripCard';
 import { api } from '@/lib/api';
 import { Trip } from '@/types';
 import { useVisitor } from '@/context/VisitorContext';
 
-// Default categories (will be replaced by dynamic ones from API)
 const defaultCategories = ['All', 'Trekking', 'Tour', 'Adventure', 'Camping', 'International', 'Beach', 'Honeymoon'];
+
+type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'rating' | 'duration-asc';
+
+const sortOptions: { value: SortOption; label: string }[] = [
+    { value: 'featured',    label: 'Featured'         },
+    { value: 'price-asc',   label: 'Price: Low → High' },
+    { value: 'price-desc',  label: 'Price: High → Low' },
+    { value: 'rating',      label: 'Top Rated'         },
+    { value: 'duration-asc',label: 'Shortest First'    },
+];
+
+function sortTrips(trips: Trip[], sort: SortOption): Trip[] {
+    const arr = [...trips];
+    switch (sort) {
+        case 'price-asc':
+            return arr.sort((a, b) => Number(a.price) - Number(b.price));
+        case 'price-desc':
+            return arr.sort((a, b) => Number(b.price) - Number(a.price));
+        case 'rating':
+            return arr.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+        case 'duration-asc':
+            return arr.sort((a, b) => {
+                const daysA = parseInt(a.duration || '99');
+                const daysB = parseInt(b.duration || '99');
+                return daysA - daysB;
+            });
+        default:
+            return arr.sort((a, b) => (b.featured || b.isFeatured ? 1 : 0) - (a.featured || a.isFeatured ? 1 : 0));
+    }
+}
 
 export default function TripsContent() {
     const { visitor } = useVisitor();
+    const searchParams = useSearchParams();
+
+    // Read ?category= and ?q= from URL on first render
+    const urlCategory = searchParams.get('category') || 'All';
+    const urlQuery    = searchParams.get('q') || '';
+
     const [trips, setTrips] = useState<Trip[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [activeCategory, setActiveCategory] = useState('All');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [activeCategory, setActiveCategory] = useState(urlCategory);
+    const [searchQuery, setSearchQuery] = useState(urlQuery);
+    const [searchInput, setSearchInput] = useState(urlQuery); // controlled input value
+    const [sortBy, setSortBy] = useState<SortOption>('featured');
+    const [showSortMenu, setShowSortMenu] = useState(false);
 
-    // Pagination state
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [totalElements, setTotalElements] = useState(0);
 
-    // Dynamic categories from API
     const [categories, setCategories] = useState<string[]>(defaultCategories);
     const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
 
     const PAGE_SIZE = 12;
 
-    // Fetch categories on mount
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -40,41 +76,28 @@ export default function TripsContent() {
                     setCategories(['All', ...response.data.categories]);
                     setCategoryCounts(response.data.counts || {});
                 }
-            } catch (err) {
-                console.error('Error fetching categories:', err);
-                // Keep default categories on error
+            } catch {
+                // keep default categories on error
             }
         };
         fetchCategories();
     }, []);
 
-    // Fetch trips with pagination
     const fetchTrips = useCallback(async (pageNum: number, append: boolean = false) => {
         try {
-            if (!append) {
-                setLoading(true);
-            } else {
-                setLoadingMore(true);
-            }
+            if (!append) setLoading(true);
+            else setLoadingMore(true);
 
             let response;
 
             if (searchQuery) {
-                // Search doesn't support pagination yet, get all results
                 response = await api.searchTrips(searchQuery);
                 setTrips(response.data);
                 setHasMore(false);
                 setTotalElements(response.data.length);
             } else {
-                // Use paginated endpoint
-                const params: Record<string, unknown> = {
-                    page: pageNum,
-                    size: PAGE_SIZE,
-                };
-
-                if (activeCategory !== 'All') {
-                    params.category = activeCategory;
-                }
+                const params: Record<string, unknown> = { page: pageNum, size: PAGE_SIZE };
+                if (activeCategory !== 'All') params.category = activeCategory;
 
                 response = await api.getTripsPaginated(params);
                 const pageData = response.data;
@@ -90,19 +113,15 @@ export default function TripsContent() {
             }
 
             setError(null);
-        } catch (err) {
-            console.error('Error fetching trips:', err);
+        } catch {
             setError('Unable to load trips. Please ensure the backend is running.');
-            if (!append) {
-                setTrips([]);
-            }
+            if (!append) setTrips([]);
         } finally {
             setLoading(false);
             setLoadingMore(false);
         }
     }, [activeCategory, searchQuery]);
 
-    // Initial fetch and when category/search changes
     useEffect(() => {
         setPage(0);
         fetchTrips(0, false);
@@ -111,12 +130,20 @@ export default function TripsContent() {
     const handleCategoryClick = (category: string) => {
         setActiveCategory(category);
         setSearchQuery('');
+        setSearchInput('');
     };
 
     const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        setSearchQuery(formData.get('search') as string);
+        const trimmed = searchInput.trim();
+        if (!trimmed) return;
+        setSearchQuery(trimmed);
+        setActiveCategory('All');
+    };
+
+    const clearSearch = () => {
+        setSearchQuery('');
+        setSearchInput('');
         setActiveCategory('All');
     };
 
@@ -126,29 +153,61 @@ export default function TripsContent() {
         fetchTrips(nextPage, true);
     };
 
-    // Foreigners see only India trips (hide 'International' outbound category)
-    const displayedTrips = visitor === 'foreigner'
+    // Visitor filter
+    const visitorFiltered = visitor === 'foreigner'
         ? trips.filter((t) => (t.category || '').toLowerCase() !== 'international')
         : trips;
 
-    // Also hide the 'International' category pill from the filter bar for foreigners
+    // Sort
+    const displayedTrips = sortTrips(visitorFiltered, sortBy);
+
     const displayedCategories = visitor === 'foreigner'
         ? categories.filter((c) => c.toLowerCase() !== 'international')
         : categories;
 
+    const activeLabel = searchQuery
+        ? `"${searchQuery}"`
+        : activeCategory !== 'All' ? activeCategory : null;
+
     return (
         <>
-            {/* Visitor context banner */}
+            {/* Foreigner CTA banner */}
             {visitor === 'foreigner' && (
-                <div className="bg-secondary/10 border-b border-secondary/20 py-3">
-                    <div className="section-container flex items-center gap-2 text-sm text-secondary">
-                        <span>🌍</span>
-                        <span>Showing India trips curated for international visitors</span>
+                <div className="bg-primary text-cream py-8 md:py-10">
+                    <div className="section-container">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="flex items-start gap-4">
+                                <Globe className="w-8 h-8 text-accent shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-[10px] uppercase tracking-[0.3em] text-accent mb-1">International Visitors</p>
+                                    <h3 className="font-display text-2xl md:text-3xl text-cream mb-1">Looking for guided India tours?</h3>
+                                    <p className="text-cream/55 text-sm">Private packages · 4-star hotels · USD pricing · Visa support included</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                                <Link
+                                    href="/tours"
+                                    className="flex items-center justify-center gap-2 bg-accent hover:bg-accent-warm text-primary px-6 py-3.5 text-xs uppercase tracking-widest font-bold transition-colors"
+                                >
+                                    Book Now
+                                    <ArrowUpRight className="w-4 h-4" />
+                                </Link>
+                                <a
+                                    href="https://wa.me/918427831127?text=Hi%2C%20I%27m%20an%20international%20traveler%20looking%20to%20book%20an%20India%20tour.%20Please%20share%20your%20packages."
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white px-6 py-3.5 text-xs uppercase tracking-widest font-semibold transition-colors"
+                                >
+                                    <MessageCircle className="w-4 h-4" />
+                                    WhatsApp Us
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
 
-            {/* Featured Itineraries Bar */}
+            {/* Curated Tours quick-links */}
             <div className="bg-secondary/5 border-b border-secondary/15 py-3">
                 <div className="section-container">
                     <div className="flex flex-nowrap items-center gap-2 md:gap-3 overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0">
@@ -168,59 +227,120 @@ export default function TripsContent() {
                             >
                                 <span className="text-xs font-medium text-primary whitespace-nowrap">{tour.label}</span>
                                 <span className="text-[10px] text-secondary/70 whitespace-nowrap hidden sm:inline">{tour.from}</span>
-                                <ArrowUpRight className="w-3 h-3 text-secondary/50 group-hover:text-secondary transition-colors shrink-0" />
+                                <ArrowUpRight className="w-3 h-3 text-secondary/50 group-hover:text-secondary shrink-0" />
                             </Link>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* Filters Section - compact on mobile so trip cards are visible */}
-            <section className="py-4 md:py-8 border-b border-primary/10 bg-cream md:sticky md:top-20 z-30">
-                <div className="section-container">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6">
-                        {/* Categories - single-row horizontal scroll on mobile, wrap on desktop */}
-                        <div className="flex flex-nowrap md:flex-wrap gap-2 md:gap-3 overflow-x-auto md:overflow-visible pb-1 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
-                            {displayedCategories.map((category) => (
-                                <button
-                                    key={category}
-                                    onClick={() => handleCategoryClick(category)}
-                                    className={`shrink-0 px-3 py-1.5 md:px-5 md:py-2.5 text-xs md:text-caption uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-2 ${activeCategory === category
+            {/* Filters — sticky on all screens */}
+            <section className="py-3 md:py-5 border-b border-primary/10 bg-cream sticky top-16 z-30 shadow-sm">
+                <div className="section-container space-y-3">
+                    {/* Row 1: Categories */}
+                    <div className="flex flex-nowrap gap-2 overflow-x-auto pb-0.5 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none">
+                        {displayedCategories.map((category) => (
+                            <button
+                                key={category}
+                                onClick={() => handleCategoryClick(category)}
+                                className={`shrink-0 px-3 py-1.5 text-xs uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-1.5 rounded-sm ${
+                                    activeCategory === category && !searchQuery
                                         ? 'bg-primary text-cream'
                                         : 'bg-cream-dark text-primary hover:bg-primary/10'
-                                        }`}
-                                >
-                                    <span>{category}</span>
-                                    {category !== 'All' && categoryCounts[category] !== undefined && (
-                                        <span className="text-[10px] md:text-xs opacity-60">
-                                            ({categoryCounts[category]})
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
+                                }`}
+                            >
+                                <span>{category}</span>
+                                {category !== 'All' && categoryCounts[category] !== undefined && (
+                                    <span className="text-[10px] opacity-55">({categoryCounts[category]})</span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
 
-                        {/* Search - compact row on mobile */}
-                        <form onSubmit={handleSearch} className="flex items-center gap-2 md:gap-4 shrink-0">
-                            <div className="relative flex-1 min-w-0 md:flex-none">
-                                <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40" />
+                    {/* Row 2: Search + Sort */}
+                    <div className="flex items-center gap-2">
+                        {/* Search */}
+                        <form onSubmit={handleSearch} className="flex items-center gap-2 flex-1 min-w-0">
+                            <div className="relative flex-1 min-w-0">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary/40" />
                                 <input
                                     type="text"
-                                    name="search"
-                                    placeholder="Search experiences..."
-                                    className="pl-9 md:pl-11 pr-3 md:pr-5 py-2.5 md:py-3 bg-cream-dark text-primary text-sm md:text-base placeholder:text-primary/40 focus:outline-none focus:ring-1 focus:ring-secondary w-full md:w-64"
+                                    placeholder="Search trips, destinations..."
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    className="w-full pl-9 pr-8 py-2.5 bg-cream-dark text-primary text-sm placeholder:text-primary/35 focus:outline-none focus:ring-1 focus:ring-secondary"
                                 />
+                                {(searchInput || searchQuery) && (
+                                    <button
+                                        type="button"
+                                        onClick={clearSearch}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
+                                )}
                             </div>
-                            <button type="submit" className="flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 md:py-3 bg-primary text-cream hover:bg-primary-light transition-colors shrink-0">
-                                <Filter className="w-4 h-4" />
-                                <span className="text-caption uppercase tracking-widest hidden md:inline">Search</span>
+                            <button
+                                type="submit"
+                                className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 bg-primary text-cream hover:bg-secondary transition-colors text-xs uppercase tracking-widest"
+                            >
+                                <Filter className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">Search</span>
                             </button>
                         </form>
+
+                        {/* Sort */}
+                        <div className="relative shrink-0">
+                            <button
+                                onClick={() => setShowSortMenu(v => !v)}
+                                className="flex items-center gap-1.5 px-3 py-2.5 border border-primary/15 bg-cream text-primary text-xs uppercase tracking-widest hover:border-primary/40 transition-colors"
+                            >
+                                <SlidersHorizontal className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">
+                                    {sortOptions.find(s => s.value === sortBy)?.label || 'Sort'}
+                                </span>
+                            </button>
+                            {showSortMenu && (
+                                <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-primary/10 shadow-xl z-50">
+                                    {sortOptions.map((opt) => (
+                                        <button
+                                            key={opt.value}
+                                            onClick={() => { setSortBy(opt.value); setShowSortMenu(false); }}
+                                            className={`w-full text-left px-4 py-2.5 text-xs uppercase tracking-widest transition-colors ${
+                                                sortBy === opt.value
+                                                    ? 'bg-primary text-cream'
+                                                    : 'text-primary hover:bg-cream-dark'
+                                            }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Error Banner */}
+            {/* Active filter pill */}
+            {activeLabel && !loading && (
+                <div className="bg-secondary/5 border-b border-secondary/10 py-2.5">
+                    <div className="section-container flex items-center gap-3">
+                        <span className="text-xs text-primary/55">Filtered by:</span>
+                        <span className="inline-flex items-center gap-1.5 bg-secondary/10 text-secondary text-xs font-medium px-3 py-1 rounded-full">
+                            {activeLabel}
+                            <button onClick={clearSearch} className="hover:text-secondary/60 transition-colors">
+                                <X className="w-3 h-3" />
+                            </button>
+                        </span>
+                        {!loading && (
+                            <span className="text-xs text-primary/40">{displayedTrips.length} result{displayedTrips.length !== 1 ? 's' : ''}</span>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Error */}
             {error && (
                 <div className="bg-terracotta/10 border-l-4 border-terracotta px-6 py-4">
                     <div className="section-container">
@@ -230,55 +350,77 @@ export default function TripsContent() {
             )}
 
             {/* Trips Grid */}
-            <section className="py-16 md:py-24 bg-cream">
+            <section className="py-12 md:py-20 bg-cream" onClick={() => showSortMenu && setShowSortMenu(false)}>
                 <div className="section-container">
-                    {/* Results Count */}
-                    <div className="flex items-center justify-between mb-10">
-                        <p className="text-primary/60">
-                            {loading ? 'Loading...' : (
-                                <>
-                                    Showing <span className="font-medium text-primary">{displayedTrips.length}</span>
-                                    {totalElements > trips.length && (
-                                        <> of <span className="font-medium text-primary">{totalElements}</span></>
-                                    )}
-                                    {' '}experiences
-                                </>
-                            )}
-                        </p>
-                    </div>
+                    {/* Results count */}
+                    {!loading && displayedTrips.length > 0 && (
+                        <div className="flex items-center justify-between mb-8">
+                            <p className="text-sm text-primary/55">
+                                Showing <span className="font-medium text-primary">{displayedTrips.length}</span>
+                                {totalElements > trips.length && (
+                                    <> of <span className="font-medium text-primary">{totalElements}</span></>
+                                )}
+                                {' '}trip{displayedTrips.length !== 1 ? 's' : ''}
+                                {activeCategory !== 'All' && !searchQuery && (
+                                    <> in <span className="font-medium text-primary">{activeCategory}</span></>
+                                )}
+                            </p>
+                            <p className="text-xs text-primary/35 uppercase tracking-widest hidden md:block">
+                                Sorted by: {sortOptions.find(s => s.value === sortBy)?.label}
+                            </p>
+                        </div>
+                    )}
 
                     {/* Grid */}
                     {loading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                                <div key={i} className="h-[500px] bg-cream-dark animate-pulse rounded-lg" />
+                                <div key={i} className="h-[480px] bg-cream-dark animate-pulse rounded-sm" />
                             ))}
                         </div>
                     ) : displayedTrips.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                             {displayedTrips.map((trip, index) => (
                                 <TripCard key={trip.id} trip={trip} index={index} />
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-16">
-                            <p className="text-primary/60 mb-4">No experiences found.</p>
-                            <p className="text-sm text-primary/40">
-                                Try a different category or{' '}
-                                <button onClick={() => { setActiveCategory('All'); setSearchQuery(''); }} className="text-secondary hover:underline">
-                                    clear filters
-                                </button>
+                        /* Empty state */
+                        <div className="text-center py-20 max-w-md mx-auto">
+                            <div className="text-5xl mb-5">🔍</div>
+                            <h3 className="font-display text-2xl text-primary mb-3">No trips found</h3>
+                            <p className="text-primary/55 text-sm mb-6 leading-relaxed">
+                                {searchQuery
+                                    ? `No results for "${searchQuery}". Try a different search term or browse by category.`
+                                    : `No trips in the "${activeCategory}" category yet. Try another category or let us plan a custom trip for you.`
+                                }
                             </p>
+                            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                <button
+                                    onClick={clearSearch}
+                                    className="px-6 py-3 bg-primary text-cream text-sm uppercase tracking-widest hover:bg-secondary transition-colors"
+                                >
+                                    Clear Filters
+                                </button>
+                                <a
+                                    href="https://wa.me/918427831127?text=Hi%2C+I'm+looking+for+a+custom+trip"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-6 py-3 border border-primary/20 text-primary text-sm uppercase tracking-widest hover:bg-primary hover:text-cream transition-all"
+                                >
+                                    Ask an Expert
+                                </a>
+                            </div>
                         </div>
                     )}
 
                     {/* Load More */}
-                    {trips.length > 0 && hasMore && (
-                        <div className="text-center mt-16">
+                    {trips.length > 0 && hasMore && !searchQuery && (
+                        <div className="text-center mt-14">
                             <button
                                 onClick={handleLoadMore}
                                 disabled={loadingMore}
-                                className="btn-outline disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="btn-outline disabled:opacity-50 disabled:cursor-not-allowed min-w-[180px]"
                             >
                                 {loadingMore ? (
                                     <>
@@ -287,18 +429,20 @@ export default function TripsContent() {
                                     </>
                                 ) : (
                                     <>
-                                        <span>Load More Experiences</span>
+                                        <span>Load More Trips</span>
                                         <ArrowUpRight className="w-4 h-4" />
                                     </>
                                 )}
                             </button>
+                            <p className="text-primary/35 text-xs mt-3">
+                                Showing {trips.length} of {totalElements} trips
+                            </p>
                         </div>
                     )}
 
-                    {/* All loaded indicator */}
-                    {trips.length > 0 && !hasMore && trips.length === totalElements && (
-                        <div className="text-center mt-16">
-                            <p className="text-primary/40 text-sm">All experiences loaded</p>
+                    {trips.length > 0 && !hasMore && trips.length >= totalElements && totalElements > 0 && (
+                        <div className="text-center mt-14 pb-4">
+                            <p className="text-primary/35 text-xs uppercase tracking-widest">— All {totalElements} trips loaded —</p>
                         </div>
                     )}
                 </div>

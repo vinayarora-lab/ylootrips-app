@@ -12,6 +12,20 @@ export const metadata: Metadata = {
     title: "10-Day Golden Triangle Tour — Delhi, Agra & Jaipur | YlooTrips",
     description: "Experience India's most iconic landmarks — Taj Mahal, Red Fort, and Amber Fort — in 10 days. Private guide, handpicked hotels, seamless logistics.",
     url: "https://www.ylootrips.com/tours/golden-triangle-10-day",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1200&q=80",
+        width: 1200,
+        height: 630,
+        alt: "Golden Triangle India Tour — Taj Mahal, Red Fort, Amber Fort in 10 days",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "10-Day Golden Triangle Tour — Delhi, Agra & Jaipur | YlooTrips",
+    description: "Taj Mahal, Red Fort, and Amber Fort in 10 days. Private guide, handpicked hotels.",
+    images: ["https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1200&q=80"],
   },
   alternates: { canonical: "https://www.ylootrips.com/tours/golden-triangle-10-day" },
 };

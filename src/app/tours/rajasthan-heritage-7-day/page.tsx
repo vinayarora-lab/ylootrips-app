@@ -9,9 +9,23 @@ export const metadata: Metadata = {
   description: "Explore royal Rajasthan in 7 days. Amber Fort, Mehrangarh Fort, Lake Palace, camel rides, and desert sunsets. Private guided tour with palace hotels. Get a custom quote.",
   keywords: "Rajasthan tour package, Jaipur Jodhpur Udaipur tour, Rajasthan heritage tour, camel safari Rajasthan, India desert tour, India royal palaces tour",
   openGraph: {
-    title: "7-Day Rajasthan Heritage Tour | YlooTrips",
+    title: "7-Day Rajasthan Heritage Tour | YlooTrips — India Travel Experts",
     description: "Royal forts, painted havelis, camel safaris, and lakeside palace hotels — explore Rajasthan's incredible heritage in 7 days.",
     url: "https://www.ylootrips.com/tours/rajasthan-heritage-7-day",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&q=80",
+        width: 1200,
+        height: 630,
+        alt: "Rajasthan heritage tour — Amber Fort, Mehrangarh Fort and Lake Palace in 7 days",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "7-Day Rajasthan Heritage Tour | YlooTrips",
+    description: "Royal forts, camel safaris, and palace hotels — Rajasthan in 7 days.",
+    images: ["https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&q=80"],
   },
   alternates: { canonical: "https://www.ylootrips.com/tours/rajasthan-heritage-7-day" },
 };

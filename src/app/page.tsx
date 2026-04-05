@@ -11,6 +11,9 @@ import TrustedHotels from '@/components/TrustedHotels';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import HowItWorks from '@/components/HowItWorks';
 import TrustBanner from '@/components/TrustBanner';
+import HolidayPlanner from '@/components/HolidayPlanner';
+import FlightSearch from '@/components/FlightSearch';
+import HiddenSpots from '@/components/HiddenSpots';
 import { api } from '@/lib/api';
 import { Destination } from '@/types';
 import { useVisitor } from '@/context/VisitorContext';
@@ -73,8 +76,8 @@ export default function Home() {
           setDestinations(data.featuredDestinations || []);
           setError(null);
           return;
-        } catch (combinedErr) {
-          console.warn('Combined endpoint failed, falling back to individual calls:', combinedErr);
+        } catch {
+          // fall through to individual calls
         }
 
         // Fallback to individual calls if combined endpoint fails
@@ -86,8 +89,7 @@ export default function Home() {
         setContent(contentRes.data);
         setDestinations(destRes.data.slice(0, 4));
         setError(null);
-      } catch (err) {
-        console.error('Error fetching data:', err);
+      } catch {
         setError('Unable to load content. Please ensure the backend is running and seeded.');
       } finally {
         setLoading(false);
@@ -282,6 +284,15 @@ export default function Home() {
       </section>
 
 
+      {/* Hidden Gems section */}
+      <HiddenSpots />
+
+      {/* Holiday & Weekend Planner */}
+      <HolidayPlanner />
+
+      {/* Live Flight Search */}
+      <FlightSearch />
+
       {/* International Testimonials — static, from real traveler countries */}
       <InternationalTestimonials />
 
@@ -296,7 +307,7 @@ export default function Home() {
         <div className="absolute inset-0">
           <Image
             src={ctaSection?.imageUrl || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&q=80'}
-            alt="Start your journey"
+            alt="India mountain landscape — start your journey with YlooTrips"
             fill
             className="object-cover"
           />

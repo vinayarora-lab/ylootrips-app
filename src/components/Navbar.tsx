@@ -9,7 +9,7 @@ import { useVisitor } from '@/context/VisitorContext';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { currency, toggle: toggleCurrency } = useCurrency();
+  const { currency, toggle: toggleCurrency, setCurrency } = useCurrency();
   const { visitor, setVisitor, hasChosen } = useVisitor();
 
   useEffect(() => {
@@ -42,8 +42,11 @@ export default function Navbar() {
         { name: 'Contact', href: '/contact' },
       ];
 
-  const toggleVisitor = () =>
-    setVisitor(visitor === 'indian' ? 'foreigner' : 'indian');
+  const toggleVisitor = () => {
+    const next = visitor === 'indian' ? 'foreigner' : 'indian';
+    setVisitor(next);
+    setCurrency(next === 'indian' ? 'INR' : 'USD');
+  };
 
   const borderClass = scrolled
     ? 'border-primary/30 text-primary hover:bg-primary hover:text-cream'

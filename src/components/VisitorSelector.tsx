@@ -1,10 +1,12 @@
 'use client';
 
 import { useVisitor } from '@/context/VisitorContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import Image from 'next/image';
 
 export default function VisitorSelector() {
   const { hasChosen, setVisitor } = useVisitor();
+  const { setCurrency } = useCurrency();
 
   // Don't render once a choice has been made
   if (hasChosen) return null;
@@ -13,7 +15,7 @@ export default function VisitorSelector() {
     <div className="fixed inset-0 z-[100] flex flex-col md:flex-row">
       {/* ── Indian Traveler Card ─────────────────── */}
       <button
-        onClick={() => setVisitor('indian')}
+        onClick={() => { setVisitor('indian'); setCurrency('INR'); }}
         className="relative flex-1 group overflow-hidden flex flex-col items-center justify-center text-cream cursor-pointer focus:outline-none"
         aria-label="I am an Indian traveler"
       >
@@ -53,7 +55,7 @@ export default function VisitorSelector() {
 
       {/* ── International Traveler Card ──────────── */}
       <button
-        onClick={() => setVisitor('foreigner')}
+        onClick={() => { setVisitor('foreigner'); setCurrency('USD'); }}
         className="relative flex-1 group overflow-hidden flex flex-col items-center justify-center text-cream cursor-pointer focus:outline-none"
         aria-label="I am an international traveler visiting India"
       >

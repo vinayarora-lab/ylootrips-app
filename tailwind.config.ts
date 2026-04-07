@@ -64,6 +64,7 @@ const config: Config = {
                 'fade-in': 'fadeIn 0.6s ease-out forwards',
                 'slide-in-left': 'slideInLeft 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards',
                 'slide-in-right': 'slideInRight 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                'slide-out-right': 'slideOutRight 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards',
                 'scale-in': 'scaleIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards',
                 'reveal': 'reveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards',
                 'float': 'float 6s ease-in-out infinite',
@@ -86,6 +87,10 @@ const config: Config = {
                 slideInRight: {
                     '0%': { opacity: '0', transform: 'translateX(60px)' },
                     '100%': { opacity: '1', transform: 'translateX(0)' },
+                },
+                slideOutRight: {
+                    '0%': { opacity: '1', transform: 'translateX(0)' },
+                    '100%': { opacity: '0', transform: 'translateX(80px)' },
                 },
                 scaleIn: {
                     '0%': { opacity: '0', transform: 'scale(0.9)' },

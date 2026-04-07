@@ -3,145 +3,134 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { Menu, X, Sparkles } from 'lucide-react';
 
 export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
 
-    // Pages that have a full-screen hero with dark overlay (navbar should be light)
-    const pagesWithHero = ['/'];
-    const hasHero = pagesWithHero.includes(pathname);
+    const hasHero = pathname === '/';
 
     useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 100);
-        };
+        const handleScroll = () => setIsScrolled(window.scrollY > 60);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Prevent body scroll when mobile menu is open
     useEffect(() => {
-        if (isMobileMenuOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
+        document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
         return () => { document.body.style.overflow = ''; };
     }, [isMobileMenuOpen]);
 
     const navLinks = [
-        { name: 'Domestic', href: '/destinations/domestic' },
-        { name: 'International', href: '/destinations/international' },
-        { name: 'Events', href: '/events' },
-        { name: 'Blogs', href: '/blogs' },
+        { name: 'Trips 🏕️', href: '/destinations/domestic' },
+        { name: 'International 🌍', href: '/destinations/international' },
+        { name: 'Events 🎉', href: '/events' },
+        { name: 'Blogs ✍️', href: '/blogs' },
         { name: 'About', href: '/about' },
     ];
 
-    const isNavActive = (link: { name: string; href: string }) => pathname === link.href;
-
-    // Determine text color based on page type and scroll state
-    const getTextColor = () => {
-        if (isScrolled || isMobileMenuOpen) return 'text-primary';
-        if (hasHero) return 'text-white';
-        return 'text-primary';
-    };
+    const isActive = (href: string) => pathname === href;
 
     return (
         <>
-            <header
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-smooth ${isScrolled
-                    ? 'bg-cream/95 blur-overlay py-4 shadow-sm'
+            <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+                isScrolled
+                    ? 'bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm py-3'
                     : hasHero
-                        ? 'bg-transparent py-6 md:py-8'
-                        : 'bg-cream py-6 md:py-8 border-b border-primary/5'
-                    }`}
-            >
+                        ? 'bg-transparent py-6'
+                        : 'bg-white/95 backdrop-blur-lg border-b border-gray-100 py-4'
+            }`}>
                 <div className="section-container">
                     <div className="flex justify-between items-center">
                         {/* Logo */}
-                        <Link href="/" className="relative z-10">
+                        <Link href="/" className="relative z-10 group">
                             <img
                                 src="/logo.png"
                                 alt="YlooTrips"
-                                className={`h-10 md:h-12 w-auto object-contain transition-all duration-500 ${hasHero && !isScrolled && !isMobileMenuOpen
-                                        ? 'brightness-0 invert'
-                                        : ''
-                                    }`}
+                                className={`h-9 md:h-11 w-auto object-contain transition-all duration-500 group-hover:scale-105 ${
+                                    hasHero && !isScrolled && !isMobileMenuOpen ? 'brightness-0 invert' : ''
+                                }`}
                             />
                         </Link>
 
-                        {/* Desktop Navigation */}
-                        <nav className="hidden lg:flex items-center gap-10">
+                        {/* Desktop Nav */}
+                        <nav className="hidden lg:flex items-center gap-1">
                             {navLinks.map((link) => (
-                                <Link
-                                    key={link.name}
-                                    href={link.href}
-                                    className={`text-caption uppercase tracking-[0.15em] font-medium transition-all duration-500 hover-line ${isNavActive(link)
-                                        ? 'text-secondary'
-                                        : `${getTextColor()} hover:text-secondary`
-                                        }`}
-                                >
+                                <Link key={link.name} href={link.href}
+                                    className={`relative px-4 py-2 text-[11px] uppercase tracking-[0.12em] font-semibold rounded-full transition-all duration-300 ${
+                                        isActive(link.href)
+                                            ? 'bg-amber-500/10 text-amber-600'
+                                            : hasHero && !isScrolled
+                                                ? 'text-white/80 hover:text-white hover:bg-white/10'
+                                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    }`}>
                                     {link.name}
+                                    {isActive(link.href) && (
+                                        <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-500" />
+                                    )}
                                 </Link>
                             ))}
                         </nav>
 
-                        {/* CTA & Mobile Toggle */}
-                        <div className="flex items-center gap-6">
-                            <Link
-                                href="/contact"
-                                className={`hidden md:flex items-center gap-2 text-caption uppercase tracking-[0.15em] font-medium transition-all duration-500 ${getTextColor()} hover:text-secondary`}
-                            >
-                                <span>Plan Your Journey</span>
-                                <ArrowUpRight className="w-4 h-4" />
+                        {/* CTA + Mobile toggle */}
+                        <div className="flex items-center gap-3">
+                            <Link href="/contact"
+                                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 transition-all duration-300 hover:scale-105 shadow-md shadow-amber-500/20">
+                                <Sparkles size={13} />
+                                Plan Journey
                             </Link>
-
-                            <button
-                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className={`lg:hidden relative z-10 p-2 -mr-2 transition-colors duration-500 ${getTextColor()}`}
-                                aria-label="Toggle menu"
-                            >
-                                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className={`lg:hidden relative z-10 p-2 rounded-full transition-all duration-300 ${
+                                    hasHero && !isScrolled && !isMobileMenuOpen
+                                        ? 'text-white hover:bg-white/10'
+                                        : 'text-gray-700 hover:bg-gray-100'
+                                }`}>
+                                {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
                             </button>
                         </div>
                     </div>
                 </div>
             </header>
 
-            {/* Mobile Menu */}
-            <div
-                className={`fixed inset-0 z-40 bg-cream transition-all duration-700 ease-smooth lg:hidden ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-                    }`}
-            >
-                <div className="h-full flex flex-col justify-center items-center">
-                    <nav className="flex flex-col items-center gap-8">
-                        {navLinks.map((link, index) => (
-                            <Link
-                                key={link.name}
-                                href={link.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className={`font-display text-4xl md:text-5xl transition-all duration-500 ${isNavActive(link) ? 'text-secondary' : 'text-primary hover:text-secondary'
-                                    } ${isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-                                style={{ transitionDelay: isMobileMenuOpen ? `${index * 100}ms` : '0ms' }}
-                            >
-                                {link.name}
-                            </Link>
-                        ))}
-                    </nav>
+            {/* Mobile Menu — full screen with glassmorphism */}
+            <div className={`fixed inset-0 z-40 lg:hidden transition-all duration-500 ${
+                isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+            }`}>
+                {/* Backdrop */}
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
 
-                    <Link
-                        href="/contact"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`mt-12 btn-primary ${isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                {/* Slide-in panel */}
+                <div className={`absolute right-0 top-0 bottom-0 w-72 bg-white/95 backdrop-blur-xl shadow-2xl transition-transform duration-500 ${
+                    isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+                }`}>
+                    <div className="flex flex-col h-full pt-20 pb-8 px-6">
+                        <nav className="flex flex-col gap-1 flex-1">
+                            {navLinks.map((link, i) => (
+                                <Link key={link.name} href={link.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={`px-4 py-3 rounded-2xl text-base font-semibold transition-all duration-300 ${
+                                        isMobileMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+                                    } ${isActive(link.href)
+                                        ? 'bg-amber-50 text-amber-600'
+                                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                                    }`}
+                                    style={{ transitionDelay: isMobileMenuOpen ? `${i * 60 + 100}ms` : '0ms' }}>
+                                    {link.name}
+                                </Link>
+                            ))}
+                        </nav>
+
+                        <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white transition-all duration-500 shadow-lg shadow-amber-500/30 ${
+                                isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                             }`}
-                        style={{ transitionDelay: isMobileMenuOpen ? '500ms' : '0ms' }}
-                    >
-                        Plan Your Journey
-                        <ArrowUpRight className="w-4 h-4" />
-                    </Link>
+                            style={{ transitionDelay: '450ms' }}>
+                            <Sparkles size={16} />
+                            Plan Your Journey
+                        </Link>
+                    </div>
                 </div>
             </div>
         </>

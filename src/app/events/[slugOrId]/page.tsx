@@ -300,12 +300,13 @@ export default function EventDetailPage() {
                                 key={i}
                                 type="button"
                                 onClick={() => setGalleryIndex(i)}
+                                aria-label={`View image ${i + 1}`}
                                 className={`relative flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-colors ${galleryIndex === i ? 'border-red-500 ring-1 ring-red-500' : 'border-transparent hover:border-gray-300'}`}
                             >
                                 <span className="absolute inset-0 block">
                                     <Image
                                         src={url}
-                                        alt=""
+                                        alt={`Gallery thumbnail ${i + 1}`}
                                         fill
                                         className="object-cover"
                                         sizes="64px"

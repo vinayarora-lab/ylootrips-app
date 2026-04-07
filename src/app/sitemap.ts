@@ -68,5 +68,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.75,
   }));
 
-  return [...staticPages, ...tripPages, ...destinationPages];
+  // ── Dynamic: event pages ──────────────────────────────────────
+  const eventsData = await fetchJson<{ content?: Array<{ id: number; slug?: string }> } | Array<{ id: number; slug?: string }>>('/events?page=0&size=100');
+  const eventItems: Array<{ id: number; slug?: string }> = Array.isArray(eventsData)
+    ? eventsData
+    : (eventsData as any)?.content ?? [];
+
+  const eventPages: MetadataRoute.Sitemap = eventItems.map((e) => ({
+    url: `${BASE_URL}/events/${e.slug || e.id}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...tripPages, ...destinationPages, ...eventPages];
 }

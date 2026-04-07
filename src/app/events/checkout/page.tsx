@@ -38,6 +38,7 @@ function EventCheckoutContent() {
     const [event, setEvent] = useState<EventType | null>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [checkoutError, setCheckoutError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         customerName: '',
         customerEmail: '',
@@ -62,8 +63,7 @@ function EventCheckoutContent() {
                 if (!formData.eventDate && response.data?.eventDate) {
                     setFormData(prev => ({ ...prev, eventDate: response.data.eventDate }));
                 }
-            } catch (err) {
-                console.error('Error fetching event:', err);
+            } catch {
                 router.push('/events');
             } finally {
                 setLoading(false);
@@ -76,9 +76,10 @@ function EventCheckoutContent() {
         e.preventDefault();
         if (!event) return;
         if (!formData.paymentMethod?.trim()) {
-            alert('Please select a payment method.');
+            setCheckoutError('Please select a payment method.');
             return;
         }
+        setCheckoutError(null);
         setSubmitting(true);
         try {
             const bookingPayload: {
@@ -118,9 +119,8 @@ function EventCheckoutContent() {
                 throw new Error('No payment URL received');
             }
         } catch (err: any) {
-            console.error('Event checkout error:', err);
             const msg = err.response?.data?.error || err.message || 'Something went wrong. Please try again.';
-            alert(msg);
+            setCheckoutError(msg);
             setSubmitting(false);
         }
     };
@@ -350,6 +350,12 @@ function EventCheckoutContent() {
                                     </div>
                                     <TrustBadges />
                                 </section>
+
+                                {checkoutError && (
+                                    <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded">
+                                        {checkoutError}
+                                    </div>
+                                )}
 
                                 <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:gap-4 pt-6">
                                     <button

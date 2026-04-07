@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const title = isEvent ? booking.event?.title : booking.trip?.title;
     const destination = isEvent ? booking.event?.location : booking.trip?.destination;
     const travelDate = booking.travelDate || booking.eventDate
-      ? new Date(booking.travelDate || booking.eventDate).toLocaleDateString('en-US', {
+      ? new Date(booking.travelDate || booking.eventDate).toLocaleDateString('en-IN', {
           weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
         })
       : null;
@@ -188,13 +188,24 @@ export async function POST(req: NextRequest) {
     });
 
     if (error) {
-      console.error('Resend error:', error);
       return NextResponse.json({ error }, { status: 500 });
     }
 
+    // Also notify admin
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail && adminEmail !== to) {
+      try {
+        await resend.emails.send({
+          from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
+          to: [adminEmail],
+          subject: `🔔 New Booking: ${title || 'Trip'} — ${booking.bookingReference || ''} | YlooTrips`,
+          html,
+        });
+      } catch { /* non-fatal */ }
+    }
+
     return NextResponse.json({ success: true, id: data?.id });
-  } catch (err) {
-    console.error('Send confirmation error:', err);
+  } catch {
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArticleJsonLd } from '@/components/JsonLd';
+import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "Solo Female Travel in India: Honest Safety Guide 2025",
@@ -11,6 +11,21 @@ export const metadata: Metadata = {
     title: "Solo Female Travel in India: Honest Safety Guide 2025 | YlooTrips",
     description: "An honest guide to solo female travel in India — practical safety tips, best cities for women, and how to have an extraordinary trip.",
     url: "https://www.ylootrips.com/blogs/solo-female-travel-india",
+    type: "article",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1200&q=80",
+        width: 1200,
+        height: 630,
+        alt: "Solo female traveler in India — safe and empowering journey",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Solo Female Travel in India: Honest Safety Guide 2025",
+    description: "Safe cities, transport tips, dress code, accommodation advice and how to have an amazing solo trip in India.",
+    images: ["https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1200&q=80"],
   },
   alternates: { canonical: "https://www.ylootrips.com/blogs/solo-female-travel-india" },
 };
@@ -18,6 +33,11 @@ export const metadata: Metadata = {
 export default function SoloFemaleTravelIndia() {
   return (
     <article className="bg-cream min-h-screen">
+      <BreadcrumbJsonLd items={[
+        { name: 'Home', url: 'https://www.ylootrips.com' },
+        { name: 'Blog', url: 'https://www.ylootrips.com/blogs' },
+        { name: 'Solo Female Travel in India', url: 'https://www.ylootrips.com/blogs/solo-female-travel-india' },
+      ]} />
       <ArticleJsonLd
         headline="Solo Female Travel in India: Honest Safety Guide 2025"
         description="Is India safe for solo female travelers? Practical guide covering safe cities, transport, dress code, accommodation, and how to have an extraordinary trip."

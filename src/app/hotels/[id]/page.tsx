@@ -48,7 +48,6 @@ export default function HotelDetailPage() {
                 setHotel(response.data);
                 setError(null);
             } catch (err: any) {
-                console.error('Error fetching hotel:', err);
                 setError(err.response?.status === 404 ? 'Hotel not found' : 'Failed to load hotel');
             } finally {
                 setLoading(false);

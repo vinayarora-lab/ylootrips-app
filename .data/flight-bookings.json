@@ -1,0 +1,77 @@
+[
+  {
+    "txnid": "FLT-1775577581340-0MC3",
+    "createdAt": "2026-04-07T15:59:41.340Z",
+    "flight": {
+      "airline": "Air India Express",
+      "code": "IX",
+      "flightNum": "IX 1108",
+      "from": "DEL",
+      "to": "GOI",
+      "dep": "05:00",
+      "arr": "07:30",
+      "date": "2026-04-15",
+      "dur": "2h 30m",
+      "stops": 0,
+      "pax": 1,
+      "price": 249
+    },
+    "passengers": [
+      {
+        "title": "Mr",
+        "firstName": "vinay",
+        "lastName": "arora",
+        "dob": "1996-05-02",
+        "gender": "Male",
+        "nationality": "Indian",
+        "passportNo": "",
+        "passportExpiry": ""
+      }
+    ],
+    "contact": {
+      "email": "v0205@outlook.com",
+      "phone": "7888733061"
+    },
+    "paymentMethod": "upi",
+    "status": "PENDING",
+    "savedAt": "2026-04-07T15:59:41.351Z"
+  },
+  {
+    "txnid": "FLT-1775578914033-7RE3",
+    "createdAt": "2026-04-07T16:21:54.033Z",
+    "flight": {
+      "airline": "IndiGo",
+      "code": "E 2150",
+      "flightNum": "6E 2150",
+      "from": "DEL",
+      "to": "GOI",
+      "dep": "16:55",
+      "arr": "19:30",
+      "date": "2026-04-15",
+      "dur": "2h 35m",
+      "stops": 0,
+      "pax": 1,
+      "price": 7949
+    },
+    "passengers": [
+      {
+        "title": "Mr",
+        "firstName": "vinay",
+        "lastName": "arora",
+        "dob": "1996-05-02",
+        "gender": "Male",
+        "nationality": "Indian",
+        "passportNo": "",
+        "passportExpiry": ""
+      }
+    ],
+    "contact": {
+      "email": "v0205@outlook.com",
+      "phone": "7888733061"
+    },
+    "paymentMethod": "upi",
+    "status": "PENDING",
+    "savedAt": "2026-04-07T16:21:54.161Z",
+    "evtRef": "EVT-E4431A95"
+  }
+]

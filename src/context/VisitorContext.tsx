@@ -19,16 +19,17 @@ const VisitorContext = createContext<VisitorContextValue>({
 const STORAGE_KEY = 'ylootrips-visitor';
 
 export function VisitorProvider({ children }: { children: ReactNode }) {
-  const [visitor, setVisitorState] = useState<VisitorType>(null);
+  const [visitor, setVisitorState] = useState<VisitorType>('indian');
   const [hasChosen, setHasChosen] = useState(false);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount and sync currency
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY) as VisitorType;
       if (saved === 'indian' || saved === 'foreigner') {
         setVisitorState(saved);
         setHasChosen(true);
+        window.dispatchEvent(new CustomEvent('visitorchange', { detail: saved }));
       }
     } catch {}
   }, []);
@@ -37,7 +38,11 @@ export function VisitorProvider({ children }: { children: ReactNode }) {
     setVisitorState(v);
     setHasChosen(true);
     try {
-      if (v) localStorage.setItem(STORAGE_KEY, v);
+      if (v) {
+        localStorage.setItem(STORAGE_KEY, v);
+        // Notify CurrencyContext to update currency
+        window.dispatchEvent(new CustomEvent('visitorchange', { detail: v }));
+      }
     } catch {}
   };
 

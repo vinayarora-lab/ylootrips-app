@@ -7,6 +7,7 @@ import { ArrowUpRight, Calendar, MapPin, Ticket, Phone, Users, Star, Camera, Mus
 import { api } from '@/lib/api';
 import { Event as EventType } from '@/types';
 import { formatPrice } from '@/lib/utils';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 
 const eventCategories = [
   {
@@ -27,7 +28,7 @@ const eventCategories = [
     icon: Camera,
     title: 'Cultural Experiences',
     desc: 'Holi festivals, Diwali celebrations, cooking classes, heritage walks, and immersive cultural programs for groups and individuals.',
-    image: 'https://images.unsplash.com/photo-1567540673237-1a5b50e14de1?w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?w=600&q=80',
     color: 'bg-terracotta',
   },
   {
@@ -62,6 +63,9 @@ export default function EventsPage() {
   const [eventType, setEventType] = useState('');
   const [guests, setGuests] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('All Events');
+
+  const eventFilters = ['All Events', 'Corporate', 'Wedding', 'Cultural', 'Adventure'];
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -71,8 +75,7 @@ export default function EventsPage() {
         const list = Array.isArray(data) ? data : (data && Array.isArray(data.content) ? data.content : []);
         setEvents(list);
         setError(null);
-      } catch (err) {
-        console.error('Error fetching events:', err);
+      } catch {
         setError('Unable to load events.');
         setEvents([]);
       } finally {
@@ -91,6 +94,10 @@ export default function EventsPage() {
 
   return (
     <div className="bg-cream min-h-screen">
+      <BreadcrumbJsonLd items={[
+        { name: 'Home', url: 'https://www.ylootrips.com' },
+        { name: 'Events', url: 'https://www.ylootrips.com/events' },
+      ]} />
 
       {/* ── HERO ── */}
       <section className="relative h-[85vh] min-h-[600px] overflow-hidden">
@@ -162,7 +169,7 @@ export default function EventsPage() {
             {eventCategories.map(({ icon: Icon, title, desc, image }) => (
               <Link key={title} href={`/contact?event=${encodeURIComponent(title)}`} className="group relative overflow-hidden bg-cream-light border border-primary/8 hover:shadow-xl transition-all duration-500 block">
                 <div className="relative h-48 overflow-hidden">
-                  <Image src={image} alt={title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <Image src={image} alt={title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80'; }} />
                   <div className="absolute inset-0 bg-primary/40 group-hover:bg-primary/20 transition-colors duration-500" />
                   <div className="absolute top-4 left-4 w-10 h-10 bg-cream/15 backdrop-blur-sm flex items-center justify-center">
                     <Icon className="w-5 h-5 text-cream" />
@@ -212,10 +219,20 @@ export default function EventsPage() {
         </div>
       </section>
 
+      {/* ── SOCIAL PROOF BAR ── */}
+      <div className="bg-accent/10 border-y border-accent/20 py-4">
+        <div className="section-container flex flex-wrap justify-center gap-6 md:gap-12 text-sm text-primary/70">
+          <span>✓ Free consultation</span>
+          <span>✓ Custom packages for all budgets</span>
+          <span>✓ Dedicated coordinator</span>
+          <span>✓ Reply in under 1 hour</span>
+        </div>
+      </div>
+
       {/* ── UPCOMING / LIVE EVENTS ── */}
       <section id="upcoming-events" className="py-20 md:py-28 bg-cream-dark">
         <div className="section-container">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
             <div>
               <p className="text-caption uppercase tracking-[0.3em] text-secondary mb-3">Live Listings</p>
               <h2 className="font-display text-display-lg text-primary">Upcoming Events</h2>
@@ -223,6 +240,21 @@ export default function EventsPage() {
             <Link href="/contact" className="btn-outline shrink-0">
               Request Custom Event
             </Link>
+          </div>
+          {/* Category filter tabs */}
+          <div className="flex flex-wrap gap-2 mb-10">
+            {eventFilters.map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-4 py-1.5 text-xs uppercase tracking-widest rounded-full transition-all border ${activeFilter === filter
+                  ? 'bg-secondary text-cream border-secondary'
+                  : 'bg-transparent text-primary/60 border-primary/20 hover:border-secondary/50 hover:text-secondary'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
           </div>
 
           {loading && (
@@ -288,8 +320,8 @@ export default function EventsPage() {
                         <p className="text-caption text-primary/40 uppercase tracking-wider">From</p>
                         <p className="font-display text-xl text-primary">{formatPrice(ev.price)}</p>
                       </div>
-                      <Link href="/contact" className="flex items-center gap-1.5 text-secondary text-sm font-medium hover:gap-3 transition-all">
-                        Book Now <ArrowUpRight className="w-4 h-4" />
+                      <Link href="/contact" className="flex items-center gap-1.5 px-4 py-2 bg-secondary text-cream text-xs font-semibold uppercase tracking-widest hover:bg-secondary/80 transition-colors">
+                        Book Tickets <ArrowUpRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   </div>
@@ -300,7 +332,7 @@ export default function EventsPage() {
 
           {!loading && !error && events.length > 0 && (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event) => {
+              {(activeFilter === 'All Events' ? events : events.filter(e => e.category?.toLowerCase().includes(activeFilter.toLowerCase()))).map((event) => {
                 const price = typeof event.price === 'number' ? event.price : parseFloat(String(event.price ?? 0));
                 const dateStr = typeof event.eventDate === 'string' ? event.eventDate : '';
                 return (
@@ -356,9 +388,9 @@ export default function EventsPage() {
                               )}
                             </p>
                           </div>
-                          <span className="flex items-center gap-1.5 text-secondary text-sm font-medium">
-                            Book Now <ArrowUpRight className="w-4 h-4" />
-                          </span>
+                          <div className="flex items-center gap-1.5 px-4 py-2 bg-secondary text-cream text-xs font-semibold uppercase tracking-widest hover:bg-secondary/80 transition-colors">
+                            Book Tickets <ArrowUpRight className="w-3.5 h-3.5" />
+                          </div>
                         </div>
                       </div>
                     </Link>
@@ -386,7 +418,7 @@ export default function EventsPage() {
                 href={`/contact?destination=${encodeURIComponent(city)}`}
                 className="group relative h-72 overflow-hidden"
               >
-                <Image src={image} alt={`${city} events`} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                <Image src={image} alt={`${city} events`} fill className="object-cover transition-transform duration-700 group-hover:scale-110" onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'; }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-5">
                   <p className="text-caption uppercase tracking-wider text-accent mb-1">{tag}</p>

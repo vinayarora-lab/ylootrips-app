@@ -28,6 +28,7 @@ function CheckoutContent() {
     const [submitting, setSubmitting] = useState(false);
     const [bookingReference, setBookingReference] = useState<string | undefined>(undefined);
     const [halfPaymentCardType, setHalfPaymentCardType] = useState<'credit' | 'debit'>('credit');
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedEmi, setSelectedEmi] = useState<{
         tenure: number;
         monthlyAmount: number;
@@ -64,8 +65,7 @@ function CheckoutContent() {
                     numberOfGuests: guests,
                     travelDate: date,
                 }));
-            } catch (error) {
-                console.error('Error fetching trip:', error);
+            } catch {
                 router.push('/trips');
             } finally {
                 setLoading(false);
@@ -81,10 +81,11 @@ function CheckoutContent() {
         if (!trip) return;
 
         if (!formData.paymentMethod || formData.paymentMethod.trim() === '') {
-            alert('Please select a payment method');
+            setErrorMessage('Please select a payment method');
             return;
         }
 
+        setErrorMessage(null);
         setSubmitting(true);
 
         try {
@@ -133,24 +134,22 @@ function CheckoutContent() {
                 throw new Error(paymentData.error || 'Failed to get payment URL from Easebuzz. Please check your payment gateway configuration.');
             }
         } catch (error: any) {
-            console.error('Error creating booking:', error);
-
-            let errorMessage = 'Failed to create booking. Please try again.';
+            let msg = 'Failed to create booking. Please try again.';
 
             if (error.response) {
                 const errorData = error.response.data;
                 if (errorData?.error) {
-                    errorMessage = errorData.error;
+                    msg = errorData.error;
                 } else if (errorData?.message) {
-                    errorMessage = errorData.message;
+                    msg = errorData.message;
                 } else if (typeof errorData === 'string') {
-                    errorMessage = errorData;
+                    msg = errorData;
                 }
             } else if (error.message) {
-                errorMessage = error.message;
+                msg = error.message;
             }
 
-            alert(errorMessage);
+            setErrorMessage(msg);
             setSubmitting(false);
         }
     };
@@ -349,6 +348,12 @@ function CheckoutContent() {
                                     />
                                     <TrustBadges isInternational={visitor === 'foreigner'} />
                                 </section>
+
+                                {errorMessage && (
+                                    <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded">
+                                        {errorMessage}
+                                    </div>
+                                )}
 
                                 <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:gap-4 pt-6">
                                     <button

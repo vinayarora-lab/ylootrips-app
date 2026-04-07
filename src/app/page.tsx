@@ -12,7 +12,6 @@ import WhyChooseUs from '@/components/WhyChooseUs';
 import HowItWorks from '@/components/HowItWorks';
 import TrustBanner from '@/components/TrustBanner';
 import HolidayPlanner from '@/components/HolidayPlanner';
-import FlightSearch from '@/components/FlightSearch';
 import HiddenSpots from '@/components/HiddenSpots';
 import { api } from '@/lib/api';
 import { Destination } from '@/types';
@@ -290,8 +289,6 @@ export default function Home() {
       {/* Holiday & Weekend Planner */}
       <HolidayPlanner />
 
-      {/* Live Flight Search */}
-      <FlightSearch />
 
       {/* International Testimonials — static, from real traveler countries */}
       <InternationalTestimonials />

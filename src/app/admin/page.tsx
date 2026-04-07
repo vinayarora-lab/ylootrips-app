@@ -15,6 +15,7 @@ import { api } from '@/lib/api';
 import ImagePreview from '@/components/ImagePreview';
 import EditableList from '@/components/EditableList';
 import { formatPrice } from '@/lib/utils';
+import InlineImageUploader from '@/components/InlineImageUploader';
 
 interface PageData {
     id: number;
@@ -272,11 +273,8 @@ export default function AdminDashboard() {
                 if (Array.isArray(res.data)) {
                     setTripItineraries({ ...tripItineraries, [id]: res.data });
                 }
-            }).catch((err: any) => {
-                // Silently handle errors - trip might not have itineraries yet
-                if (err.response?.status !== 404) {
-                    console.error('Error fetching trip itineraries:', err);
-                }
+            }).catch(() => {
+                // silently handle - trip might not have itineraries yet
             });
         }
     };
@@ -743,7 +741,7 @@ export default function AdminDashboard() {
         { id: 'pages', icon: FileText, label: 'Page Content' },
         { id: 'stats', icon: LayoutDashboard, label: 'Statistics' },
         { id: 'testimonials', icon: MessageSquare, label: 'Testimonials' },
-        { id: 'bookings', icon: ShoppingBag, label: 'Bookings' },
+        { id: 'bookings', icon: ShoppingBag, label: 'Bookings', href: '/admin/bookings' },
         { id: 'inquiries', icon: Mail, label: 'Inquiries' },
         { id: 'ads', icon: Megaphone, label: 'Ads' },
     ];
@@ -770,19 +768,31 @@ export default function AdminDashboard() {
 
                 <nav className="p-4">
                     {sidebarItems.map((item) => (
-                        <button
-                            key={item.id}
-                            onClick={() => handleTabChange(item.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 mb-1 transition-colors ${activeTab === item.id
-                                ? 'bg-accent text-primary'
-                                : 'text-cream/60 hover:bg-white/5 hover:text-cream'
-                                }`}
-                        >
-                            <item.icon className="w-5 h-5" />
-                            <span className="text-sm">{item.label}</span>
-                            {tabLoading[item.id] && <RefreshCw className="w-4 h-4 ml-auto animate-spin" />}
-                            {activeTab === item.id && !tabLoading[item.id] && <ChevronRight className="w-4 h-4 ml-auto" />}
-                        </button>
+                        (item as { href?: string }).href ? (
+                            <Link
+                                key={item.id}
+                                href={(item as { href: string }).href}
+                                className={`w-full flex items-center gap-3 px-4 py-3 mb-1 transition-colors text-cream/60 hover:bg-white/5 hover:text-cream`}
+                            >
+                                <item.icon className="w-5 h-5" />
+                                <span className="text-sm">{item.label}</span>
+                                <ChevronRight className="w-4 h-4 ml-auto" />
+                            </Link>
+                        ) : (
+                            <button
+                                key={item.id}
+                                onClick={() => handleTabChange(item.id)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 mb-1 transition-colors ${activeTab === item.id
+                                    ? 'bg-accent text-primary'
+                                    : 'text-cream/60 hover:bg-white/5 hover:text-cream'
+                                    }`}
+                            >
+                                <item.icon className="w-5 h-5" />
+                                <span className="text-sm">{item.label}</span>
+                                {tabLoading[item.id] && <RefreshCw className="w-4 h-4 ml-auto animate-spin" />}
+                                {activeTab === item.id && !tabLoading[item.id] && <ChevronRight className="w-4 h-4 ml-auto" />}
+                            </button>
+                        )
                     ))}
                 </nav>
 
@@ -883,12 +893,14 @@ export default function AdminDashboard() {
                                 <div key={page.id} className="border-b border-primary/10 pb-8 last:border-0">
                                     <h3 className="font-display text-xl text-primary mb-4 capitalize">{page.pageKey} Page</h3>
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        {/* Image Preview */}
+                                        {/* Image Upload */}
                                         <div className="lg:col-span-1">
-                                            <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Hero Image Preview</label>
-                                            <ImagePreview
-                                                imageUrl={page.heroImageUrl || ''}
-                                                className="w-full h-48 rounded"
+                                            <InlineImageUploader
+                                                label="Hero Image"
+                                                value={page.heroImageUrl || ''}
+                                                onChange={url => setPages(pages.map(p => p.id === page.id ? { ...p, heroImageUrl: url } : p))}
+                                                folder="pages"
+                                                previewHeight="h-48"
                                             />
                                         </div>
 
@@ -911,28 +923,6 @@ export default function AdminDashboard() {
                                                     rows={3}
                                                     className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
                                                 />
-                                            </div>
-                                            <div>
-                                                <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Hero Image URL</label>
-                                                <div className="flex gap-2">
-                                                    <input
-                                                        type="text"
-                                                        value={page.heroImageUrl || ''}
-                                                        onChange={(e) => setPages(pages.map(p => p.id === page.id ? { ...p, heroImageUrl: e.target.value } : p))}
-                                                        className="flex-1 px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
-                                                        placeholder="https://images.unsplash.com/..."
-                                                    />
-                                                    {page.heroImageUrl && (
-                                                        <a
-                                                            href={page.heroImageUrl}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="px-4 py-3 border border-primary/20 bg-cream hover:bg-cream-dark transition-colors flex items-center"
-                                                        >
-                                                            <Eye className="w-4 h-4" />
-                                                        </a>
-                                                    )}
-                                                </div>
                                             </div>
                                             <button
                                                 onClick={() => handleSavePage(page)}
@@ -1007,12 +997,13 @@ export default function AdminDashboard() {
                             {destinations.map((dest) => (
                                 <div key={dest.id as number} className="p-6 border border-primary/10 bg-cream-light">
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        {/* Image Preview */}
                                         <div className="lg:col-span-1">
-                                            <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image Preview</label>
-                                            <ImagePreview
-                                                imageUrl={dest.imageUrl as string || ''}
-                                                className="w-full h-48 rounded"
+                                            <InlineImageUploader
+                                                label="Destination Image"
+                                                value={dest.imageUrl as string || ''}
+                                                onChange={url => setDestinations(destinations.map(d => d.id === dest.id ? { ...d, imageUrl: url } : d))}
+                                                folder="destinations"
+                                                previewHeight="h-48"
                                             />
                                         </div>
 
@@ -1084,28 +1075,6 @@ export default function AdminDashboard() {
                                                     rows={3}
                                                     className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
                                                 />
-                                            </div>
-                                            <div>
-                                                <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image URL</label>
-                                                <div className="flex gap-2">
-                                                    <input
-                                                        type="text"
-                                                        value={dest.imageUrl as string || ''}
-                                                        onChange={(e) => setDestinations(destinations.map(d => d.id === dest.id ? { ...d, imageUrl: e.target.value } : d))}
-                                                        className="flex-1 px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
-                                                        placeholder="https://images.unsplash.com/..."
-                                                    />
-                                                    {typeof dest.imageUrl === "string" && dest.imageUrl.trim() !== "" ? (
-                                                        <a
-                                                            href={dest.imageUrl}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="px-4 py-3 border border-primary/20 bg-cream hover:bg-cream-dark transition-colors flex items-center"
-                                                        >
-                                                            <Eye className="w-4 h-4" />
-                                                        </a>
-                                                    ) : null}
-                                                </div>
                                             </div>
                                             <div className="flex gap-2">
                                                 <button
@@ -1309,12 +1278,13 @@ export default function AdminDashboard() {
                             {trips.map((trip) => (
                                 <div key={trip.id as number} className="p-6 border border-primary/10 bg-cream-light">
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        {/* Image Preview */}
                                         <div className="lg:col-span-1">
-                                            <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image Preview</label>
-                                            <ImagePreview
-                                                imageUrl={trip.imageUrl as string || ''}
-                                                className="w-full h-48 rounded"
+                                            <InlineImageUploader
+                                                label="Trip Image"
+                                                value={trip.imageUrl as string || ''}
+                                                onChange={url => setTrips(trips.map(t => t.id === trip.id ? { ...t, imageUrl: url } : t))}
+                                                folder="trips"
+                                                previewHeight="h-48"
                                             />
                                         </div>
 
@@ -1343,13 +1313,28 @@ export default function AdminDashboard() {
                                                     ) : null}
                                                 </div>
                                                 <div>
-                                                    <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Original Price (₹)</label>
+                                                    <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Discount (%) → auto-calculates MRP</label>
                                                     <input
                                                         type="number"
-                                                        value={trip.originalPrice as number || 0}
-                                                        onChange={(e) => setTrips(trips.map(t => t.id === trip.id ? { ...t, originalPrice: Number(e.target.value) } : t))}
+                                                        min="0"
+                                                        max="99"
+                                                        value={(() => {
+                                                            const p = Number(trip.price) || 0;
+                                                            const op = Number(trip.originalPrice) || 0;
+                                                            if (op > 0 && p > 0 && op > p) return Math.round((1 - p / op) * 100);
+                                                            return 0;
+                                                        })()}
+                                                        onChange={(e) => {
+                                                            const discount = Math.min(99, Math.max(0, Number(e.target.value)));
+                                                            const price = Number(trip.price) || 0;
+                                                            const originalPrice = discount > 0 ? Math.round(price / (1 - discount / 100)) : 0;
+                                                            setTrips(trips.map(t => t.id === trip.id ? { ...t, originalPrice } : t));
+                                                        }}
                                                         className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
                                                     />
+                                                    {Number(trip.originalPrice) > 0 && (
+                                                        <p className="text-xs text-primary/50 mt-1">MRP: {formatPrice(Number(trip.originalPrice))}</p>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Duration</label>
@@ -1468,28 +1453,6 @@ export default function AdminDashboard() {
                                                     rows={4}
                                                     className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
                                                 />
-                                            </div>
-                                            <div>
-                                                <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image URL</label>
-                                                <div className="flex gap-2">
-                                                    <input
-                                                        type="text"
-                                                        value={trip.imageUrl as string || ''}
-                                                        onChange={(e) => setTrips(trips.map(t => t.id === trip.id ? { ...t, imageUrl: e.target.value } : t))}
-                                                        className="flex-1 px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
-                                                        placeholder="https://images.unsplash.com/..."
-                                                    />
-                                                    {(trip.imageUrl && typeof trip.imageUrl === 'string' && trip.imageUrl.trim() !== '') ? (
-                                                        <a
-                                                            href={trip.imageUrl}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="px-4 py-3 border border-primary/20 bg-cream hover:bg-cream-dark transition-colors flex items-center"
-                                                        >
-                                                            <Eye className="w-4 h-4" />
-                                                        </a>
-                                                    ) : null}
-                                                </div>
                                             </div>
                                             <EditableList
                                                 label="Gallery Images (URLs)"
@@ -1702,12 +1665,13 @@ export default function AdminDashboard() {
                             {hotels.map((hotel) => (
                                 <div key={hotel.id as number} className="p-6 border border-primary/10 bg-cream-light">
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        {/* Image Preview */}
                                         <div className="lg:col-span-1">
-                                            <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image Preview</label>
-                                            <ImagePreview
-                                                imageUrl={hotel.imageUrl as string || ''}
-                                                className="w-full h-48 rounded"
+                                            <InlineImageUploader
+                                                label="Hotel Image"
+                                                value={hotel.imageUrl as string || ''}
+                                                onChange={url => setHotels(hotels.map(h => h.id === hotel.id ? { ...h, imageUrl: url } : h))}
+                                                folder="hotels"
+                                                previewHeight="h-48"
                                             />
                                         </div>
 
@@ -1824,28 +1788,6 @@ export default function AdminDashboard() {
                                                     className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
                                                 />
                                             </div>
-                                            <div>
-                                                <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image URL</label>
-                                                <div className="flex gap-2">
-                                                    <input
-                                                        type="text"
-                                                        value={hotel.imageUrl as string || ''}
-                                                        onChange={(e) => setHotels(hotels.map(h => h.id === hotel.id ? { ...h, imageUrl: e.target.value } : h))}
-                                                        className="flex-1 px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
-                                                        placeholder="https://images.unsplash.com/..."
-                                                    />
-                                                    {(hotel.imageUrl && typeof hotel.imageUrl === 'string' && hotel.imageUrl.trim() !== '') ? (
-                                                        <a
-                                                            href={hotel.imageUrl}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="px-4 py-3 border border-primary/20 bg-cream hover:bg-cream-dark transition-colors flex items-center"
-                                                        >
-                                                            <Eye className="w-4 h-4" />
-                                                        </a>
-                                                    ) : null}
-                                                </div>
-                                            </div>
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleSaveHotel(hotel)}
@@ -1929,12 +1871,13 @@ export default function AdminDashboard() {
                             {blogs.map((blog) => (
                                 <div key={blog.id as number} className="p-6 border border-primary/10 bg-cream-light">
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        {/* Image Preview */}
                                         <div className="lg:col-span-1">
-                                            <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image Preview</label>
-                                            <ImagePreview
-                                                imageUrl={blog.imageUrl as string || ''}
-                                                className="w-full h-48 rounded"
+                                            <InlineImageUploader
+                                                label="Blog Image"
+                                                value={blog.imageUrl as string || ''}
+                                                onChange={url => setBlogs(blogs.map(b => b.id === blog.id ? { ...b, imageUrl: url } : b))}
+                                                folder="blogs"
+                                                previewHeight="h-48"
                                             />
                                         </div>
 
@@ -2026,28 +1969,6 @@ export default function AdminDashboard() {
                                                     className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
                                                 />
                                             </div>
-                                            <div>
-                                                <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image URL</label>
-                                                <div className="flex gap-2">
-                                                    <input
-                                                        type="text"
-                                                        value={blog.imageUrl as string || ''}
-                                                        onChange={(e) => setBlogs(blogs.map(b => b.id === blog.id ? { ...b, imageUrl: e.target.value } : b))}
-                                                        className="flex-1 px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
-                                                        placeholder="https://images.unsplash.com/..."
-                                                    />
-                                                    {(blog.imageUrl && typeof blog.imageUrl === 'string' && blog.imageUrl.trim() !== '') ? (
-                                                        <a
-                                                            href={blog.imageUrl}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="px-4 py-3 border border-primary/20 bg-cream hover:bg-cream-dark transition-colors flex items-center"
-                                                        >
-                                                            <Eye className="w-4 h-4" />
-                                                        </a>
-                                                    ) : null}
-                                                </div>
-                                            </div>
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleSaveBlog(blog)}
@@ -2125,8 +2046,13 @@ export default function AdminDashboard() {
                                 <div key={event.id as number} className="p-6 border border-primary/10 bg-cream-light space-y-4">
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                         <div className="lg:col-span-1">
-                                            <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image Preview</label>
-                                            <ImagePreview imageUrl={event.imageUrl as string || ''} className="w-full h-48 rounded" />
+                                            <InlineImageUploader
+                                                label="Event Image"
+                                                value={event.imageUrl as string || ''}
+                                                onChange={url => setEvents(events.map(ev => ev.id === event.id ? { ...ev, imageUrl: url } : ev))}
+                                                folder="events"
+                                                previewHeight="h-48"
+                                            />
                                         </div>
                                         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="md:col-span-2">
@@ -2154,8 +2080,9 @@ export default function AdminDashboard() {
                                                 <input type="number" value={event.price as number || 0} onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? { ...ev, price: Number(e.target.value) } : ev))} className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary" />
                                             </div>
                                             <div>
-                                                <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Original Price</label>
-                                                <input type="number" value={event.originalPrice as number || 0} onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? { ...ev, originalPrice: Number(e.target.value) } : ev))} className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary" />
+                                                <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Discount (%) → auto-calculates MRP</label>
+                                                <input type="number" min="0" max="99" value={(() => { const p = Number(event.price)||0; const op = Number(event.originalPrice)||0; if(op>0&&p>0&&op>p) return Math.round((1-p/op)*100); return 0; })()} onChange={(e) => { const discount = Math.min(99, Math.max(0, Number(e.target.value))); const price = Number(event.price)||0; const originalPrice = discount > 0 ? Math.round(price / (1 - discount / 100)) : 0; setEvents(events.map(ev => ev.id === event.id ? { ...ev, originalPrice } : ev)); }} className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary" />
+                                                {Number(event.originalPrice) > 0 && <p className="text-xs text-primary/50 mt-1">MRP: {formatPrice(Number(event.originalPrice))}</p>}
                                             </div>
                                             <div>
                                                 <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Capacity</label>
@@ -2169,10 +2096,6 @@ export default function AdminDashboard() {
                                                     <option value="CANCELLED">CANCELLED</option>
                                                     <option value="COMPLETED">COMPLETED</option>
                                                 </select>
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image URL</label>
-                                                <input type="text" value={event.imageUrl as string || ''} onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? { ...ev, imageUrl: e.target.value } : ev))} className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary" />
                                             </div>
                                             <div>
                                                 <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Venue Name</label>
@@ -2258,12 +2181,7 @@ export default function AdminDashboard() {
                                                         arr[idx] = { ...arr[idx], price: Number(e.target.value) };
                                                         return { ...ev, ticketTypes: arr };
                                                     }))} className="px-3 py-2 border border-primary/20 bg-white" />
-                                                    <input type="number" placeholder="Orig." value={tt.originalPrice || 0} onChange={(e) => setEvents(events.map(ev => {
-                                                        if (ev.id !== event.id) return ev;
-                                                        const arr = Array.isArray(ev.ticketTypes) ? [...ev.ticketTypes] : [];
-                                                        arr[idx] = { ...arr[idx], originalPrice: Number(e.target.value) };
-                                                        return { ...ev, ticketTypes: arr };
-                                                    }))} className="px-3 py-2 border border-primary/20 bg-white" />
+                                                    <input type="number" placeholder="Disc%" min="0" max="99" value={(() => { const p = Number(tt.price)||0; const op = Number(tt.originalPrice)||0; if(op>0&&p>0&&op>p) return Math.round((1-p/op)*100); return 0; })()} onChange={(e) => { const discount = Math.min(99, Math.max(0, Number(e.target.value))); const price = Number(tt.price)||0; const originalPrice = discount > 0 ? Math.round(price / (1 - discount / 100)) : 0; setEvents(events.map(ev => { if (ev.id !== event.id) return ev; const arr = Array.isArray(ev.ticketTypes) ? [...ev.ticketTypes] : []; arr[idx] = { ...arr[idx], originalPrice }; return { ...ev, ticketTypes: arr }; })); }} className="px-3 py-2 border border-primary/20 bg-white" />
                                                     <input type="number" placeholder="Capacity" value={tt.capacity ?? 0} onChange={(e) => setEvents(events.map(ev => {
                                                         if (ev.id !== event.id) return ev;
                                                         const arr = Array.isArray(ev.ticketTypes) ? [...ev.ticketTypes] : [];
@@ -2946,12 +2864,13 @@ export default function AdminDashboard() {
                             {ads.map((ad) => (
                                 <div key={ad.id as number} className="p-6 border border-primary/10 bg-cream-light">
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        {/* Image Preview */}
                                         <div className="lg:col-span-1">
-                                            <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image Preview</label>
-                                            <ImagePreview
-                                                imageUrl={ad.imageUrl as string || ''}
-                                                className="w-full h-40 rounded"
+                                            <InlineImageUploader
+                                                label="Ad Image"
+                                                value={ad.imageUrl as string || ''}
+                                                onChange={url => setAds(ads.map(a => a.id === ad.id ? { ...a, imageUrl: url } : a))}
+                                                folder="ads"
+                                                previewHeight="h-40"
                                             />
                                             {typeof ad.discountText === 'string' && ad.discountText && (
                                                 <div className="mt-2 inline-block bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -2993,16 +2912,6 @@ export default function AdminDashboard() {
                                                 />
                                             </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Image URL</label>
-                                                    <input
-                                                        type="text"
-                                                        value={ad.imageUrl as string || ''}
-                                                        onChange={(e) => setAds(ads.map(a => a.id === ad.id ? { ...a, imageUrl: e.target.value } : a))}
-                                                        className="w-full px-4 py-3 border border-primary/20 bg-cream focus:outline-none focus:border-secondary"
-                                                        placeholder="https://images.unsplash.com/..."
-                                                    />
-                                                </div>
                                                 <div>
                                                     <label className="block text-caption uppercase tracking-widest text-primary/70 mb-2">Redirect URL</label>
                                                     <input

@@ -8,7 +8,7 @@ export default function MobileStickyCTA() {
     const pathname = usePathname();
 
     // Don't show on checkout, payment, contact (user already there), admin, or event tickets (Proceed bar needs the space)
-    if (pathname?.includes('/checkout') || pathname?.includes('/payment') || pathname === '/contact' || pathname?.includes('/admin') || pathname?.includes('/events/') && pathname?.endsWith('/tickets')) {
+    if (pathname?.includes('/checkout') || pathname?.includes('/payment') || pathname === '/contact' || pathname?.includes('/admin') || (pathname?.includes('/events/') && pathname?.endsWith('/tickets'))) {
         return null;
     }
 

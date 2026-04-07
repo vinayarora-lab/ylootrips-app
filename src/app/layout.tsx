@@ -23,15 +23,14 @@ const playfair = Playfair_Display({
   weight: ['400', '500', '600', '700'],
 });
 
-// Replace G-XXXXXXXXXX with your actual GA4 Measurement ID
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-XXXXXXXXXX';
+const GA_ID = 'G-D70RVF66E1';
 
 export const metadata: Metadata = {
   title: {
-    default: "YlooTrips | India Tour Packages for International Travelers",
-    template: "%s | YlooTrips"
+    default: "YlooTrips — India Tour Packages for International Travelers",
+    template: "%s | YlooTrips — India Travel Experts"
   },
-  description: "Plan your India trip with YlooTrips. Luxury & budget India tour packages — Golden Triangle, Kerala, Rajasthan, Himalayas. Trusted by 25,000+ travelers from USA, UK, Australia & Europe. Get a custom quote in 1 hour.",
+  description: "Plan your India trip with YlooTrips India Pvt. Ltd. Luxury & budget India tour packages — Golden Triangle, Kerala, Rajasthan, Himalayas. Trusted by 25,000+ travelers from USA, UK, Australia & Europe. 4.9★ rated. Get a custom quote in 1 hour.",
   keywords: [
     "India tour packages",
     "luxury India travel",
@@ -112,23 +111,19 @@ export default function RootLayout({
         <OrganizationJsonLd />
       </head>
       <body className="antialiased" suppressHydrationWarning>
-        {/* Google Analytics 4 — replace G-XXXXXXXXXX with your Measurement ID */}
-        {GA_ID !== 'G-XXXXXXXXXX' && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${GA_ID}', { page_path: window.location.pathname });
-              `}
-            </Script>
-          </>
-        )}
+        {/* Google Analytics 4 */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}');
+          `}
+        </Script>
 
         <Providers>
           <Suspense fallback={<div className="h-24 bg-cream" />}>

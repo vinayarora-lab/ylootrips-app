@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ArrowLeft, Clock, User, Calendar, Share2 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { BreadcrumbJsonLd, ArticleJsonLd } from '@/components/JsonLd';
 
 interface Blog {
     id: number;
@@ -37,7 +38,6 @@ export default function BlogDetailPage() {
                 setBlog(response.data);
                 setError(null);
             } catch (err: any) {
-                console.error('Error fetching blog:', err);
                 setError(err.response?.status === 404 ? 'Blog post not found' : 'Failed to load blog post');
             } finally {
                 setLoading(false);
@@ -83,8 +83,26 @@ export default function BlogDetailPage() {
         );
     }
 
+    const url = `https://www.ylootrips.com/blogs/${blog.slug}`;
+
     return (
         <div className="min-h-screen">
+            {/* Structured Data */}
+            <BreadcrumbJsonLd items={[
+                { name: 'Home', url: 'https://www.ylootrips.com' },
+                { name: 'Blog', url: 'https://www.ylootrips.com/blogs' },
+                { name: blog.title, url },
+            ]} />
+            <ArticleJsonLd
+                headline={blog.title}
+                description={blog.shortDescription || blog.title}
+                url={url}
+                image={blog.imageUrl || 'https://www.ylootrips.com/og-image.jpg'}
+                datePublished={blog.publishedDate}
+                authorName={blog.authorName || 'YlooTrips Editorial Team'}
+                keywords={[blog.category, 'India travel', 'YlooTrips']}
+            />
+
             {/* Hero Image */}
             <section className="relative h-[60vh] min-h-[400px] overflow-hidden">
                 <Image

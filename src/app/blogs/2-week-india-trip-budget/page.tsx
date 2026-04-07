@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArticleJsonLd } from '@/components/JsonLd';
+import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "How to Plan a 2-Week India Trip on a $2,000 Budget",
@@ -11,6 +11,21 @@ export const metadata: Metadata = {
     title: "How to Plan a 2-Week India Trip on a $2,000 Budget | YlooTrips",
     description: "A realistic budget breakdown for 14 days in India — where to save, where to spend, and a sample itinerary for $2,000.",
     url: "https://www.ylootrips.com/blogs/2-week-india-trip-budget",
+    type: "article",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1200&q=80",
+        width: 1200,
+        height: 630,
+        alt: "Budget India trip — 2 weeks in India for $2,000 itinerary",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "How to Plan a 2-Week India Trip on a $2,000 Budget",
+    description: "Full budget breakdown, where to save vs splurge, and a complete 14-day India itinerary.",
+    images: ["https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1200&q=80"],
   },
   alternates: { canonical: "https://www.ylootrips.com/blogs/2-week-india-trip-budget" },
 };
@@ -36,6 +51,11 @@ const itinerary = [
 export default function IndiaBudgetGuide() {
   return (
     <article className="bg-cream min-h-screen">
+      <BreadcrumbJsonLd items={[
+        { name: 'Home', url: 'https://www.ylootrips.com' },
+        { name: 'Blog', url: 'https://www.ylootrips.com/blogs' },
+        { name: '2-Week India Trip Budget', url: 'https://www.ylootrips.com/blogs/2-week-india-trip-budget' },
+      ]} />
       <ArticleJsonLd
         headline="How to Plan a 2-Week India Trip on a $2,000 Budget"
         description="Can you visit India for 2 weeks on $2,000? Yes — budget breakdown, where to save, where to splurge, and a sample 14-day itinerary."

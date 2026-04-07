@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import TripCard from '@/components/TripCard';
 import { Trip } from '@/types';
 import { formatPrice } from '@/lib/utils';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 
 interface DestinationDetail {
     id: number;
@@ -58,15 +59,13 @@ export default function DestinationDetailPage() {
                     try {
                         const tripsResponse = await api.getTrips({ destinationId: detailRes.data.destination.id });
                         setTrips(tripsResponse.data);
-                    } catch (tripErr) {
-                        console.error('Error fetching trips:', tripErr);
+                    } catch {
                         setTrips([]);
                     }
                 }
                 
                 setError(null);
             } catch (err: any) {
-                console.error('Error fetching destination:', err);
                 setError(err.response?.status === 404 ? 'Destination not found' : 'Failed to load destination');
             } finally {
                 setLoading(false);
@@ -107,6 +106,13 @@ export default function DestinationDetailPage() {
 
     return (
         <div className="min-h-screen">
+            {/* Structured Data */}
+            <BreadcrumbJsonLd items={[
+                { name: 'Home', url: 'https://www.ylootrips.com' },
+                { name: 'Destinations', url: 'https://www.ylootrips.com/destinations' },
+                { name: destination.name, url: `https://www.ylootrips.com/destinations/${destination.slug || slug}` },
+            ]} />
+
             {/* Hero Section */}
             <section className="relative h-[70vh] min-h-[500px] overflow-hidden">
                 <Image
@@ -222,7 +228,7 @@ export default function DestinationDetailPage() {
                                         <div key={index} className="aspect-square relative overflow-hidden rounded-lg">
                                             <Image
                                                 src={image}
-                                                alt={`${destination.name} ${index + 1}`}
+                                                alt={`${destination.name} gallery photo ${index + 1} — ${destination.country} travel`}
                                                 fill
                                                 className="object-cover hover:scale-110 transition-transform duration-500"
                                             />

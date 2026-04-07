@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Shield, Sun, Heart, Backpack, Syringe, CreditCard, ChevronRight } from 'lucide-react';
-import { ArticleJsonLd, FaqJsonLd } from '@/components/JsonLd';
+import { ArticleJsonLd, FaqJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "India Travel Guide for International Tourists 2025",
@@ -11,6 +11,21 @@ export const metadata: Metadata = {
     title: "India Travel Guide 2025 — Everything International Tourists Need to Know",
     description: "Visa, safety, health, packing, currency — the complete guide to visiting India for first-time international travelers.",
     url: "https://www.ylootrips.com/india-travel-guide",
+    type: "article",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&q=80",
+        width: 1200,
+        height: 630,
+        alt: "India travel guide for international tourists — Taj Mahal and Rajasthan landmarks",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "India Travel Guide 2025 | YlooTrips",
+    description: "Visa, safety, health, packing, currency — the complete India guide for international visitors.",
+    images: ["https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&q=80"],
   },
   alternates: {
     canonical: "https://www.ylootrips.com/india-travel-guide",
@@ -65,6 +80,10 @@ const sections = [
 export default function IndiaTravelGuide() {
   return (
     <div className="bg-cream min-h-screen">
+      <BreadcrumbJsonLd items={[
+        { name: 'Home', url: 'https://www.ylootrips.com' },
+        { name: 'India Travel Guide', url: 'https://www.ylootrips.com/india-travel-guide' },
+      ]} />
       <ArticleJsonLd
         headline="India Travel Guide for International Tourists 2025"
         description="Complete India travel guide for first-time international visitors. Visa requirements, best time to visit, safety tips, what to pack, health & vaccinations, and currency advice."

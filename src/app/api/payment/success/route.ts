@@ -19,13 +19,6 @@ export async function POST(request: NextRequest) {
       txnid = formData.get('txnid')?.toString() || formData.get('udf1')?.toString() || null;
       status = formData.get('status')?.toString() || 'success';
       easepayid = formData.get('easepayid')?.toString() || null;
-
-      console.log('Easebuzz POST received (form-urlencoded):', {
-        txnid,
-        status,
-        easepayid,
-        allFields: Object.fromEntries(formData.entries())
-      });
     } else {
       // Try to parse as JSON (fallback)
       try {
@@ -33,22 +26,16 @@ export async function POST(request: NextRequest) {
         txnid = body.txnid || body.udf1 || null;
         status = body.status || 'success';
         easepayid = body.easepayid || null;
-
-        console.log('Easebuzz POST received (JSON):', { txnid, status, easepayid });
-      } catch (e) {
+      } catch {
         // If JSON parsing fails, try to get from URL search params
         const url = new URL(request.url);
         txnid = url.searchParams.get('txnid') || url.searchParams.get('udf1');
         status = url.searchParams.get('status') || 'success';
         easepayid = url.searchParams.get('easepayid');
-
-        console.log('Easebuzz POST received (URL params):', { txnid, status, easepayid });
       }
     }
 
     if (!txnid) {
-      console.error('Missing transaction ID in payment success POST');
-      // If no txnid, redirect to failure page
       return NextResponse.redirect(
         new URL(`/payment/failure?error=Missing transaction ID`, request.url),
         { status: 303 }
@@ -57,6 +44,39 @@ export async function POST(request: NextRequest) {
 
     // Redirect to frontend success page with GET parameters
     const baseUrl = request.nextUrl.origin;
+
+    // Direct flight bookings (EASEBUZZ_KEY mode) go to flight success page
+    if (txnid.startsWith('FLT-')) {
+      const flightSuccessUrl = new URL('/flights/booking-success', baseUrl);
+      flightSuccessUrl.searchParams.set('txnid', txnid);
+      flightSuccessUrl.searchParams.set('status', status);
+      return NextResponse.redirect(flightSuccessUrl, { status: 303 });
+    }
+
+    // Backend-proxied flight bookings arrive with EVT- prefix — look up in local store
+    if (txnid.startsWith('EVT-')) {
+      try {
+        const lookup = await fetch(`${baseUrl}/api/admin/flight-bookings?evtRef=${txnid}`);
+        if (lookup.ok) {
+          const data = await lookup.json();
+          if (data.data) {
+            // This EVT booking is actually a flight — redirect to flight success page
+            const flightTxnid = (data.data as Record<string, string>).txnid || txnid;
+            const flightSuccessUrl = new URL('/flights/booking-success', baseUrl);
+            flightSuccessUrl.searchParams.set('txnid', flightTxnid);
+            flightSuccessUrl.searchParams.set('status', status);
+            // Mark booking as paid
+            await fetch(`${baseUrl}/api/admin/flight-bookings`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ txnid: flightTxnid, status: 'PAID' }),
+            }).catch(() => {});
+            return NextResponse.redirect(flightSuccessUrl, { status: 303 });
+          }
+        }
+      } catch { /* fall through to regular event success */ }
+    }
+
     const successUrl = new URL(`/payment/success`, baseUrl);
     successUrl.searchParams.set('txnid', txnid);
     successUrl.searchParams.set('status', status);
@@ -66,11 +86,8 @@ export async function POST(request: NextRequest) {
       successUrl.searchParams.set('easepayid', easepayid);
     }
 
-    console.log('Redirecting to:', successUrl.toString());
-
     return NextResponse.redirect(successUrl, { status: 303 });
-  } catch (error) {
-    console.error('Error processing payment success POST:', error);
+  } catch {
     const baseUrl = request.nextUrl.origin;
     return NextResponse.redirect(
       new URL(`/payment/failure?error=Failed to process payment response`, baseUrl),
@@ -99,4 +116,3 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.redirect(successUrl, { status: 303 });
 }
-

@@ -34,8 +34,7 @@ export default function HotelsPage() {
         const response = await api.getFeaturedHotels();
         setHotels(response.data);
         setError(null);
-      } catch (err) {
-        console.error('Error fetching hotels:', err);
+      } catch {
         setError('Unable to load hotels. Please ensure the backend is running.');
         setHotels([]);
       } finally {

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArticleJsonLd } from '@/components/JsonLd';
+import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "India vs Thailand: Which Should You Visit First?",
@@ -11,6 +11,21 @@ export const metadata: Metadata = {
     title: "India vs Thailand: Which Should You Visit First? | YlooTrips",
     description: "An honest comparison of India and Thailand — cost, culture, safety, food, and which one is right for your travel style.",
     url: "https://www.ylootrips.com/blogs/india-vs-thailand",
+    type: "article",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1200&q=80",
+        width: 1200,
+        height: 630,
+        alt: "India vs Thailand travel comparison — which destination to visit first",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "India vs Thailand: Which Should You Visit First?",
+    description: "Cost, safety, food, beaches, culture — an honest head-to-head comparison to help you decide.",
+    images: ["https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1200&q=80"],
   },
   alternates: { canonical: "https://www.ylootrips.com/blogs/india-vs-thailand" },
 };
@@ -63,6 +78,11 @@ const comparisons = [
 export default function IndiaVsThailand() {
   return (
     <article className="bg-cream min-h-screen">
+      <BreadcrumbJsonLd items={[
+        { name: 'Home', url: 'https://www.ylootrips.com' },
+        { name: 'Blog', url: 'https://www.ylootrips.com/blogs' },
+        { name: 'India vs Thailand', url: 'https://www.ylootrips.com/blogs/india-vs-thailand' },
+      ]} />
       <ArticleJsonLd
         headline="India vs Thailand: Which Should You Visit First?"
         description="Comparing India and Thailand for international travelers — cost, safety, food, culture, beaches, and which is right for first-time Asia visitors."

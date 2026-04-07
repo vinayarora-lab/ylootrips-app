@@ -10,7 +10,8 @@ export function OrganizationJsonLd() {
       {
         '@type': ['TravelAgency', 'LocalBusiness'],
         '@id': 'https://www.ylootrips.com/#organization',
-        name: 'YlooTrips',
+        name: 'YlooTrips India Pvt. Ltd.',
+        alternateName: 'YlooTrips',
         url: 'https://www.ylootrips.com',
         logo: {
           '@type': 'ImageObject',
@@ -19,17 +20,23 @@ export function OrganizationJsonLd() {
           height: 60,
         },
         description:
-          'YlooTrips crafts bespoke India travel experiences — Golden Triangle, Kerala, Rajasthan, Himalayas and more. Trusted by 25,000+ travelers from 40+ countries.',
+          'YlooTrips India Pvt. Ltd. crafts bespoke India travel experiences — Golden Triangle, Kerala, Rajasthan, Himalayas and more. Trusted by 25,000+ travelers from 40+ countries since 2012.',
         foundingDate: '2012',
         numberOfEmployees: { '@type': 'QuantitativeValue', value: 50 },
         areaServed: ['IN', 'US', 'GB', 'AU', 'CA', 'DE', 'FR', 'SG'],
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'New Delhi',
+          addressRegion: 'Delhi',
+          addressCountry: 'IN',
+        },
         contactPoint: [
           {
             '@type': 'ContactPoint',
             telephone: '+91-8427831127',
+            email: 'connectylootrips@gmail.com',
             contactType: 'customer service',
             availableLanguage: ['English', 'Hindi'],
-            contactOption: 'TollFree',
           },
         ],
         sameAs: [
@@ -39,8 +46,8 @@ export function OrganizationJsonLd() {
         ],
         aggregateRating: {
           '@type': 'AggregateRating',
-          ratingValue: '4.8',
-          reviewCount: '1240',
+          ratingValue: '4.9',
+          reviewCount: '2400',
           bestRating: '5',
           worstRating: '1',
         },

@@ -24,8 +24,8 @@ function CheckoutSuccessContent() {
             try {
                 const response = await api.getBooking(reference);
                 setBooking(response.data);
-            } catch (error) {
-                console.error('Error fetching booking:', error);
+            } catch {
+                // booking fetch failed, show generic confirmation
             } finally {
                 setLoading(false);
             }

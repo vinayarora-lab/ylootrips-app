@@ -25,8 +25,8 @@ export default function AdCarousel() {
             try {
                 const response = await api.getActiveAds();
                 setAds(response.data || []);
-            } catch (error) {
-                console.error('Failed to fetch ads:', error);
+            } catch {
+                // silently skip ads if unavailable
             }
         };
         fetchAds();
@@ -64,7 +64,7 @@ export default function AdCarousel() {
     return (
         <>
             {/* Mobile: Infinite scrolling discount strip */}
-            <div className="lg:hidden fixed top-16 left-0 right-0 z-40 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 overflow-hidden">
+            <div className="lg:hidden fixed top-16 left-0 right-0 z-40 bg-gradient-to-r from-primary via-secondary to-primary overflow-hidden">
                 <div className="animate-marquee whitespace-nowrap py-2">
                     {[...discountTexts, ...discountTexts, ...discountTexts].map((text, idx) => (
                         <span key={idx} className="inline-block text-white text-sm font-bold mx-8">
@@ -78,7 +78,7 @@ export default function AdCarousel() {
             <div className="absolute z-20 hidden lg:block lg:right-8 lg:top-1/2 lg:-translate-y-1/2">
                 <Link
                     href={currentAd.redirectUrl}
-                    className={`block relative w-72 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer
+                    className={`block relative w-72 bg-primary/85 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer
                         ${isAnimating ? (slideDirection === 'out' ? 'animate-slide-out-right' : 'animate-slide-in-right') : ''}`}
                 >
                     {/* Discount Badge */}
@@ -93,10 +93,11 @@ export default function AdCarousel() {
                     {/* Ad Image */}
                     <div className="relative h-40 overflow-hidden">
                         <Image
-                            src={currentAd.imageUrl}
+                            src={currentAd.imageUrl || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'}
                             alt={currentAd.title}
                             fill
                             className="object-cover"
+                            onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'; }}
                         />
                         <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                     </div>
@@ -111,17 +112,15 @@ export default function AdCarousel() {
                         </p>
 
                         {/* CTA */}
-                        <div className="mt-3 flex items-center justify-between">
-                            <span className="text-xs text-accent uppercase tracking-wider font-semibold">Book Now →</span>
-                            <div className="flex gap-1">
-                                {ads.map((_, idx) => (
-                                    <span
-                                        key={idx}
-                                        className={`w-1.5 h-1.5 rounded-full transition-colors ${idx === currentIndex ? 'bg-accent' : 'bg-cream/30'
-                                            }`}
-                                    />
-                                ))}
-                            </div>
+                        <div className="mt-3 px-4 py-2 bg-accent text-primary text-xs font-bold uppercase tracking-widest text-center hover:bg-accent-warm transition-colors">Book Now</div>
+                        {/* Dots indicator */}
+                        <div className="flex gap-1 justify-center mt-3">
+                            {ads.map((_, idx) => (
+                                <span
+                                    key={idx}
+                                    className={`w-1.5 h-1.5 rounded-full transition-colors ${idx === currentIndex ? 'bg-accent' : 'bg-cream/30'}`}
+                                />
+                            ))}
                         </div>
                     </div>
 

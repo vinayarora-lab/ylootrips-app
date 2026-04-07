@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowUpRight, Clock, User, ArrowRight } from 'lucide-react';
 import PageHero from '@/components/PageHero';
 import { api } from '@/lib/api';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 
 interface Blog {
   id: number;
@@ -79,8 +80,7 @@ export default function BlogsPage() {
         const response = await api.getBlogs();
         setBlogs(response.data);
         setError(null);
-      } catch (err) {
-        console.error('Error fetching blogs:', err);
+      } catch {
         setError('Unable to load blogs. Please ensure the backend is running.');
         setBlogs([]);
       } finally {
@@ -106,6 +106,10 @@ export default function BlogsPage() {
 
   return (
     <>
+      <BreadcrumbJsonLd items={[
+        { name: 'Home', url: 'https://www.ylootrips.com' },
+        { name: 'Blog', url: 'https://www.ylootrips.com/blogs' },
+      ]} />
       <PageHero
         title="The Journal"
         subtitle="Stories, insights, and inspiration from our travels around the world. Discover new perspectives on destinations, cultures, and the art of meaningful travel."
@@ -113,9 +117,9 @@ export default function BlogsPage() {
       />
 
       {/* Categories */}
-      <section className="py-4 md:py-6 border-b border-primary/10 bg-cream">
+      <section className="sticky top-16 z-30 bg-cream py-4 md:py-6 border-b border-primary/10 overflow-x-auto">
         <div className="section-container">
-          <div className="flex flex-wrap gap-2 sm:gap-3">
+          <div className="flex flex-nowrap sm:flex-wrap gap-2 sm:gap-3 min-w-max sm:min-w-0">
             {categories.map((category) => (
               <button
                 key={category}
@@ -154,6 +158,7 @@ export default function BlogsPage() {
                     alt={guide.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=800&q=80'; }}
                   />
                   <div className="absolute inset-0 bg-primary/20" />
                   <div className="absolute top-4 left-4">
@@ -237,9 +242,9 @@ export default function BlogsPage() {
       {/* All Posts Grid */}
       <section className="py-16 md:py-24 bg-cream-dark">
         <div className="section-container">
-          <h2 className="font-display text-display-lg text-primary mb-12">
-            Latest Stories
-          </h2>
+          <p className="text-caption uppercase tracking-[0.3em] text-secondary mb-3">From Our Writers</p>
+          <h2 className="font-display text-display-lg text-primary mb-2">Latest Stories</h2>
+          <p className="text-primary/50 text-sm mb-10">Our team shares travel insights, destination guides, and inspiration.</p>
 
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -276,7 +281,12 @@ export default function BlogsPage() {
                       {post.shortDescription}
                     </p>
                     <div className="flex items-center justify-between text-caption text-primary/50">
-                      <span>{post.authorName}</span>
+                      <span>
+                        {post.authorName}
+                        {post.publishedDate && (
+                          <span className="text-primary/35 text-caption"> · {formatDate(post.publishedDate)}</span>
+                        )}
+                      </span>
                       <span>{post.readTime || '5 min'}</span>
                     </div>
                   </div>
@@ -289,36 +299,28 @@ export default function BlogsPage() {
             </div>
           )}
 
-          {regularPosts.length > 0 && (
-            <div className="text-center mt-12">
-              <button className="btn-outline">
-                <span>Load More Stories</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className="py-20 bg-primary text-cream">
-        <div className="section-container text-center">
-          <h2 className="font-display text-display-lg mb-4">
-            Never miss a story
-          </h2>
-          <p className="text-cream/60 text-body-lg max-w-xl mx-auto mb-10">
-            Get travel inspiration, tips, and exclusive content delivered to your inbox.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Your email address"
-              className="flex-1 px-5 py-4 bg-white/10 border border-white/20 text-cream placeholder:text-cream/40 focus:outline-none focus:border-accent"
-            />
-            <button type="submit" className="btn-primary bg-accent text-primary hover:bg-accent-warm">
-              Subscribe
-            </button>
-          </form>
+      {/* CTA */}
+      <section className="py-16 md:py-20 bg-primary text-cream">
+        <div className="section-container">
+          <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-16">
+            <div className="flex-1 text-center md:text-left">
+              <p className="text-caption uppercase tracking-[0.3em] text-accent mb-3">Ready to travel?</p>
+              <h2 className="font-display text-2xl md:text-3xl text-cream mb-2">Turn inspiration into a journey</h2>
+              <p className="text-cream/55 text-sm">Our India experts craft custom itineraries in 24 hours — no obligation.</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+              <a href="https://wa.me/918427831127" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white px-6 py-3 text-sm font-semibold uppercase tracking-widest transition-colors">
+                WhatsApp Us
+              </a>
+              <Link href="/trips" className="inline-flex items-center justify-center gap-2 border border-cream/25 text-cream hover:bg-white/8 px-6 py-3 text-sm uppercase tracking-widest transition-all">
+                Browse Trips
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </>

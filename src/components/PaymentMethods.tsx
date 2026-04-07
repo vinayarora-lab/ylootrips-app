@@ -55,8 +55,8 @@ export default function PaymentMethods({ selectedMethod, onMethodChange, amount,
                     if (data.eligible && data.options) {
                         setEmiOptions(data.options);
                     }
-                } catch (error) {
-                    console.error('Failed to fetch EMI options:', error);
+                } catch {
+                    // fall through to local calculation
                     // Use fallback local calculation
                     const fallbackOptions: EmiOption[] = [
                         {

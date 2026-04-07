@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArticleJsonLd } from '@/components/JsonLd';
+import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "Best Time to Visit India — Month by Month Guide 2025",
@@ -11,6 +11,21 @@ export const metadata: Metadata = {
     title: "Best Time to Visit India — Month by Month Guide 2025",
     description: "When should you travel to India? Our month-by-month breakdown covers weather, festivals, crowds, and prices for every region.",
     url: "https://www.ylootrips.com/blogs/best-time-to-visit-india",
+    type: "article",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&q=80",
+        width: 1200,
+        height: 630,
+        alt: "India travel seasons — Holi festival colors in Rajasthan",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Best Time to Visit India — Month by Month Guide 2025",
+    description: "Month-by-month India weather, festivals, crowds, and prices. Find your perfect travel window.",
+    images: ["https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&q=80"],
   },
   alternates: { canonical: "https://www.ylootrips.com/blogs/best-time-to-visit-india" },
 };
@@ -33,6 +48,11 @@ const months = [
 export default function BestTimeToVisitIndia() {
   return (
     <article className="bg-cream min-h-screen">
+      <BreadcrumbJsonLd items={[
+        { name: 'Home', url: 'https://www.ylootrips.com' },
+        { name: 'Blog', url: 'https://www.ylootrips.com/blogs' },
+        { name: 'Best Time to Visit India', url: 'https://www.ylootrips.com/blogs/best-time-to-visit-india' },
+      ]} />
       <ArticleJsonLd
         headline="Best Time to Visit India — Month by Month Guide 2025"
         description="When is the best time to visit India? Month-by-month breakdown of weather, festivals, crowds, and prices."

@@ -25,6 +25,7 @@ export default function Navbar() {
     ? [
         { name: 'India Trips', href: '/trips' },
         { name: 'Destinations', href: '/destinations' },
+        { name: 'Flights', href: '/#flight-search' },
         { name: 'Events', href: '/events' },
         { name: 'India Guide', href: '/india-travel-guide' },
         { name: 'Blogs', href: '/blogs' },
@@ -34,6 +35,7 @@ export default function Navbar() {
     : [
         { name: 'Domestic', href: '/destinations/domestic' },
         { name: 'International', href: '/destinations/international' },
+        { name: 'Flights', href: '/#flight-search' },
         { name: 'Events', href: '/events' },
         { name: 'Blogs', href: '/blogs' },
         { name: 'About', href: '/about' },
@@ -67,18 +69,19 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Visitor type toggle — shown only after first choice */}
-          {hasChosen && (
-            <button
-              onClick={toggleVisitor}
-              title={visitor === 'indian' ? 'Switch to International mode' : 'Switch to Indian mode'}
-              className={`flex items-center gap-1.5 text-xs font-semibold tracking-widest uppercase border rounded-full px-3 py-1.5 transition-all duration-300 ${borderClass}`}
-            >
-              <span className={visitor === 'indian' ? 'opacity-100' : 'opacity-40'}>🇮🇳</span>
-              <span className="opacity-30">/</span>
-              <span className={visitor === 'foreigner' ? 'opacity-100' : 'opacity-40'}>🌍</span>
-            </button>
-          )}
+          {/* Visitor type toggle — always visible */}
+          <button
+            onClick={toggleVisitor}
+            title={visitor === 'indian' ? 'Switch to International mode' : 'Switch to Indian mode'}
+            className={`flex items-center gap-2 text-xs font-semibold tracking-widest uppercase border rounded-full px-3.5 py-1.5 transition-all duration-300 ${borderClass}`}
+          >
+            <span className={visitor === 'indian' ? 'opacity-100' : 'opacity-35'}>🇮🇳</span>
+            <span className="opacity-20 text-[10px]">/</span>
+            <span className={visitor === 'foreigner' ? 'opacity-100' : 'opacity-35'}>🌍</span>
+            <span className="text-[9px] opacity-40 hidden lg:inline">
+              {visitor === 'indian' ? 'IN' : visitor === 'foreigner' ? 'INTL' : ''}
+            </span>
+          </button>
 
           {/* Currency toggle */}
           <button
@@ -109,17 +112,15 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Visitor toggle — mobile */}
-          {hasChosen && (
-            <button
-              onClick={() => { toggleVisitor(); setIsOpen(false); }}
-              className="flex items-center gap-3 border border-primary/30 rounded-full px-6 py-3 text-sm font-semibold tracking-widest uppercase text-primary"
-            >
-              <span className={visitor === 'indian' ? 'opacity-100' : 'opacity-40'}>🇮🇳 Indian</span>
-              <span className="opacity-30">/</span>
-              <span className={visitor === 'foreigner' ? 'opacity-100' : 'opacity-40'}>🌍 International</span>
-            </button>
-          )}
+          {/* Visitor toggle — mobile (always visible) */}
+          <button
+            onClick={() => { toggleVisitor(); setIsOpen(false); }}
+            className="flex items-center gap-3 border border-primary/30 rounded-full px-6 py-3 text-sm font-semibold tracking-widest uppercase text-primary"
+          >
+            <span className={visitor === 'indian' ? 'opacity-100' : 'opacity-40'}>🇮🇳 Indian</span>
+            <span className="opacity-30">/</span>
+            <span className={visitor === 'foreigner' ? 'opacity-100' : 'opacity-40'}>🌍 International</span>
+          </button>
 
           {/* Currency toggle — mobile */}
           <button

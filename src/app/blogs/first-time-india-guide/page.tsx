@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArticleJsonLd, FaqJsonLd } from '@/components/JsonLd';
+import { ArticleJsonLd, FaqJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "First Time in India? Complete 2025 Guide for International Travelers",
@@ -11,6 +11,21 @@ export const metadata: Metadata = {
     title: "First Time in India? Complete 2025 Guide for International Travelers",
     description: "The honest, practical guide to your first India trip — from visa to street food, safety to culture shock.",
     url: "https://www.ylootrips.com/blogs/first-time-india-guide",
+    type: "article",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1200&q=80",
+        width: 1200,
+        height: 630,
+        alt: "First time in India — guide for international travelers visiting the Taj Mahal",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "First Time in India? Complete 2025 Guide",
+    description: "Everything you need before visiting India — visa, safety, money, food, transport and the best places to start.",
+    images: ["https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1200&q=80"],
   },
   alternates: { canonical: "https://www.ylootrips.com/blogs/first-time-india-guide" },
 };
@@ -18,6 +33,11 @@ export const metadata: Metadata = {
 export default function FirstTimeIndiaGuide() {
   return (
     <article className="bg-cream min-h-screen">
+      <BreadcrumbJsonLd items={[
+        { name: 'Home', url: 'https://www.ylootrips.com' },
+        { name: 'Blog', url: 'https://www.ylootrips.com/blogs' },
+        { name: 'First Time India Guide', url: 'https://www.ylootrips.com/blogs/first-time-india-guide' },
+      ]} />
       <ArticleJsonLd
         headline="First Time in India? Complete 2025 Guide for International Travelers"
         description="Everything you need to know before visiting India for the first time. Visa, safety, money, food, transport, cultural tips, and the best places to start."

@@ -11,6 +11,8 @@ import { formatPriceWithCurrency } from '@/lib/utils';
 import { useCurrency } from '@/context/CurrencyContext';
 import { useVisitor } from '@/context/VisitorContext';
 import MobileStickyBookingBar from '@/components/MobileStickyBookingBar';
+import { BreadcrumbJsonLd, FaqJsonLd, TourJsonLd } from '@/components/JsonLd';
+import FlightBookingSection from '@/components/FlightBookingSection';
 
 interface TripItinerary {
     id: number;
@@ -52,7 +54,6 @@ export default function TripDetailPage() {
                 setItinerary(itineraryRes.data);
                 setError(null);
             } catch (err: any) {
-                console.error('Error fetching trip:', err);
                 setError(err.response?.status === 404 ? 'Trip not found' : 'Failed to load trip');
             } finally {
                 setLoading(false);
@@ -116,6 +117,27 @@ export default function TripDetailPage() {
 
     return (
         <div className="min-h-screen">
+            {/* Structured Data */}
+            <BreadcrumbJsonLd items={[
+                { name: 'Home', url: 'https://www.ylootrips.com' },
+                { name: 'Trips', url: 'https://www.ylootrips.com/trips' },
+                { name: trip.title, url: `https://www.ylootrips.com/trips/${trip.id}` },
+            ]} />
+            <TourJsonLd
+                name={trip.title}
+                description={trip.shortDescription || trip.description || ''}
+                url={`https://www.ylootrips.com/trips/${trip.id}`}
+                image={trip.imageUrl || (trip.images?.[0]) || 'https://www.ylootrips.com/og-image.jpg'}
+                price={basePrice.toString()}
+                currency="USD"
+                duration={trip.duration || ''}
+                startLocation={trip.destination || 'India'}
+                highlights={trip.highlights || []}
+                rating={typeof trip.rating === 'number' ? trip.rating : 4.8}
+                reviewCount={typeof trip.reviewCount === 'number' ? trip.reviewCount : 94}
+            />
+            <FaqJsonLd faqs={tripFaqs.map(f => ({ question: f.q, answer: f.a }))} />
+
             {/* Hero Section */}
             <section className="relative h-[60vh] min-h-[400px] overflow-hidden">
                 <Image
@@ -204,6 +226,7 @@ export default function TripDetailPage() {
                                                                 alt={day.dayTitle}
                                                                 fill
                                                                 className="object-cover"
+                                                                onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'; }}
                                                             />
                                                         </div>
                                                     )}
@@ -250,6 +273,13 @@ export default function TripDetailPage() {
                                 </div>
                             </section>
                         )}
+
+                        {/* Flight Booking */}
+                        <FlightBookingSection
+                            destination={trip.destination || 'Delhi'}
+                            travelDate={selectedDate}
+                            guests={selectedGuests}
+                        />
 
                         {/* Includes & Excludes */}
                         <div className="grid md:grid-cols-2 gap-8">

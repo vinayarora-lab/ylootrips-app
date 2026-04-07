@@ -31,8 +31,8 @@ function PaymentSuccessContent() {
             if (txnid) {
                 return { txnid, status, type };
             }
-        } catch (e) {
-            console.log('searchParams not ready, using window.location');
+        } catch {
+            // fall through to window.location
         }
 
         // Fallback to window.location for external redirects
@@ -79,10 +79,7 @@ function PaymentSuccessContent() {
 
             const { txnid: urlTxnid, status, type } = getUrlParams();
 
-            console.log('Payment success page - URL params:', { urlTxnid, status, type });
-
             if (!urlTxnid) {
-                console.error('Missing transaction ID in URL');
                 setError('Invalid payment response. Missing transaction ID.');
                 setLoading(false);
                 return;
@@ -95,14 +92,11 @@ function PaymentSuccessContent() {
 
             // Set a timeout to prevent infinite loading
             const timeoutId = setTimeout(() => {
-                console.error('API call timeout');
                 setError('Request timed out. Please try refreshing the page.');
                 setLoading(false);
             }, 10000); // 10 second timeout
 
             try {
-                console.log('Calling API for booking:', urlTxnid, isEvent ? '(event)' : '(trip)');
-
                 // Retry logic for 405 errors (might be a caching issue)
                 let response;
                 let retries = 0;
@@ -115,7 +109,6 @@ function PaymentSuccessContent() {
                         break; // Success, exit retry loop
                     } catch (retryErr: any) {
                         if (retryErr.response?.status === 405 && retries < maxRetries) {
-                            console.log(`405 error, retrying... (${retries + 1}/${maxRetries})`);
                             retries++;
                             await new Promise(resolve => setTimeout(resolve, 500 * retries)); // Exponential backoff
                             continue;
@@ -130,17 +123,14 @@ function PaymentSuccessContent() {
                     throw new Error('No response received from API');
                 }
 
-                console.log('API response received:', response);
                 const bookingData = response.data;
 
                 if (!bookingData) {
-                    console.error('No booking data in response');
                     setNotFound(true);
                     setLoading(false);
                     return;
                 }
 
-                console.log('Booking data:', bookingData);
                 setBooking(bookingData);
 
                 // Check payment status
@@ -152,7 +142,7 @@ function PaymentSuccessContent() {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ to: customerEmail, booking: bookingData }),
-                        }).catch((e) => console.warn('Email send failed:', e));
+                        }).catch(() => { /* email send failed silently */ });
                     }
                     setError(null);
                 } else {
@@ -160,13 +150,6 @@ function PaymentSuccessContent() {
                 }
             } catch (err: any) {
                 clearTimeout(timeoutId);
-                console.error('Error verifying payment:', err);
-                console.error('Error details:', {
-                    message: err.message,
-                    response: err.response,
-                    status: err.response?.status,
-                    data: err.response?.data
-                });
 
                 // Handle different error types
                 if (err.response?.status === 405) {

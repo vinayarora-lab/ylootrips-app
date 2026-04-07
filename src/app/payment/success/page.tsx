@@ -330,9 +330,17 @@ function PaymentSuccessContent() {
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    {booking?.bookingReference && (
+                        <button
+                            onClick={() => router.push(`/my-booking?ref=${booking.bookingReference}`)}
+                            className="btn-primary"
+                        >
+                            Track My Booking
+                        </button>
+                    )}
                     <button
                         onClick={() => router.push(booking?.event ? '/events' : '/trips')}
-                        className="btn-primary"
+                        className="btn-outline"
                     >
                         {booking?.event ? 'Browse more events' : 'Browse More Trips'}
                     </button>

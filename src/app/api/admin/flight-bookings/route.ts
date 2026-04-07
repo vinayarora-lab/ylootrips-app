@@ -22,7 +22,12 @@ function writeBookings(bookings: Record<string, unknown>[]) {
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const evtRef = searchParams.get('evtRef');
+    const txnid = searchParams.get('txnid');
     const bookings = readBookings();
+    if (txnid) {
+        const booking = bookings.find((b: Record<string, unknown>) => b.txnid === txnid);
+        return NextResponse.json({ data: booking || null });
+    }
     if (evtRef) {
         const booking = bookings.find((b: Record<string, unknown>) => b.evtRef === evtRef);
         return NextResponse.json({ data: booking || null });

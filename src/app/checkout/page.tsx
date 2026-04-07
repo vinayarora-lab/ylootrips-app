@@ -26,6 +26,7 @@ function CheckoutContent() {
     const [trip, setTrip] = useState<Trip | null>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [agreed, setAgreed] = useState(false);
     const [bookingReference, setBookingReference] = useState<string | undefined>(undefined);
     const [halfPaymentCardType, setHalfPaymentCardType] = useState<'credit' | 'debit'>('credit');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -355,10 +356,18 @@ function CheckoutContent() {
                                     </div>
                                 )}
 
-                                <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:gap-4 pt-6">
+                                <div className="flex flex-col gap-4 pt-6">
+                                    <label className="flex items-start gap-3 cursor-pointer">
+                                        <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} className="mt-1 w-4 h-4 accent-amber-500" />
+                                        <span className="text-xs text-gray-600">
+                                            I agree to the <a href="/terms" target="_blank" className="text-amber-600 underline">Terms &amp; Conditions</a> and{' '}
+                                            <a href="/privacy" target="_blank" className="text-amber-600 underline">Privacy Policy</a>.
+                                        </span>
+                                    </label>
+                                    <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:gap-4">
                                     <button
                                         type="submit"
-                                        disabled={submitting}
+                                        disabled={submitting || !agreed}
                                         className="btn-primary flex-1 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {submitting ? 'Processing...' : 'Complete Booking'}
@@ -366,6 +375,7 @@ function CheckoutContent() {
                                     <div className="flex items-center justify-center sm:justify-start gap-2 text-body-sm text-text-secondary">
                                         <Lock size={16} />
                                         <span>Secure Payment</span>
+                                    </div>
                                     </div>
                                 </div>
                             </form>

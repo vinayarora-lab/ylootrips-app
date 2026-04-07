@@ -92,7 +92,12 @@ function CheckoutSuccessContent() {
                     )}
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href="/trips" className="btn-primary">
+                        {booking?.bookingReference && (
+                            <Link href={`/my-booking?ref=${booking.bookingReference}`} className="btn-primary">
+                                Track My Booking
+                            </Link>
+                        )}
+                        <Link href="/trips" className="btn-outline">
                             Browse More Trips
                         </Link>
                         <Link href="/" className="btn-outline">

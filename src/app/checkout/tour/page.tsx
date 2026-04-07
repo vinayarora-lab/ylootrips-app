@@ -53,6 +53,7 @@ function TourCheckoutContent() {
   const fp = (p: number) => formatPriceWithCurrency(p, currency);
 
   const [submitting, setSubmitting] = useState(false);
+  const [agreed, setAgreed] = useState(false);
   const [done, setDone] = useState(false);
   const [selectedEmi, setSelectedEmi] = useState<{
     tenure: number; monthlyAmount: number; totalAmount: number;
@@ -333,16 +334,25 @@ function TourCheckoutContent() {
                   <TrustBadges isInternational={visitor === 'foreigner'} />
                 </section>
 
-                <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 pt-4">
+                <div className="flex flex-col gap-4 pt-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} className="mt-1 w-4 h-4 accent-amber-500" />
+                    <span className="text-xs text-gray-600">
+                      I agree to the <a href="/terms" target="_blank" className="text-amber-600 underline">Terms &amp; Conditions</a> and{' '}
+                      <a href="/privacy" target="_blank" className="text-amber-600 underline">Privacy Policy</a>.
+                    </span>
+                  </label>
+                  <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3">
                   <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || !agreed}
                     className="btn-primary flex-1 py-4 text-sm uppercase tracking-widest disabled:opacity-50"
                   >
                     {submitting ? 'Processing…' : 'Confirm & Pay'}
                   </button>
                   <div className="flex items-center justify-center gap-2 text-sm text-primary/50">
                     <Lock size={15} /> Secure Payment
+                  </div>
                   </div>
                 </div>
               </form>

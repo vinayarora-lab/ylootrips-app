@@ -38,6 +38,7 @@ function EventCheckoutContent() {
     const [event, setEvent] = useState<EventType | null>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [agreed, setAgreed] = useState(false);
     const [checkoutError, setCheckoutError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         customerName: '',
@@ -357,10 +358,18 @@ function EventCheckoutContent() {
                                     </div>
                                 )}
 
-                                <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:gap-4 pt-6">
+                                <div className="flex flex-col gap-4 pt-6">
+                                    <label className="flex items-start gap-3 cursor-pointer">
+                                        <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} className="mt-1 w-4 h-4 accent-amber-500" />
+                                        <span className="text-xs text-gray-600">
+                                            I agree to the <a href="/terms" target="_blank" className="text-amber-600 underline">Terms &amp; Conditions</a> and{' '}
+                                            <a href="/privacy" target="_blank" className="text-amber-600 underline">Privacy Policy</a>.
+                                        </span>
+                                    </label>
+                                    <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:gap-4">
                                     <button
                                         type="submit"
-                                        disabled={submitting}
+                                        disabled={submitting || !agreed}
                                         className="btn-primary flex-1 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {submitting ? 'Redirecting to payment...' : 'Pay & book'}
@@ -368,6 +377,7 @@ function EventCheckoutContent() {
                                     <div className="flex items-center justify-center sm:justify-start gap-2 text-body-sm text-primary/70">
                                         <Lock size={16} />
                                         <span>Secure payment</span>
+                                    </div>
                                     </div>
                                 </div>
                             </form>

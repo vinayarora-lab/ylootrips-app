@@ -191,6 +191,10 @@ function SuccessContent() {
 
                 {/* Action buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
+                    <Link href={`/my-booking?ref=${encodeURIComponent(booking.txnid)}`}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-colors">
+                        <ArrowRight size={16} /> Track My Booking
+                    </Link>
                     <a href={`https://wa.me/918427831127?text=Hi!%20I%20booked%20flight%20${encodeURIComponent(booking.txnid)}.%20Please%20send%20my%20e-ticket%20to%20${encodeURIComponent(contact.email)}`}
                         target="_blank" rel="noopener noreferrer"
                         className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold rounded-xl transition-colors">
@@ -198,7 +202,7 @@ function SuccessContent() {
                         Track on WhatsApp
                     </a>
                     <Link href="/"
-                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-colors">
+                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded-xl transition-colors">
                         <Home size={16} /> Back to Home
                     </Link>
                 </div>

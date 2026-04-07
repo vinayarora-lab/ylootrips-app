@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Ticket } from 'lucide-react';
 import { useCurrency } from '@/context/CurrencyContext';
 import { useVisitor } from '@/context/VisitorContext';
 
@@ -72,6 +72,15 @@ export default function Navbar() {
             </Link>
           ))}
 
+          {/* Track Booking CTA */}
+          <Link
+            href="/my-booking"
+            className="flex items-center gap-1.5 border border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200"
+          >
+            <Ticket size={13} />
+            Track Booking
+          </Link>
+
           {/* Visitor type toggle — always visible */}
           <button
             onClick={toggleVisitor}
@@ -114,6 +123,16 @@ export default function Navbar() {
               {link.name}
             </Link>
           ))}
+
+          {/* Track Booking — mobile */}
+          <Link
+            href="/my-booking"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-2 border border-amber-500 text-amber-600 rounded-full px-6 py-3 text-sm font-semibold tracking-widest uppercase"
+          >
+            <Ticket size={16} />
+            Track Booking
+          </Link>
 
           {/* Visitor toggle — mobile (always visible) */}
           <button

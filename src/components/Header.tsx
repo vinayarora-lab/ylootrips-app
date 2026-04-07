@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Menu, X, Sparkles } from 'lucide-react';
+import { Menu, X, Sparkles, Ticket } from 'lucide-react';
 
 export default function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -75,7 +75,18 @@ export default function Header() {
                         </nav>
 
                         {/* CTA + Mobile toggle */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            {/* Track Booking */}
+                            <Link href="/my-booking"
+                                className={`hidden md:flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider border transition-all duration-300 ${
+                                    hasHero && !isScrolled
+                                        ? 'border-amber-400/50 text-amber-300 hover:bg-amber-400/10'
+                                        : 'border-amber-400 text-amber-600 hover:bg-amber-50'
+                                }`}>
+                                <Ticket size={12} />
+                                My Booking
+                            </Link>
+                            {/* Plan Journey */}
                             <Link href="/contact"
                                 className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 transition-all duration-300 hover:scale-105 shadow-md shadow-amber-500/20">
                                 <Sparkles size={13} />
@@ -122,11 +133,19 @@ export default function Header() {
                             ))}
                         </nav>
 
+                        <Link href="/my-booking" onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-bold border border-amber-400 text-amber-600 transition-all duration-500 ${
+                                isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                            }`}
+                            style={{ transitionDelay: '400ms' }}>
+                            <Ticket size={15} />
+                            Track My Booking
+                        </Link>
                         <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}
                             className={`flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white transition-all duration-500 shadow-lg shadow-amber-500/30 ${
                                 isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                             }`}
-                            style={{ transitionDelay: '450ms' }}>
+                            style={{ transitionDelay: '480ms' }}>
                             <Sparkles size={16} />
                             Plan Your Journey
                         </Link>

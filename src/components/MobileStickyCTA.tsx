@@ -13,7 +13,7 @@ export default function MobileStickyCTA() {
     }
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-lg safe-area-bottom">
+        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-lg" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
             <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex-1">
                     <p className="text-sm font-medium text-primary">Plan Your Dream Trip</p>

@@ -53,11 +53,11 @@ export default function Navbar() {
     : 'border-primary/20 text-primary hover:bg-primary hover:text-cream';
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${scrolled ? 'py-4 bg-[#F4F1EA]/90 backdrop-blur-md border-b border-black/5' : 'py-8 bg-transparent'}`}>
-      <div className="max-w-[1800px] mx-auto px-6 md:px-12 flex justify-between items-center">
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${scrolled ? 'py-3 md:py-4 bg-[#F4F1EA]/90 backdrop-blur-md border-b border-black/5' : 'py-5 md:py-8 bg-transparent'}`}>
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 md:px-12 flex justify-between items-center">
 
         <Link href="/" className="z-50 relative">
-          <span className="font-serif text-3xl font-bold tracking-tighter">LocalHi.</span>
+          <span className="font-serif text-2xl sm:text-3xl font-bold tracking-tighter">LocalHi.</span>
         </Link>
 
         {/* Desktop nav */}
@@ -112,7 +112,7 @@ export default function Navbar() {
         </button>
 
         {/* Mobile full-screen menu */}
-        <div className={`fixed inset-0 bg-[#F4F1EA] z-40 flex flex-col items-center justify-center gap-8 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-y-0' : '-translate-y-full'}`}>
+        <div className={`fixed inset-0 bg-[#F4F1EA] z-40 flex flex-col items-center justify-center gap-6 overflow-y-auto py-20 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-y-0' : '-translate-y-full'}`}>
           {links.map((link) => (
             <Link
               key={link.name}

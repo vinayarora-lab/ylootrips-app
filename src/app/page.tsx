@@ -12,6 +12,7 @@ import WhyChooseUs from '@/components/WhyChooseUs';
 import HowItWorks from '@/components/HowItWorks';
 import TrustBanner from '@/components/TrustBanner';
 import HolidayPlanner from '@/components/HolidayPlanner';
+import MyBookingSection from '@/components/MyBookingSection';
 import HiddenSpots from '@/components/HiddenSpots';
 import { api } from '@/lib/api';
 import { Destination } from '@/types';
@@ -298,6 +299,9 @@ export default function Home() {
 
       {/* How It Works */}
       <HowItWorks />
+
+      {/* My Booking Portal */}
+      <MyBookingSection />
 
       {/* CTA Section - CMS Driven */}
       <section className="relative py-20 md:py-32 lg:py-40 overflow-hidden">

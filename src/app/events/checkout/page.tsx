@@ -8,6 +8,10 @@ import { Event as EventType, TicketLineItem } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import TrustBadges from '@/components/TrustBadges';
 import PaintSplashBg from '@/components/PaintSplashBg';
+import PromoCodeInput from '@/components/PromoCodeInput';
+import { PromoCode } from '@/lib/promoCodes';
+import { useWallet } from '@/context/WalletContext';
+import { formatPriceWithCurrency } from '@/lib/utils';
 
 const PAYMENT_OPTIONS = [
     { id: 'upi', label: 'UPI', note: 'No extra charges' },
@@ -29,6 +33,7 @@ function parseTicketLines(param: string | null): TicketLineItem[] {
 function EventCheckoutContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { balance: walletBalance, addCashback, deductBalance } = useWallet();
     const eventId = searchParams.get('eventId');
     const ticketsParam = searchParams.get('tickets');
     const dateParam = searchParams.get('date');
@@ -40,6 +45,9 @@ function EventCheckoutContent() {
     const [submitting, setSubmitting] = useState(false);
     const [agreed, setAgreed] = useState(false);
     const [checkoutError, setCheckoutError] = useState<string | null>(null);
+    const [promoCode, setPromoCode] = useState<string | null>(null);
+    const [promoDiscount, setPromoDiscount] = useState(0);
+    const [applyWallet, setApplyWallet] = useState(false);
     const [formData, setFormData] = useState({
         customerName: '',
         customerEmail: '',
@@ -115,6 +123,8 @@ function EventCheckoutContent() {
             const paymentData = paymentRes.data;
             if (paymentData.success === false) throw new Error(paymentData.error || 'Failed to initiate payment');
             if (paymentData.paymentUrl) {
+                if (walletDeduction > 0) deductBalance(walletDeduction, ref);
+                addCashback(finalTotal, ref, event.title);
                 window.location.href = paymentData.paymentUrl;
             } else {
                 throw new Error('No payment URL received');
@@ -142,7 +152,11 @@ function EventCheckoutContent() {
     const isCard = formData.paymentMethod === 'credit_card' || formData.paymentMethod === 'debit_card';
     const surchargePercent = isCard ? 3 : 0;
     const surchargeAmount = (baseTotal * surchargePercent) / 100;
-    const finalTotal = baseTotal + surchargeAmount;
+    const afterPromo = Math.max(0, baseTotal + surchargeAmount - promoDiscount);
+    const maxWalletUsable = Math.round(afterPromo * 0.10); // cap at 10% of order
+    const walletDeduction = applyWallet ? Math.min(walletBalance, maxWalletUsable) : 0;
+    const finalTotal = Math.max(0, afterPromo - walletDeduction);
+    const cashbackAmount = Math.round(finalTotal * 0.10);
 
     if (loading) {
         return (
@@ -352,6 +366,53 @@ function EventCheckoutContent() {
                                     <TrustBadges />
                                 </section>
 
+                                {/* Promo code */}
+                                <section className="bg-white/60 backdrop-blur-sm p-5 md:p-6 border border-primary/10 rounded-xl">
+                                    <h2 className="text-xl md:text-2xl font-light mb-4">Promo Code</h2>
+                                    <PromoCodeInput
+                                        orderTotal={baseTotal}
+                                        appliedCode={promoCode}
+                                        discountAmount={promoDiscount}
+                                        onApply={(code, discount, _promo: PromoCode) => {
+                                            setPromoCode(code);
+                                            setPromoDiscount(discount);
+                                        }}
+                                        onRemove={() => { setPromoCode(null); setPromoDiscount(0); }}
+                                    />
+                                </section>
+
+                                {/* WanderLoot wallet */}
+                                {walletBalance > 0 && (
+                                    <section className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 bg-amber-500 rounded-full flex items-center justify-center shrink-0">
+                                                    <span className="text-white text-sm">₹</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-amber-900">WanderLoot 💸</p>
+                                                    <p className="text-xs text-amber-700">Balance: {formatPriceWithCurrency(walletBalance, 'INR')} · Use up to {formatPriceWithCurrency(maxWalletUsable, 'INR')} here</p>
+                                                </div>
+                                            </div>
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={applyWallet}
+                                                    onChange={(e) => setApplyWallet(e.target.checked)}
+                                                    className="w-4 h-4 accent-amber-500"
+                                                />
+                                                <span className="text-xs font-semibold text-amber-800">Apply</span>
+                                            </label>
+                                        </div>
+                                        {applyWallet && walletDeduction > 0 && (
+                                            <div className="mt-3 pt-3 border-t border-amber-200 flex items-center justify-between text-sm">
+                                                <span className="text-amber-800">💰 WanderLoot cashback applied</span>
+                                                <span className="font-semibold text-green-700">−{formatPriceWithCurrency(walletDeduction, 'INR')}</span>
+                                            </div>
+                                        )}
+                                    </section>
+                                )}
+
                                 {checkoutError && (
                                     <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded">
                                         {checkoutError}
@@ -413,12 +474,27 @@ function EventCheckoutContent() {
                                             <span>+{formatPrice(surchargeAmount)}</span>
                                         </div>
                                     )}
+                                    {promoDiscount > 0 && (
+                                        <div className="flex justify-between text-body-sm text-green-600 font-medium">
+                                            <span>🏷️ Promo ({promoCode})</span>
+                                            <span>−{formatPrice(promoDiscount)}</span>
+                                        </div>
+                                    )}
+                                    {walletDeduction > 0 && (
+                                        <div className="flex justify-between text-body-sm text-amber-600 font-medium">
+                                            <span>💰 WanderLoot</span>
+                                            <span>−{formatPrice(walletDeduction)}</span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="pt-6 border-t border-primary/10 mb-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-lg md:text-xl font-light">Total</span>
                                         <span className="text-2xl md:text-3xl font-light">{formatPrice(finalTotal)}</span>
                                     </div>
+                                    {cashbackAmount > 0 && (
+                                        <p className="text-xs text-amber-600 font-medium mt-2">🎉 You&apos;ll earn {formatPrice(cashbackAmount)} cashback on this booking!</p>
+                                    )}
                                 </div>
                                 <div className="space-y-3 text-body-sm text-primary/70">
                                     <div className="flex items-start gap-2">

@@ -12,6 +12,8 @@ import CheckoutStepper from '@/components/CheckoutStepper';
 import { useCurrency } from '@/context/CurrencyContext';
 import { useVisitor } from '@/context/VisitorContext';
 import { useWallet } from '@/context/WalletContext';
+import PromoCodeInput from '@/components/PromoCodeInput';
+import type { PromoCode } from '@/lib/promoCodes';
 
 function CheckoutContent() {
     const router = useRouter();
@@ -33,6 +35,8 @@ function CheckoutContent() {
     const [halfPaymentCardType, setHalfPaymentCardType] = useState<'credit' | 'debit'>('credit');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [applyWallet, setApplyWallet] = useState(false);
+    const [promoCode, setPromoCode] = useState<string | null>(null);
+    const [promoDiscount, setPromoDiscount] = useState(0);
     const [selectedEmi, setSelectedEmi] = useState<{
         tenure: number;
         monthlyAmount: number;
@@ -164,9 +168,10 @@ function CheckoutContent() {
     const basePrice = trip ? (typeof trip.price === 'number' ? trip.price : parseFloat(trip.price.toString())) * formData.numberOfGuests : 0;
     const discountPercent = formData.paymentMethod === 'upi' ? 5 : (formData.paymentMethod === 'credit_card' || formData.paymentMethod === 'debit_card') ? 3 : 0;
     const discountAmount = (basePrice * discountPercent) / 100;
-    const priceAfterDiscount = basePrice - discountAmount;
-    const walletDeduction = applyWallet ? Math.min(walletBalance, priceAfterDiscount) : 0;
-    const totalPrice = priceAfterDiscount - walletDeduction;
+    const priceAfterDiscount = basePrice - discountAmount - promoDiscount;
+    const maxWalletUsable = Math.round(Math.max(0, priceAfterDiscount) * 0.10); // cap at 10% of order
+    const walletDeduction = applyWallet ? Math.min(walletBalance, maxWalletUsable) : 0;
+    const totalPrice = Math.max(0, priceAfterDiscount - walletDeduction);
     const cashbackAmount = Math.round(totalPrice * 0.10);
 
     if (loading) {
@@ -359,7 +364,19 @@ function CheckoutContent() {
                                     <TrustBadges isInternational={visitor === 'foreigner'} />
                                 </section>
 
-                                {/* Wallet balance section */}
+                                {/* Promo code section */}
+                                <section>
+                                    <h2 className="text-xl md:text-2xl font-light mb-3">Promo Code</h2>
+                                    <PromoCodeInput
+                                        orderTotal={basePrice - discountAmount}
+                                        appliedCode={promoCode}
+                                        discountAmount={promoDiscount}
+                                        onApply={(code, discount) => { setPromoCode(code); setPromoDiscount(discount); }}
+                                        onRemove={() => { setPromoCode(null); setPromoDiscount(0); }}
+                                    />
+                                </section>
+
+                                {/* WanderLoot wallet section */}
                                 {walletBalance > 0 && (
                                     <section className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                                         <div className="flex items-center justify-between gap-3">
@@ -368,8 +385,8 @@ function CheckoutContent() {
                                                     <span className="text-white text-sm">₹</span>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-semibold text-amber-900">WanderLoot</p>
-                                                    <p className="text-xs text-amber-700">Available: {fp(walletBalance)}</p>
+                                                    <p className="text-sm font-semibold text-amber-900">WanderLoot 💸</p>
+                                                    <p className="text-xs text-amber-700">Balance: {fp(walletBalance)} · Use up to {fp(maxWalletUsable)} on this booking</p>
                                                 </div>
                                             </div>
                                             <label className="flex items-center gap-2 cursor-pointer">
@@ -384,7 +401,7 @@ function CheckoutContent() {
                                         </div>
                                         {applyWallet && walletDeduction > 0 && (
                                             <div className="mt-3 pt-3 border-t border-amber-200 flex items-center justify-between text-sm">
-                                                <span className="text-amber-800">Wallet deduction</span>
+                                                <span className="text-amber-800">💰 WanderLoot cashback applied</span>
                                                 <span className="font-semibold text-green-700">−{fp(walletDeduction)}</span>
                                             </div>
                                         )}
@@ -457,10 +474,18 @@ function CheckoutContent() {
                                         </div>
                                     )}
 
+                                    {/* Promo discount */}
+                                    {promoDiscount > 0 && (
+                                        <div className="flex justify-between text-body-lg text-green-600">
+                                            <span>🏷️ Promo ({promoCode})</span>
+                                            <span>-{fp(promoDiscount)}</span>
+                                        </div>
+                                    )}
+
                                     {/* Wallet deduction */}
                                     {walletDeduction > 0 && (
                                         <div className="flex justify-between text-body-lg text-amber-600">
-                                            <span>💰 Wallet Balance</span>
+                                            <span>💰 WanderLoot</span>
                                             <span>-{fp(walletDeduction)}</span>
                                         </div>
                                     )}

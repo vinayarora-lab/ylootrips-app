@@ -59,7 +59,7 @@ const PROMO_CODES = [
 
 const HOW_IT_WORKS = [
   { icon: Zap, step: '01', title: 'Book Any Trip', desc: 'Complete a trip booking through our checkout — domestic, international, or curated tours.' },
-  { icon: TrendingUp, step: '02', title: 'Earn 10% Cashback', desc: 'Instantly receive 10% of your booking value as cashback in your LocalHi Wallet.' },
+  { icon: TrendingUp, step: '02', title: 'Earn 10% Cashback', desc: 'Instantly receive 10% of your booking value as cashback in your WanderLoot.' },
   { icon: Wallet, step: '03', title: 'Apply on Next Booking', desc: 'Use your wallet balance to reduce the total on your next trip. No expiry on cashback.' },
 ];
 
@@ -125,9 +125,9 @@ export default function CashbackPage() {
 
         {/* Page header */}
         <div className="mb-8">
-          <p className="text-caption uppercase tracking-[0.3em] text-amber-600 mb-2">Your Benefits</p>
-          <h1 className="font-display text-3xl md:text-display-xl text-primary">Cashback & Offers</h1>
-          <p className="text-primary/55 mt-2">Earn 10% cashback on every booking. Use your balance on the next trip.</p>
+          <p className="text-caption uppercase tracking-[0.3em] text-amber-600 mb-2">✨ No cap, real rewards</p>
+          <h1 className="font-display text-3xl md:text-display-xl text-primary">WanderLoot 💸</h1>
+          <p className="text-primary/55 mt-2">Book trips, stack loot. 10% cashback hits your wallet instantly — use it to slay your next adventure.</p>
         </div>
 
         {/* Wallet balance card */}
@@ -141,7 +141,7 @@ export default function CashbackPage() {
           <div className="relative">
             <div className="flex items-start justify-between mb-8">
               <div>
-                <p className="text-white/70 text-xs uppercase tracking-widest font-semibold mb-1">LocalHi Wallet</p>
+                <p className="text-white/70 text-xs uppercase tracking-widest font-semibold mb-1">WanderLoot</p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-display text-5xl md:text-6xl font-light">{fp(balance)}</span>
                 </div>

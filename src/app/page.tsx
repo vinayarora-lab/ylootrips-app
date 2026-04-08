@@ -140,7 +140,7 @@ export default function Home() {
                 <Wallet size={26} className="text-white" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-white/70 mb-0.5">LocalHi Wallet</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-white/70 mb-0.5">WanderLoot</p>
                 <h2 className="font-display text-xl md:text-2xl font-bold leading-tight">
                   {balance > 0
                     ? <>You have <span className="underline underline-offset-4">{fp(balance)}</span> cashback waiting!</>
@@ -179,7 +179,7 @@ export default function Home() {
               className="shrink-0 flex items-center gap-2 bg-white text-amber-600 hover:bg-amber-50 font-bold text-sm px-6 py-3 rounded-full transition-all shadow-lg shadow-black/10 whitespace-nowrap"
             >
               <Wallet size={16} />
-              {balance > 0 ? `Use ${fp(balance)} Now` : 'View Cashback & Offers'}
+              {balance > 0 ? `Use ${fp(balance)} Now` : 'View WanderLoot'}
               <ArrowUpRight size={15} />
             </Link>
 

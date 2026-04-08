@@ -32,7 +32,7 @@ export default function Navbar() {
         { name: 'Events', href: '/events' },
         { name: 'India Guide', href: '/india-travel-guide' },
         { name: 'Blogs', href: '/blogs' },
-        { name: 'Cashback & Offers', href: '/cashback' },
+        { name: 'WanderLoot 💸', href: '/cashback' },
         { name: 'About', href: '/about' },
         { name: 'Contact', href: '/contact' },
       ]
@@ -42,7 +42,7 @@ export default function Navbar() {
         { name: 'Flights', href: '/#flight-search' },
         { name: 'Events', href: '/events' },
         { name: 'Blogs', href: '/blogs' },
-        { name: 'Cashback & Offers', href: '/cashback' },
+        { name: 'WanderLoot 💸', href: '/cashback' },
         { name: 'About', href: '/about' },
         { name: 'Contact', href: '/contact' },
       ];
@@ -85,7 +85,7 @@ export default function Navbar() {
             className="flex items-center gap-1.5 border border-amber-500 bg-amber-500 text-white hover:bg-amber-600 hover:border-amber-600 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 relative"
           >
             <Wallet size={13} />
-            Cashback & Offers
+            WanderLoot 💸
             {balance > 0 && (
               <span className="ml-1 bg-white text-amber-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
                 {formatPriceWithCurrency(balance, currency)}
@@ -135,7 +135,7 @@ export default function Navbar() {
         {/* Mobile full-screen menu */}
         <div className={`fixed inset-0 bg-[#F4F1EA] z-40 flex flex-col items-center justify-center gap-6 overflow-y-auto py-20 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-y-0' : '-translate-y-full'}`}>
           {links.map((link) => (
-            link.name === 'Cashback & Offers' ? (
+            link.name === 'WanderLoot 💸' ? (
               <Link
                 key={link.name}
                 href={link.href}

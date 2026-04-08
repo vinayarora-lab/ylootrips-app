@@ -519,7 +519,7 @@ function TourCheckoutContent() {
                         <span className="text-white font-bold text-sm">₹</span>
                       </div>
                       <div>
-                        <p className="font-semibold text-amber-900 text-sm">LocalHi Wallet</p>
+                        <p className="font-semibold text-amber-900 text-sm">WanderLoot</p>
                         <p className="text-xs text-amber-700">Available: {fp(walletBalance)}</p>
                       </div>
                     </div>

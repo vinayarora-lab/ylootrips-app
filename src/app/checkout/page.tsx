@@ -368,7 +368,7 @@ function CheckoutContent() {
                                                     <span className="text-white text-sm">₹</span>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-semibold text-amber-900">LocalHi Wallet</p>
+                                                    <p className="text-sm font-semibold text-amber-900">WanderLoot</p>
                                                     <p className="text-xs text-amber-700">Available: {fp(walletBalance)}</p>
                                                 </div>
                                             </div>

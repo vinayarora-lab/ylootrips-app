@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@ylootrips.com';
-const FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev';
-
 function fmt(n: number) { return new Intl.NumberFormat('en-IN').format(n); }
 
 interface FlightBooking {
@@ -232,6 +228,9 @@ function buildEmailHtml(booking: FlightBooking, isAdmin: boolean) {
 }
 
 export async function POST(req: NextRequest) {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@ylootrips.com';
+    const FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev';
     try {
         const body = await req.json();
         const { type, booking, to } = body as {

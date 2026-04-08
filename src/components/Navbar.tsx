@@ -67,22 +67,9 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex gap-6 lg:gap-8 items-center">
-          {links.map((link) => (
-            link.name === 'Cashback & Offers' ? (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="flex items-center gap-1.5 text-sm uppercase tracking-widest font-medium hover-underline text-amber-600 relative"
-              >
-                <Wallet size={13} />
-                {link.name}
-                {balance > 0 && (
-                  <span className="absolute -top-2 -right-3 bg-amber-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
-                    {formatPriceWithCurrency(balance, currency)}
-                  </span>
-                )}
-              </Link>
-            ) : (
+          {links
+            .filter((link) => link.name !== 'Cashback & Offers')
+            .map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
@@ -90,8 +77,21 @@ export default function Navbar() {
               >
                 {link.name}
               </Link>
-            )
-          ))}
+            ))}
+
+          {/* Cashback & Offers — always-visible pill */}
+          <Link
+            href="/cashback"
+            className="flex items-center gap-1.5 border border-amber-500 bg-amber-500 text-white hover:bg-amber-600 hover:border-amber-600 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 relative"
+          >
+            <Wallet size={13} />
+            Cashback & Offers
+            {balance > 0 && (
+              <span className="ml-1 bg-white text-amber-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                {formatPriceWithCurrency(balance, currency)}
+              </span>
+            )}
+          </Link>
 
           {/* Track Booking CTA */}
           <Link

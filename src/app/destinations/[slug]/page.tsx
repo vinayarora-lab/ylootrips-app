@@ -11,6 +11,7 @@ import { Trip } from '@/types';
 import { formatPriceWithCurrency } from '@/lib/utils';
 import { useCurrency } from '@/context/CurrencyContext';
 import { BreadcrumbJsonLd } from '@/components/JsonLd';
+import { getDestinationImageUrl, DEST_IMAGES } from '@/lib/destinationImages';
 
 interface DestinationDetail {
     id: number;
@@ -53,19 +54,59 @@ export default function DestinationDetailPage() {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const detailRes = await api.getDestinationDetails(slug);
-                setDetail(detailRes.data);
-                
-                // Fetch trips for this destination after detail is loaded
-                if (detailRes.data?.destination?.id) {
+                let detailData: DestinationDetail | null = null;
+
+                try {
+                    const detailRes = await api.getDestinationDetails(slug);
+                    detailData = detailRes.data;
+                } catch {
+                    // Detail record may not exist — fall back to basic destination info
                     try {
-                        const tripsResponse = await api.getTrips({ destinationId: detailRes.data.destination.id });
+                        const basicRes = await api.getDestinationBySlug(slug);
+                        const dest = basicRes.data;
+                        if (dest) {
+                            detailData = {
+                                id: 0,
+                                destination: dest,
+                                overview: dest.description || '',
+                                bestTimeToVisit: '',
+                                climate: '',
+                                culture: '',
+                                cuisine: '',
+                                highlights: [],
+                                galleryImages: [],
+                                popularActivities: [],
+                                visaInfo: '',
+                                currency: '',
+                                language: '',
+                                timeZone: '',
+                                safetyRating: 0,
+                                budgetRange: '',
+                            };
+                        }
+                    } catch {
+                        setError('Destination not found');
+                        return;
+                    }
+                }
+
+                if (!detailData) {
+                    setError('Destination not found');
+                    return;
+                }
+
+                setDetail(detailData);
+
+                // Fetch trips for this destination
+                if (detailData?.destination?.id) {
+                    try {
+                        const tripsResponse = await api.getTrips({ destinationId: detailData.destination.id });
                         setTrips(tripsResponse.data);
                     } catch {
                         setTrips([]);
                     }
                 }
-                
+
                 setError(null);
             } catch (err: any) {
                 setError(err.response?.status === 404 ? 'Destination not found' : 'Failed to load destination');
@@ -118,11 +159,22 @@ export default function DestinationDetailPage() {
             {/* Hero Section */}
             <section className="relative h-[70vh] min-h-[500px] overflow-hidden">
                 <Image
-                    src={detail.galleryImages?.[0] || destination.imageUrl || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80'}
+                    src={(() => {
+                        // Always prefer our curated map — backend gallery/imageUrl often has wrong photos
+                        const curated = DEST_IMAGES[(destination.slug || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')] ||
+                                        DEST_IMAGES[(destination.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')];
+                        if (curated) return curated;
+                        // Fall back to gallery or backend URL only if no curated entry
+                        return detail.galleryImages?.[0] || getDestinationImageUrl(destination.slug, destination.name, destination.imageUrl);
+                    })()}
                     alt={destination.name}
                     fill
                     className="object-cover"
                     priority
+                    onError={(e) => {
+                      e.currentTarget.srcset = '';
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80';
+                    }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30"></div>
                 

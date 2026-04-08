@@ -115,7 +115,7 @@ export default function BestTimeToVisitIndia() {
           </div>
 
           <div className="relative h-64 md:h-80 overflow-hidden my-2 not-prose">
-            <Image src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80" alt="Ladakh mountain landscape India — best visited June to September" fill className="object-cover" />
+            <Image src="https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1200&q=80" alt="Ladakh mountain landscape India — best visited June to September" fill className="object-cover" />
             <div className="absolute bottom-0 left-0 right-0 bg-primary/50 py-2 px-4">
               <p className="text-cream text-xs text-center tracking-wider">Ladakh is open June–September — a world apart from the rest of India.</p>
             </div>

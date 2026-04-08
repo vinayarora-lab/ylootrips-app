@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     type: "article",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1200&q=80",
+        url: "https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=1200&q=80",
         width: 1200,
         height: 630,
         alt: "Solo female traveler in India — safe and empowering journey",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Solo Female Travel in India: Honest Safety Guide 2025",
     description: "Safe cities, transport tips, dress code, accommodation advice and how to have an amazing solo trip in India.",
-    images: ["https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1200&q=80"],
+    images: ["https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=1200&q=80"],
   },
   alternates: { canonical: "https://www.ylootrips.com/blogs/solo-female-travel-india" },
 };
@@ -42,14 +42,14 @@ export default function SoloFemaleTravelIndia() {
         headline="Solo Female Travel in India: Honest Safety Guide 2025"
         description="Is India safe for solo female travelers? Practical guide covering safe cities, transport, dress code, accommodation, and how to have an extraordinary trip."
         url="https://www.ylootrips.com/blogs/solo-female-travel-india"
-        image="https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1200&q=80"
+        image="https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=1200&q=80"
         datePublished="2024-10-20"
         dateModified="2025-04-01"
         keywords={['solo female travel India', 'India safety women', 'solo woman India', 'India solo travel tips']}
       />
       <div className="relative h-[40vh] min-h-[280px] overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=1400&q=85"
+          src="https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=1400&q=85"
           alt="Solo female traveler exploring the colorful streets of Jaipur, Rajasthan India"
           fill className="object-cover" priority
         />
@@ -99,7 +99,7 @@ export default function SoloFemaleTravelIndia() {
           </div>
 
           <div className="relative h-64 md:h-80 overflow-hidden not-prose my-2">
-            <Image src="https://images.unsplash.com/photo-1604928141064-207cea6f571f?w=1200&q=80" alt="Udaipur lake city Rajasthan — one of the safest and most beautiful cities for solo female travelers" fill className="object-cover" />
+            <Image src="https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1200&q=80" alt="Udaipur lake city Rajasthan — one of the safest and most beautiful cities for solo female travelers" fill className="object-cover" />
             <div className="absolute bottom-0 left-0 right-0 bg-primary/50 py-2 px-4">
               <p className="text-cream text-xs text-center tracking-wider">Udaipur — City of Lakes. Consistently rated the most welcoming city for solo female travelers in India.</p>
             </div>

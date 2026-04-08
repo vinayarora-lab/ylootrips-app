@@ -375,7 +375,7 @@ export default function Home() {
       <section className="relative py-20 md:py-32 lg:py-40 overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src={ctaSection?.imageUrl || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&q=80'}
+            src={ctaSection?.imageUrl || 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1920&q=80'}
             alt="India mountain landscape — start your journey with YlooTrips"
             fill
             className="object-cover"

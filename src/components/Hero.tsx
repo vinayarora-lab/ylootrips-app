@@ -671,9 +671,9 @@ export default function Hero({ content, stats }: HeroProps) {
                                         </div>
                                     )}
                                     <div className="relative h-44 overflow-hidden">
-                                        <Image src={currentAd.imageUrl || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80'}
+                                        <Image src={currentAd.imageUrl || 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=600&q=80'}
                                             alt={currentAd.title} fill className="object-cover"
-                                            onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80'; }} />
+                                            onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=600&q=80'; }} />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                                     </div>
                                     <div className="p-4">

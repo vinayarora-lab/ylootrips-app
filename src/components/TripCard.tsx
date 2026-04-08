@@ -8,8 +8,14 @@ import { formatPriceWithCurrency, calculateDiscount } from '@/lib/utils';
 import { useCurrency } from '@/context/CurrencyContext';
 import { useVisitor } from '@/context/VisitorContext';
 import WishlistButton from '@/components/WishlistButton';
+import { getDestinationImageUrl } from '@/lib/destinationImages';
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80';
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80';
+
+function getTripImage(trip: Trip): string {
+    // Use curated destination image if available (overrides potentially wrong backend image)
+    return getDestinationImageUrl(undefined, trip.destination, trip.imageUrl);
+}
 
 const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const target = e.currentTarget;
@@ -55,7 +61,7 @@ export default function TripCard({ trip, index = 0, variant = 'default' }: TripC
                 {/* Image */}
                 <div className="relative w-full md:w-72 aspect-landscape md:aspect-square overflow-hidden shrink-0">
                     <Image
-                        src={trip.imageUrl || FALLBACK_IMAGE}
+                        src={getTripImage(trip)}
                         alt={trip.title}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -114,7 +120,7 @@ export default function TripCard({ trip, index = 0, variant = 'default' }: TripC
             {/* Image Container — clicking image goes to detail */}
             <Link href={`/trips/${trip.id}`} className="block relative aspect-portrait overflow-hidden shrink-0">
                 <Image
-                    src={trip.imageUrl || FALLBACK_IMAGE}
+                    src={getTripImage(trip)}
                     alt={trip.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"

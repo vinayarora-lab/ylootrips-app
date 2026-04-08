@@ -36,7 +36,7 @@ const hiddenSpots: HiddenSpot[] = [
     imageUrl: 'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=1200&q=80',
     galleryImages: [
       'https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=800&q=80',
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+      'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
       'https://images.unsplash.com/photo-1522163182402-834f871fd851?w=800&q=80',
     ],
     category: 'hills',

@@ -4,133 +4,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight, MapPin } from 'lucide-react';
 import { Destination } from '@/types';
-
-// Destination-specific images keyed by slug or normalised name.
-// These ALWAYS take priority over backend imageUrl to ensure correct, working images.
-const DEST_IMAGES: Record<string, string> = {
-  // ── India (generic) ────────────────────────────────────────
-  'india':                'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
-  // ── Rajasthan ──────────────────────────────────────────────
-  'rajasthan':            'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=800&q=80',
-  'jaipur':               'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=800&q=80',
-  'jodhpur':              'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&q=80',
-  'udaipur':              'https://images.unsplash.com/photo-1586187786830-a8b30e2093b7?w=800&q=80',
-  'jaisalmer':            'https://images.unsplash.com/photo-1519923041107-2f76fc43efad?w=800&q=80',
-  'pushkar':              'https://images.unsplash.com/photo-1519923041107-2f76fc43efad?w=800&q=80',
-  // ── Iconic North India ─────────────────────────────────────
-  'agra':                 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
-  'taj-mahal':            'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
-  'delhi':                'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800&q=80',
-  'new-delhi':            'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800&q=80',
-  'varanasi':             'https://images.unsplash.com/photo-1561361058-c24e81fc7e80?w=800&q=80',
-  'benares':              'https://images.unsplash.com/photo-1561361058-c24e81fc7e80?w=800&q=80',
-  'amritsar':             'https://images.unsplash.com/photo-1588416499018-d8c621e55bac?w=800&q=80',
-  'golden-triangle':      'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
-  // ── Himalayas / Hill Stations ──────────────────────────────
-  'leh':                  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
-  'ladakh':               'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
-  'leh-ladakh':           'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
-  'manali':               'https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=800&q=80',
-  'spiti':                'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  'spiti-valley':         'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  'shimla':               'https://images.unsplash.com/photo-1598077540161-9218a1b26fb2?w=800&q=80',
-  'dharamsala':           'https://images.unsplash.com/photo-1604928141064-207cea6f571f?w=800&q=80',
-  'dharamshala':          'https://images.unsplash.com/photo-1604928141064-207cea6f571f?w=800&q=80',
-  'mcleod-ganj':          'https://images.unsplash.com/photo-1604928141064-207cea6f571f?w=800&q=80',
-  'himachal-pradesh':     'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  'uttarakhand':          'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  'rishikesh':            'https://images.unsplash.com/photo-1592820487765-54de6041af07?w=800&q=80',
-  'haridwar':             'https://images.unsplash.com/photo-1592820487765-54de6041af07?w=800&q=80',
-  'mussoorie':            'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  'nainital':             'https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=800&q=80',
-  'dehradun':             'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  'auli':                 'https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=800&q=80',
-  'chopta':               'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  'joshimath':            'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  'jibhi':                'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  'kasol':                'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  // ── Kashmir ────────────────────────────────────────────────
-  'kashmir':              'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&q=80',
-  'srinagar':             'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=800&q=80',
-  'gulmarg':              'https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=800&q=80',
-  'pahalgam':             'https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800&q=80',
-  // ── Northeast India ────────────────────────────────────────
-  'darjeeling':           'https://images.unsplash.com/photo-1595859703065-2259982b2352?w=800&q=80',
-  'sikkim':               'https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=800&q=80',
-  'gangtok':              'https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=800&q=80',
-  'meghalaya':            'https://images.unsplash.com/photo-1589308078059-be1415eab4c3?w=800&q=80',
-  'shillong':             'https://images.unsplash.com/photo-1589308078059-be1415eab4c3?w=800&q=80',
-  'cherrapunji':          'https://images.unsplash.com/photo-1589308078059-be1415eab4c3?w=800&q=80',
-  'assam':                'https://images.unsplash.com/photo-1568454537842-d933259bb258?w=800&q=80',
-  'kaziranga':            'https://images.unsplash.com/photo-1568454537842-d933259bb258?w=800&q=80',
-  // ── South India ────────────────────────────────────────────
-  'kerala':               'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80',
-  'alleppey':             'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80',
-  'alappuzha':            'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80',
-  'munnar':               'https://images.unsplash.com/photo-1630973008133-8fc5f98c35a3?w=800&q=80',
-  'thekkady':             'https://images.unsplash.com/photo-1630973008133-8fc5f98c35a3?w=800&q=80',
-  'wayanad':              'https://images.unsplash.com/photo-1630973008133-8fc5f98c35a3?w=800&q=80',
-  'goa':                  'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80',
-  'mysore':               'https://images.unsplash.com/photo-1567416661576-659f49e6aba5?w=800&q=80',
-  'mysuru':               'https://images.unsplash.com/photo-1567416661576-659f49e6aba5?w=800&q=80',
-  'hampi':                'https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80',
-  'coorg':                'https://images.unsplash.com/photo-1610448721566-47369c768e70?w=800&q=80',
-  'kodagu':               'https://images.unsplash.com/photo-1610448721566-47369c768e70?w=800&q=80',
-  'ooty':                 'https://images.unsplash.com/photo-1590123715927-4da88cd4d55e?w=800&q=80',
-  'kodaikanal':           'https://images.unsplash.com/photo-1590123715927-4da88cd4d55e?w=800&q=80',
-  'pondicherry':          'https://images.unsplash.com/photo-1571260899304-425eee4c7efd?w=800&q=80',
-  'puducherry':           'https://images.unsplash.com/photo-1571260899304-425eee4c7efd?w=800&q=80',
-  'madurai':              'https://images.unsplash.com/photo-1600100397608-f7a4d5e3046e?w=800&q=80',
-  'tamil-nadu':           'https://images.unsplash.com/photo-1600100397608-f7a4d5e3046e?w=800&q=80',
-  'hyderabad':            'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?w=800&q=80',
-  // ── West India ─────────────────────────────────────────────
-  'mumbai':               'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
-  'gujarat':              'https://images.unsplash.com/photo-1558618047-f4e90c90d9c1?w=800&q=80',
-  'rann-of-kutch':        'https://images.unsplash.com/photo-1558618047-f4e90c90d9c1?w=800&q=80',
-  'somnath':              'https://images.unsplash.com/photo-1600100397608-f7a4d5e3046e?w=800&q=80',
-  // ── Islands ────────────────────────────────────────────────
-  'andaman':              'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=800&q=80',
-  'andaman-and-nicobar':  'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=800&q=80',
-  'port-blair':           'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=800&q=80',
-  'lakshadweep':          'https://images.unsplash.com/photo-1559494007-9f5847c49d94?w=800&q=80',
-  // ── International ──────────────────────────────────────────
-  'bali':                 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80',
-  'thailand':             'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=800&q=80',
-  'singapore':            'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&q=80',
-  'dubai':                'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80',
-  'nepal':                'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80',
-  'bhutan':               'https://images.unsplash.com/photo-1490077476659-095159692ab5?w=800&q=80',
-  'sri-lanka':            'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&q=80',
-  'maldives':             'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80',
-  'europe':               'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80',
-};
-
-// Known generic fallback URLs used by the backend — treat these as "no image set"
-const GENERIC_FALLBACKS = new Set([
-  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4',
-  'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
-]);
-
-function isGeneric(url?: string): boolean {
-  if (!url) return true;
-  return GENERIC_FALLBACKS.has(url.split('?')[0]);
-}
-
-function normalise(str: string): string {
-  return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
+import { getDestinationImageUrl } from '@/lib/destinationImages';
 
 function getDestinationImage(destination: Destination): string {
-  // Try slug first, then normalised name
-  const bySlug = destination.slug ? DEST_IMAGES[normalise(destination.slug)] : undefined;
-  const byName = destination.name ? DEST_IMAGES[normalise(destination.name)] : undefined;
-  const mapped = bySlug || byName;
-
-  // Always prefer our curated map — ensures correct destination-specific photos
-  if (mapped) return mapped;
-  // Fall back to backend URL only if it's not a known generic placeholder
-  if (!isGeneric(destination.imageUrl)) return destination.imageUrl;
-  return 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80';
+  return getDestinationImageUrl(destination.slug, destination.name, destination.imageUrl);
 }
 
 interface DestinationCardProps {
@@ -178,6 +55,10 @@ export default function DestinationCard({ destination, index = 0, variant = 'def
                     alt={destination.name}
                     fill
                     className="object-cover"
+                    onError={(e) => {
+                      e.currentTarget.srcset = '';
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80';
+                    }}
                 />
             </div>
 

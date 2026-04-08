@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowUpRight, Calendar, MapPin, Ticket, Phone, Users, Star, Camera, Music, Briefcase, Heart, ChevronRight, Check } from 'lucide-react';
+import { ArrowUpRight, Calendar, MapPin, Ticket, Phone, Users, Star, Camera, Music, Briefcase, Heart, ChevronRight, Check, Sparkles, UtensilsCrossed } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Event as EventType } from '@/types';
 import { formatPrice } from '@/lib/utils';
@@ -51,7 +51,40 @@ const destinationEvents = [
   { city: 'Rajasthan', tag: 'Palace Weddings & Offsites', image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&q=80' },
   { city: 'Kerala', tag: 'Backwater Retreats & Wellness', image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80' },
   { city: 'Goa', tag: 'Beach Events & Celebrations', image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80' },
-  { city: 'Himalayas', tag: 'Adventure & Team Building', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80' },
+  { city: 'Himalayas', tag: 'Adventure & Team Building', image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80' },
+];
+
+const PARTY_EVENTS = [
+  {
+    id: 'club-party-ncr',
+    title: 'Club Night NCR 🎉',
+    subtitle: 'The Ultimate Club Party Experience',
+    desc: 'Delhi NCR\'s hottest club night — premium DJ set, open bar, curated cocktail menu, and live food stations. Pre-book your spot before it sells out.',
+    location: 'Delhi NCR (Venue disclosed on booking)',
+    category: 'Club Party',
+    price: 2000,
+    perks: ['Open bar (beer, spirits, cocktails)', 'Live food stations', 'Premium DJ set', 'VIP entry & seating', 'Midnight snacks included'],
+    image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80',
+    badge: '🔥 Selling Fast',
+    badgeColor: 'bg-red-500',
+    spotsLeft: 18,
+    whatsapp: 'Hi! I\'d like to pre-book the Club Night NCR party. Please share venue details and availability.',
+  },
+  {
+    id: 'house-party',
+    title: 'House Party Vibes 🏠',
+    subtitle: 'Exclusive Curated House Party',
+    desc: 'Intimate yet electric — a curated house party with a chill lounge vibe, chef-crafted finger food, artisan cocktails, and a surprise DJ set. Limited seats only.',
+    location: 'South Delhi / Gurgaon (location shared on booking)',
+    category: 'House Party',
+    price: 2000,
+    perks: ['Craft cocktails & mocktails', 'Chef-made finger food & desserts', 'DJ + curated playlist', 'Instagram-worthy setup', 'Goodie bag on entry'],
+    image: 'https://images.unsplash.com/photo-1574270981993-49ccc2e7f63e?w=800&q=80',
+    badge: '✨ Limited Seats',
+    badgeColor: 'bg-purple-600',
+    spotsLeft: 12,
+    whatsapp: 'Hi! I\'d like to pre-book the House Party. Please share venue details and availability.',
+  },
 ];
 
 export default function EventsPage() {
@@ -65,14 +98,20 @@ export default function EventsPage() {
   const [submitted, setSubmitted] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All Events');
 
-  const eventFilters = ['All Events', 'Corporate', 'Wedding', 'Cultural', 'Adventure'];
+  const eventFilters = ['All Events', 'Party', 'Corporate', 'Wedding', 'Cultural', 'Adventure'];
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await api.getEvents();
         const data = response.data;
-        const list = Array.isArray(data) ? data : (data && Array.isArray(data.content) ? data.content : []);
+        const raw: EventType[] = Array.isArray(data) ? data : (data && Array.isArray(data.content) ? data.content : []);
+        // Filter out internal/test events (e.g. FlightPayment001)
+        const list = raw.filter((e) => {
+          const t = (e.title || '').toLowerCase();
+          const cat = (e.category || '').toLowerCase();
+          return !t.includes('flight') && !t.includes('payment') && cat !== 'internal';
+        });
         setEvents(list);
         setError(null);
       } catch {
@@ -129,10 +168,10 @@ export default function EventsPage() {
                 Plan My Event
               </a>
               <a
-                href="#upcoming-events"
-                className="px-8 py-4 border border-cream/40 text-cream text-sm uppercase tracking-widest hover:bg-cream/10 transition-colors"
+                href="#party-events"
+                className="px-8 py-4 border border-amber-400/60 text-amber-400 text-sm uppercase tracking-widest hover:bg-amber-400/10 transition-colors"
               >
-                View Upcoming Events
+                🎉 Party Events · ₹2,000
               </a>
             </div>
           </div>
@@ -169,7 +208,7 @@ export default function EventsPage() {
             {eventCategories.map(({ icon: Icon, title, desc, image }) => (
               <Link key={title} href={`/contact?event=${encodeURIComponent(title)}`} className="group relative overflow-hidden bg-cream-light border border-primary/8 hover:shadow-xl transition-all duration-500 block">
                 <div className="relative h-48 overflow-hidden">
-                  <Image src={image} alt={title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80'; }} />
+                  <Image src={image} alt={title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=600&q=80'; }} />
                   <div className="absolute inset-0 bg-primary/40 group-hover:bg-primary/20 transition-colors duration-500" />
                   <div className="absolute top-4 left-4 w-10 h-10 bg-cream/15 backdrop-blur-sm flex items-center justify-center">
                     <Icon className="w-5 h-5 text-cream" />
@@ -229,6 +268,96 @@ export default function EventsPage() {
         </div>
       </div>
 
+      {/* ── PARTY EVENTS ── */}
+      <section id="party-events" className="py-20 md:py-28 bg-gradient-to-br from-primary via-primary/95 to-[#1a0a2e]">
+        <div className="section-container">
+          <div className="text-center mb-12">
+            <p className="text-caption uppercase tracking-[0.3em] text-amber-400 mb-3">Pre-Book Now · Limited Spots</p>
+            <h2 className="font-display text-display-lg text-cream">
+              Party Events <span className="italic text-amber-400">NCR</span>
+            </h2>
+            <p className="text-cream/60 text-body mt-3 max-w-xl mx-auto">
+              ₹2,000 per person · Includes food &amp; drinks · Pre-book your spot before it sells out
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
+            {PARTY_EVENTS.map((party) => (
+              <div key={party.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden group hover:border-amber-400/40 transition-all duration-500">
+                {/* Image */}
+                <div className="relative h-52 overflow-hidden">
+                  <Image
+                    src={party.image}
+                    alt={party.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1533240332313-0db49b459ad6?w=800&q=80'; }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  <div className="absolute top-4 left-4">
+                    <span className={`${party.badgeColor} text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full`}>
+                      {party.badge}
+                    </span>
+                  </div>
+                  <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    {party.spotsLeft} spots left
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <span className="text-amber-400 text-[10px] uppercase tracking-widest font-semibold">{party.category}</span>
+                    <h3 className="font-display text-xl text-white mt-0.5">{party.title}</h3>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-5">
+                  <p className="text-cream/60 text-sm leading-relaxed mb-4">{party.desc}</p>
+
+                  {/* Perks */}
+                  <div className="space-y-1.5 mb-5">
+                    {party.perks.map((perk) => (
+                      <div key={perk} className="flex items-center gap-2 text-xs text-cream/70">
+                        <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        {perk}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Location */}
+                  <div className="flex items-center gap-1.5 text-xs text-cream/50 mb-5">
+                    <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    {party.location}
+                  </div>
+
+                  {/* Price + CTA */}
+                  <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                    <div>
+                      <p className="text-[10px] text-cream/40 uppercase tracking-wider">Per Person</p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-display text-2xl text-amber-400">₹2,000</span>
+                        <span className="text-xs text-cream/50 flex items-center gap-1"><UtensilsCrossed className="w-3 h-3" /> food &amp; drinks incl.</span>
+                      </div>
+                    </div>
+                    <a
+                      href={`https://wa.me/918427831127?text=${encodeURIComponent(party.whatsapp)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-primary text-xs font-bold uppercase tracking-widest rounded-xl transition-all duration-200 shadow-lg shadow-amber-400/30"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Pre-Book
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-cream/40 text-xs mt-8">
+            Payment collected at venue · Confirmation sent on WhatsApp · 48-hr cancellation policy
+          </p>
+        </div>
+      </section>
+
       {/* ── UPCOMING / LIVE EVENTS ── */}
       <section id="upcoming-events" className="py-20 md:py-28 bg-cream-dark">
         <div className="section-container">
@@ -275,7 +404,7 @@ export default function EventsPage() {
                   city: 'Jaipur',
                   date: 'Oct 2025',
                   price: 4500,
-                  image: 'https://images.unsplash.com/photo-1624461050280-d59b3066afef?w=800&q=80',
+                  image: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=800&q=80',
                 },
                 {
                   title: 'Kerala Backwater Corporate Offsite',
@@ -293,12 +422,12 @@ export default function EventsPage() {
                   city: 'Jaisalmer',
                   date: 'Dec 2025',
                   price: 6500,
-                  image: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=800&q=80',
+                  image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80',
                 },
               ].map((ev) => (
                 <article key={ev.title} className="bg-cream overflow-hidden border border-primary/8 hover:shadow-xl transition-all duration-500 group">
                   <div className="relative h-56 overflow-hidden">
-                    <Image src={ev.image} alt={ev.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <Image src={ev.image} alt={ev.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&q=80'; }} />
                     <div className="absolute inset-0 bg-primary/20" />
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1 bg-accent text-primary text-[10px] uppercase tracking-widest font-medium">
@@ -418,7 +547,7 @@ export default function EventsPage() {
                 href={`/contact?destination=${encodeURIComponent(city)}`}
                 className="group relative h-72 overflow-hidden"
               >
-                <Image src={image} alt={`${city} events`} fill className="object-cover transition-transform duration-700 group-hover:scale-110" onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'; }} />
+                <Image src={image} alt={`${city} events`} fill className="object-cover transition-transform duration-700 group-hover:scale-110" onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80'; }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-5">
                   <p className="text-caption uppercase tracking-wider text-accent mb-1">{tag}</p>

@@ -6,7 +6,7 @@ import { Calendar, MapPin, Star, Users } from 'lucide-react';
 import { formatPriceWithCurrency, calculateDiscount } from '@/lib/utils';
 import { useCurrency } from '@/context/CurrencyContext';
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80';
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80';
 
 interface Trip {
   id: number;

@@ -2839,7 +2839,7 @@ export default function AdminDashboard() {
                                             const newAd = {
                                                 title: 'New Ad',
                                                 description: 'Ad description',
-                                                imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600',
+                                                imageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=600',
                                                 redirectUrl: '/trips',
                                                 discountText: '10% OFF',
                                                 isActive: true,

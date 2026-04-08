@@ -93,11 +93,11 @@ export default function AdCarousel() {
                     {/* Ad Image */}
                     <div className="relative h-40 overflow-hidden">
                         <Image
-                            src={currentAd.imageUrl || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'}
+                            src={currentAd.imageUrl || 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80'}
                             alt={currentAd.title}
                             fill
                             className="object-cover"
-                            onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'; }}
+                            onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80'; }}
                         />
                         <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                     </div>

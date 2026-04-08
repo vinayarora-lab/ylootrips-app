@@ -139,8 +139,8 @@ export default function RajasthanTourPage() {
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { src: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=600&q=80', alt: 'Hawa Mahal Palace of Winds, Jaipur Pink City Rajasthan', label: 'Jaipur' },
-                  { src: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=600&q=80', alt: 'Mehrangarh Fort and blue-painted city of Jodhpur, Rajasthan India', label: 'Jodhpur' },
-                  { src: 'https://images.unsplash.com/photo-1604928141064-207cea6f571f?w=600&q=80', alt: 'Lake Pichola and City Palace at sunset, Udaipur Rajasthan', label: 'Udaipur' },
+                  { src: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=600&q=80', alt: 'Mehrangarh Fort and blue-painted city of Jodhpur, Rajasthan India', label: 'Jodhpur' },
+                  { src: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=600&q=80', alt: 'Lake Pichola and City Palace at sunset, Udaipur Rajasthan', label: 'Udaipur' },
                 ].map(({ src, alt, label }) => (
                   <div key={label} className="relative h-48 overflow-hidden group">
                     <Image src={src} alt={alt} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />

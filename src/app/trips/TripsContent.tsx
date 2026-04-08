@@ -50,7 +50,7 @@ const CURATED_TOURS = [
     duration: '7 Days / 6 Nights',
     rating: 4.8,
     reviews: 194,
-    image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=800&q=80',
     href: '/tours/rajasthan-heritage-7-day',
     highlights: ['Desert safari', 'Lake Palace', 'Blue City'],
     badge: 'Quick Escape',

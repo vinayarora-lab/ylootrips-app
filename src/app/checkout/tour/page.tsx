@@ -10,10 +10,12 @@ import {
   Star, ChevronRight, BadgeCheck, Globe, Clock,
 } from 'lucide-react';
 import PaymentMethods from '@/components/PaymentMethods';
+import PromoCodeInput from '@/components/PromoCodeInput';
 import { useCurrency } from '@/context/CurrencyContext';
 import { useVisitor } from '@/context/VisitorContext';
 import { useWallet } from '@/context/WalletContext';
 import { formatPriceWithCurrency } from '@/lib/utils';
+import { PromoCode } from '@/lib/promoCodes';
 import { api } from '@/lib/api';
 
 // Tour data — all amounts in INR (fp() converts display currency)
@@ -53,7 +55,7 @@ const TOURS: Record<string, {
     duration: '7 Days / 6 Nights',
     location: 'Jaipur · Jodhpur · Udaipur',
     route: '/tours/rajasthan-heritage-7-day',
-    image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=800&q=80',
     rating: 4.8, reviews: 194,
     tripId: null,
     includes: ['Private English-speaking guide', 'Heritage haveli stays', 'Desert safari (camel/jeep)', 'All fort & palace tickets', 'Private AC vehicle', 'Daily breakfast'],
@@ -86,6 +88,8 @@ function TourCheckoutContent() {
   const [submitting, setSubmitting] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [applyWallet, setApplyWallet] = useState(false);
+  const [promoCode, setPromoCode] = useState<string | null>(null);
+  const [promoDiscount, setPromoDiscount] = useState(0);
   const [done, setDone] = useState(false);
   const [doneViaContact, setDoneViaContact] = useState(false);
 
@@ -119,7 +123,6 @@ function TourCheckoutContent() {
           const trips: Array<{ id: number; title: string }> = Array.isArray(res.data) ? res.data : (res.data?.content || []);
           if (trips.length > 0) {
             setTripId(trips[0].id);
-            console.log(`[TourCheckout] Found tripId=${trips[0].id} via keyword "${kw}"`);
             return;
           }
         } catch { /* try next */ }
@@ -135,7 +138,6 @@ function TourCheckoutContent() {
         });
         if (match) {
           setTripId(match.id);
-          console.log(`[TourCheckout] Found tripId=${match.id} via getAllTrips`);
         }
       } catch { /* no match */ }
     };
@@ -160,15 +162,16 @@ function TourCheckoutContent() {
   const discountPercent = formData.paymentMethod === 'upi' ? 5
     : (formData.paymentMethod === 'credit_card' || formData.paymentMethod === 'debit_card') ? 3 : 0;
   const discountAmount = (basePrice * discountPercent) / 100;
-  const priceAfterDiscount = basePrice - discountAmount;
-  const walletDeduction = applyWallet ? Math.min(walletBalance, priceAfterDiscount) : 0;
-  const totalPrice = priceAfterDiscount - walletDeduction;
+  const priceAfterDiscount = basePrice - discountAmount - promoDiscount;
+  const maxWalletUsable = Math.round(Math.max(0, priceAfterDiscount) * 0.10); // cap at 10% of order
+  const walletDeduction = applyWallet ? Math.min(walletBalance, maxWalletUsable) : 0;
+  const totalPrice = Math.max(0, priceAfterDiscount - walletDeduction);
   const totalINR = totalPrice;
   const cashbackAmount = Math.round(totalPrice * 0.10);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.travelDate) { alert('Please select a travel date'); return; }
+    if (!formData.travelDate) { setPaymentError('Please select a travel date'); return; }
     setSubmitting(true);
     setPaymentError(null);
 
@@ -510,6 +513,26 @@ function TourCheckoutContent() {
                 </div>
               </div>
 
+              {/* Promo code section */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center">4</div>
+                  <h2 className="font-semibold text-gray-800">Promo Code</h2>
+                </div>
+                <div className="p-6">
+                  <PromoCodeInput
+                    orderTotal={basePrice - discountAmount}
+                    appliedCode={promoCode}
+                    discountAmount={promoDiscount}
+                    onApply={(code, discount, _promo: PromoCode) => {
+                      setPromoCode(code);
+                      setPromoDiscount(discount);
+                    }}
+                    onRemove={() => { setPromoCode(null); setPromoDiscount(0); }}
+                  />
+                </div>
+              </div>
+
               {/* Wallet balance section */}
               {walletBalance > 0 && (
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
@@ -519,8 +542,8 @@ function TourCheckoutContent() {
                         <span className="text-white font-bold text-sm">₹</span>
                       </div>
                       <div>
-                        <p className="font-semibold text-amber-900 text-sm">WanderLoot</p>
-                        <p className="text-xs text-amber-700">Available: {fp(walletBalance)}</p>
+                        <p className="font-semibold text-amber-900 text-sm">WanderLoot 💸</p>
+                        <p className="text-xs text-amber-700">Balance: {fp(walletBalance)} · Use up to {fp(maxWalletUsable)} here</p>
                       </div>
                     </div>
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -535,7 +558,7 @@ function TourCheckoutContent() {
                   </div>
                   {applyWallet && walletDeduction > 0 && (
                     <div className="mt-3 pt-3 border-t border-amber-200 flex items-center justify-between">
-                      <span className="text-sm text-amber-800">Wallet deduction</span>
+                      <span className="text-sm text-amber-800">💰 WanderLoot cashback applied</span>
                       <span className="text-sm font-bold text-green-700">−{fp(walletDeduction)}</span>
                     </div>
                   )}
@@ -629,9 +652,15 @@ function TourCheckoutContent() {
                         <span>−{fp(discountAmount)}</span>
                       </div>
                     )}
+                    {promoDiscount > 0 && (
+                      <div className="flex justify-between text-sm text-green-600 font-medium">
+                        <span>🏷️ Promo ({promoCode})</span>
+                        <span>−{fp(promoDiscount)}</span>
+                      </div>
+                    )}
                     {walletDeduction > 0 && (
                       <div className="flex justify-between text-sm text-amber-600 font-medium">
-                        <span>💰 Wallet balance</span>
+                        <span>💰 WanderLoot</span>
                         <span>−{fp(walletDeduction)}</span>
                       </div>
                     )}

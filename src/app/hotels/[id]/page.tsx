@@ -284,16 +284,14 @@ export default function HotelDetailPage() {
                                     </div>
                                 )}
 
-                                <button
-                                    type="button"
-                                    className="btn-primary w-full"
-                                    onClick={() => {
-                                        // TODO: Implement booking functionality
-                                        alert('Booking functionality coming soon!');
-                                    }}
+                                <a
+                                    href={`https://wa.me/918427831127?text=Hi%2C+I%27d+like+to+book+${encodeURIComponent(hotel?.name || 'this hotel')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn-primary w-full text-center block"
                                 >
                                     Book Now
-                                </button>
+                                </a>
                             </form>
 
                             <div className="mt-6 pt-6 border-t border-primary/10">

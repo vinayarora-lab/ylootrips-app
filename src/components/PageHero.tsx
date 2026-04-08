@@ -15,7 +15,7 @@ interface PageHeroProps {
 const defaultBackgrounds: Record<string, string> = {
     'Domestic': 'https://images.unsplash.com/photo-1528181304800-259b08848526?w=1920&q=80',
     'International': 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&q=80',
-    'Destinations': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80',
+    'Destinations': 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1920&q=80',
     'Experiences': 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1920&q=80',
     'Curated Experiences': 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1920&q=80',
     'Stays': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80',
@@ -31,7 +31,7 @@ const defaultBackgrounds: Record<string, string> = {
 export default function PageHero({ title, subtitle, breadcrumb, backgroundImage, overlayClassName }: PageHeroProps) {
     // Try to find a default background if none provided
     const imageUrl = backgroundImage || defaultBackgrounds[breadcrumb || ''] || defaultBackgrounds[title] ||
-        'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&q=80';
+        'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1920&q=80';
 
     return (
         <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 lg:pt-40 lg:pb-28 overflow-hidden">

@@ -126,10 +126,24 @@ export default function DomesticDestinationsPage() {
     fetchDestinations();
   }, []);
 
+  // Map backend region values to filter tab values
+  const REGION_ALIASES: Record<string, string> = {
+    'Jammu & Kashmir': 'Himalayan Region',
+    'Jammu and Kashmir': 'Himalayan Region',
+    'J&K': 'Himalayan Region',
+    'Northeast': 'Northeast India',
+    'North East India': 'Northeast India',
+    'North East': 'Northeast India',
+  };
+
   const filtered =
     activeRegion === 'All India'
       ? destinations
-      : destinations.filter((d) => d.region === activeRegion);
+      : destinations.filter((d) => {
+          const region = d.region || '';
+          const mapped = REGION_ALIASES[region] || region;
+          return mapped === activeRegion;
+        });
 
   return (
     <>
@@ -217,7 +231,7 @@ export default function DomesticDestinationsPage() {
                   title: '7-Day Rajasthan Heritage',
                   subtitle: 'Jaipur · Jodhpur · Udaipur',
                   price: '$950', priceINR: 79800,
-                  image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&q=80',
+                  image: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=800&q=80',
                   href: '/tours/rajasthan-heritage-7-day',
                   checkoutHref: '/checkout/tour?tour=rajasthan-heritage-7-day',
                   tags: ['Desert Safari', 'Lake Palace', 'Blue City'],
@@ -371,7 +385,7 @@ export default function DomesticDestinationsPage() {
                       <Image src="https://images.unsplash.com/photo-1603262110263-e5fb6c69ddd9?w=600&q=80" alt="Kerala backwaters" fill className="object-cover" />
                     </div>
                     <div className="relative aspect-[3/4] overflow-hidden rounded-xl">
-                      <Image src="https://images.unsplash.com/photo-1599661046289-e31897846e41?w=600&q=80" alt="Rajasthan heritage" fill className="object-cover" />
+                      <Image src="https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=600&q=80" alt="Rajasthan heritage" fill className="object-cover" />
                     </div>
                   </div>
                 </div>

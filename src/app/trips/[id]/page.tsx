@@ -12,6 +12,7 @@ import { useCurrency } from '@/context/CurrencyContext';
 import { useVisitor } from '@/context/VisitorContext';
 import MobileStickyBookingBar from '@/components/MobileStickyBookingBar';
 import { BreadcrumbJsonLd, FaqJsonLd, TourJsonLd } from '@/components/JsonLd';
+import { getDestinationImageUrl } from '@/lib/destinationImages';
 import FlightBookingSection from '@/components/FlightBookingSection';
 
 interface TripItinerary {
@@ -143,7 +144,7 @@ export default function TripDetailPage() {
             {/* Hero Section */}
             <section className="relative h-[60vh] min-h-[400px] overflow-hidden">
                 <Image
-                    src={trip.imageUrl || trip.images?.[0] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80'}
+                    src={getDestinationImageUrl(undefined, trip.destination, trip.imageUrl || trip.images?.[0])}
                     alt={trip.title}
                     fill
                     className="object-cover"
@@ -273,7 +274,7 @@ export default function TripDetailPage() {
                                                                 alt={day.dayTitle}
                                                                 fill
                                                                 className="object-cover"
-                                                                onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'; }}
+                                                                onError={(e) => { e.currentTarget.srcset = ''; e.currentTarget.src = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80'; }}
                                                             />
                                                         </div>
                                                     )}

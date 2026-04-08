@@ -53,7 +53,7 @@ const staticGuides = [
     title: 'Solo Female Travel in India: Honest Safety Guide 2025',
     description: 'Safe cities, transport tips, dress code, accommodation advice, and how to handle unwanted attention — the guide no one else writes.',
     href: '/blogs/solo-female-travel-india',
-    image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=600&q=80',
     tag: 'Solo Travel',
     read: '10 min read',
   },

@@ -43,7 +43,7 @@ function isRateLimited(ip: string, isApi: boolean): boolean {
   return false;
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
   const ip = getIp(req);
   const fullUrl = pathname + search;

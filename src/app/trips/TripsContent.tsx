@@ -344,10 +344,14 @@ export default function TripsContent() {
         fetchTrips(nextPage, true);
     };
 
+    // Hide known bad trips that can't be deleted (e.g. has a booking constraint)
+    const HIDDEN_TRIP_IDS = [525];
+
     // Visitor filter — hide all international-destination trips from foreigners
-    const visitorFiltered = visitor === 'foreigner'
+    const visitorFiltered = (visitor === 'foreigner'
         ? trips.filter((t) => !isInternationalTrip(t))
-        : trips;
+        : trips
+    ).filter((t) => !HIDDEN_TRIP_IDS.includes(t.id));
 
     // Budget filter
     const budgetOpt = BUDGET_OPTIONS[budgetIdx];

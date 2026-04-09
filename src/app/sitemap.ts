@@ -56,6 +56,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/maldives-luxury-package`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
     { url: `${BASE_URL}/singapore-tour-package`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
     { url: `${BASE_URL}/kashmir-tour-package`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
+    { url: `${BASE_URL}/manali-tour-package`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
+    { url: `${BASE_URL}/goa-tour-package`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
+    { url: `${BASE_URL}/kerala-tour-package`, lastModified: now, changeFrequency: 'weekly', priority: 0.95 },
   ];
 
   // ── Dynamic: trip detail pages ────────────────────────────────

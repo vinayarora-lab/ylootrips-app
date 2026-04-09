@@ -29,6 +29,9 @@ const URLS = [
   `${HOST}/maldives-luxury-package`,
   `${HOST}/singapore-tour-package`,
   `${HOST}/kashmir-tour-package`,
+  `${HOST}/manali-tour-package`,
+  `${HOST}/goa-tour-package`,
+  `${HOST}/kerala-tour-package`,
 
   // Blog posts
   `${HOST}/blogs/best-time-to-visit-bali`,

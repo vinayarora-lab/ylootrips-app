@@ -43,9 +43,22 @@ function Tilt3D({ children, className = '' }: { children: React.ReactNode; class
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80';
 
+const GENERIC_IMG_FRAGMENTS = [
+    'photo-1501554728187-ce583db33af7', // generic mountain 1
+    'photo-1517176118067-7f04c8f3f95e', // generic mountain 2
+    'photo-1519681393784-d120267933ba', // generic mountain 3
+    'photo-1526772662000-3f88f10405ff', // generic mountain 4
+    'photo-1530866495561-501e8d4e82d4', // generic mountain 5
+    'photo-1506905925346-21bda4d32df4', // wrong generic
+];
+
 function getTripImage(trip: Trip): string {
-    // Use curated destination image if available (overrides potentially wrong backend image)
-    return getDestinationImageUrl(undefined, trip.destination, trip.imageUrl);
+    const url = trip.imageUrl || '';
+    // If backend has a real, non-generic image (e.g. Cloudinary from BANBANJARA), use it
+    const isGeneric = !url || GENERIC_IMG_FRAGMENTS.some(f => url.includes(f));
+    if (!isGeneric) return url;
+    // Fall back to destination-mapped Unsplash image
+    return getDestinationImageUrl(undefined, trip.destination, url);
 }
 
 const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {

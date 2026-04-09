@@ -300,6 +300,20 @@ export const DEST_IMAGES: Record<string, string> = {
   // Peru → Machu Picchu in mist ✓
   'peru':                'https://images.unsplash.com/photo-1526392060635-9d6019884377?w=1200&q=85',
   'machu-picchu':        'https://images.unsplash.com/photo-1526392060635-9d6019884377?w=1200&q=85',
+
+  // ── Additional trek destinations ───────────────────────────────────────────
+  // Haldwani / Uttarakhand gateway → Roopkund trail Himalayas ✓
+  'haldwani':            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=85',
+  // Mandi / Prashar Lake → Himalayan lake reflection ✓
+  'mandi':               'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=1200&q=85',
+  // Yuksom / Sikkim → Kanchenjunga green valley ✓
+  'yuksom':              'https://images.unsplash.com/photo-1571566882372-1598d88abd90?w=1200&q=85',
+  // Kedarkantha trek → snow forest Uttarakhand ✓
+  'kedarkantha':         'https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?w=1200&q=85',
+  // Brahmatal trek → frozen alpine lake ✓
+  'brahmatal':           'https://images.unsplash.com/photo-1548933122-5fedf3661c57?w=1200&q=85',
+  // Lakshadweep → coral lagoon turquoise water ✓
+  'lakshadweep':         'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=1200&q=85',
 };
 
 const INDIA_FALLBACK = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80';

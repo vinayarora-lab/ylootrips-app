@@ -92,7 +92,11 @@ function TrendingCard({ trip, rank }: { trip: Trip; rank: number }) {
   const spotsLeft = getSpotsLeft(trip.id);
   const viewers = getViewers(trip.id);
   const bookHref = visitor === 'foreigner' ? '/tours' : `/checkout?tripId=${trip.id}`;
-  const img = getDestinationImageUrl(undefined, trip.destination, trip.imageUrl);
+  const _genericFragments = ['photo-1501554728187','photo-1517176118067','photo-1519681393784','photo-1526772662000','photo-1530866495561','photo-1506905925346'];
+  const _url = trip.imageUrl || '';
+  const img = _genericFragments.some(f => _url.includes(f)) || !_url
+    ? getDestinationImageUrl(undefined, trip.destination, _url)
+    : _url;
 
   return (
     <TiltCard className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl flex flex-col h-full cursor-default">

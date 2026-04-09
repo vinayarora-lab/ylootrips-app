@@ -241,13 +241,13 @@ export default function Hero({ content, stats }: HeroProps) {
                             {/* Headline */}
                             <div className="mb-6">
                                 <p className="text-amber-400 text-xs uppercase tracking-[0.3em] font-semibold mb-3">
-                                    {content?.eyebrow || "India's Most Trusted Travel Company"}
+                                    {content?.eyebrow || '⭐ Rated 4.9 on Google · 25,000+ Trips Booked'}
                                 </p>
                                 <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight mb-4">
-                                    {content?.title ? content.title : <>Your Perfect <span className="italic text-amber-300">India Journey</span> Awaits</>}
+                                    {content?.title ? content.title : <>International Trips<br /><span className="italic text-amber-300">Starting ₹9,999</span></>}
                                 </h1>
                                 <p className="text-white/70 text-base sm:text-lg max-w-xl">
-                                    {content?.subtitle || 'Handcrafted tours, trusted guides, seamless booking — from the Himalayas to Kerala.'}
+                                    {content?.subtitle || 'Goa · Kashmir · Dubai · Bali · Singapore · Thailand — Book in 2 minutes, pay ₹5,000 to confirm.'}
                                 </p>
                             </div>
 

@@ -2,29 +2,49 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar } from 'lucide-react';
+import { Zap, MessageCircle } from 'lucide-react';
+
+const WA_NUMBER = '918427831127';
+const WA_MSG = encodeURIComponent('Hi! I want to book a trip. Please share the best package price and available dates.');
+const WA_URL = `https://wa.me/${WA_NUMBER}?text=${WA_MSG}`;
 
 export default function MobileStickyCTA() {
     const pathname = usePathname();
 
-    // Don't show on checkout, payment, contact (user already there), admin, or event tickets (Proceed bar needs the space)
-    if (pathname?.includes('/checkout') || pathname?.includes('/payment') || pathname === '/contact' || pathname?.includes('/admin') || (pathname?.includes('/events/') && pathname?.endsWith('/tickets'))) {
+    if (
+        pathname?.includes('/checkout') ||
+        pathname?.includes('/payment') ||
+        pathname === '/contact' ||
+        pathname?.includes('/admin') ||
+        (pathname?.includes('/events/') && pathname?.endsWith('/tickets'))
+    ) {
         return null;
     }
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-gray-200 shadow-lg" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-            <div className="flex items-center justify-between px-4 py-3">
-                <div className="flex-1">
-                    <p className="text-sm font-medium text-primary">Plan Your Dream Trip</p>
-                    <p className="text-xs text-text-secondary">Custom packages • EMI available</p>
-                </div>
-                <Link
-                    href="/contact"
-                    className="bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-lg font-medium text-sm flex items-center gap-2 transition-colors"
+        <div
+            className="fixed bottom-0 left-0 right-0 z-40 md:hidden shadow-2xl"
+            style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
+            <div className="flex">
+                {/* WhatsApp — left half */}
+                <a
+                    href={WA_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] text-white py-4 font-bold text-sm"
                 >
-                    <Calendar size={18} />
-                    Get Quote
+                    <MessageCircle size={18} className="fill-white" />
+                    Get Instant Price
+                </a>
+
+                {/* Book Now — right half */}
+                <Link
+                    href="/trips"
+                    className="flex-1 flex items-center justify-center gap-2 bg-primary text-white py-4 font-bold text-sm"
+                >
+                    <Zap size={18} />
+                    Book Now
                 </Link>
             </div>
         </div>

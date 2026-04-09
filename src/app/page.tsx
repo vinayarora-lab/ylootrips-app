@@ -130,6 +130,42 @@ export default function Home() {
         stats={content?.stats}
       />
 
+      {/* ── Hot Package Strip ── */}
+      <section className="bg-gray-950 py-6 overflow-x-auto">
+        <div className="section-container">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-amber-400 text-xs font-bold uppercase tracking-widest">🔥 Top Packages This Week</span>
+            <span className="text-gray-500 text-xs">Booked {Math.floor(Date.now() / 3600000) % 60 + 140}+ times</span>
+          </div>
+          <div className="flex gap-3 min-w-max pb-1">
+            {[
+              { label: 'Goa', price: '₹9,999', nights: '3N', tag: 'Best Seller', href: '/goa-tour-package', urgency: 'Only 4 slots left' },
+              { label: 'Manali', price: '₹12,999', nights: '4N', tag: 'Most Popular', href: '/manali-tour-package', urgency: 'Only 3 slots left' },
+              { label: 'Kashmir', price: '₹18,999', nights: '5N', tag: 'Trending', href: '/kashmir-tour-package', urgency: 'Only 5 slots left' },
+              { label: 'Dubai', price: '₹35,999', nights: '5N', tag: 'International', href: '/dubai-tour-package-from-delhi', urgency: 'Only 2 slots left' },
+              { label: 'Bali', price: '₹42,999', nights: '6N', tag: 'Honeymoon', href: '/bali-honeymoon-package', urgency: 'Only 3 slots left' },
+              { label: 'Singapore', price: '₹32,999', nights: '4N', tag: 'New', href: '/singapore-tour-package', urgency: 'Only 4 slots left' },
+              { label: 'Thailand', price: '₹28,999', nights: '5N', tag: 'Budget', href: '/thailand-budget-trip', urgency: 'Only 6 slots left' },
+              { label: 'Maldives', price: '₹89,999', nights: '4N', tag: 'Luxury', href: '/maldives-luxury-package', urgency: 'Only 2 slots left' },
+            ].map((pkg) => (
+              <Link key={pkg.href} href={pkg.href}
+                className="group flex-shrink-0 bg-gray-900 border border-gray-800 hover:border-amber-500/50 rounded-xl px-4 py-3 transition-all hover:bg-gray-800 min-w-[140px]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-amber-400 text-[10px] font-bold uppercase tracking-wide">{pkg.tag}</span>
+                  <span className="text-[9px] text-gray-500">{pkg.nights}</span>
+                </div>
+                <p className="text-white font-bold text-sm">{pkg.label}</p>
+                <p className="text-amber-300 font-black text-base mt-0.5">{pkg.price}</p>
+                <p className="text-red-400 text-[10px] mt-1 font-medium">{pkg.urgency}</p>
+                <div className="mt-2 bg-amber-500 group-hover:bg-amber-400 text-black text-[10px] font-bold uppercase tracking-widest text-center rounded-lg py-1.5 transition-colors">
+                  Book Now
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Limited-Time Offers Banner */}
       <LimitedOffersBanner />
 

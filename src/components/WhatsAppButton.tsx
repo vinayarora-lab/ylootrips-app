@@ -9,7 +9,7 @@ interface WhatsAppButtonProps {
 
 export default function WhatsAppButton({
   phoneNumber = '918427831127',
-  message = 'Hi! I am interested in booking an India trip. Can you help me plan a custom itinerary?',
+  message = 'Hi! I want to book a trip. Please share the best package price and available dates.',
 }: WhatsAppButtonProps) {
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${phoneNumber.replace(/\D/g, '')}?text=${encodedMessage}`;
@@ -31,7 +31,7 @@ export default function WhatsAppButton({
       {/* Main button */}
       <div className="relative bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center gap-2">
         <MessageCircle size={24} className="fill-white shrink-0" />
-        <span className="text-sm font-semibold pr-1 hidden sm:block">Chat with us</span>
+        <span className="text-sm font-semibold pr-1 hidden sm:block">Get Instant Price</span>
 
         {/* Pulse ring */}
         <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20 pointer-events-none" />

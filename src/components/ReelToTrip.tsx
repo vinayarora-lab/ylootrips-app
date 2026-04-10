@@ -338,7 +338,7 @@ function ItineraryCard({
             href={`/trip-planner?q=5 day trip to ${itinerary.destination}, ${itinerary.vibe} style`}
             className="flex-1 flex items-center justify-center gap-2 bg-white text-primary font-semibold text-sm py-3 rounded-xl hover:bg-cream transition-colors"
           >
-            Customise with AI Planner
+            Customise with Yloo AI
             <ArrowRight className="w-4 h-4" />
           </Link>
           <a

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { generateTicket, logLeadToSheet } from '@/lib/leads';
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'connectylootrips@gmail.com';
 const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
@@ -21,11 +22,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const subject = `🏔️ Market Package Inquiry: ${packageName || destination} — ${name}`;
+    const ticket = generateTicket();
+    const subject = `🏔️ [${ticket}] Market Package Inquiry: ${packageName || destination} — ${name}`;
 
     const adminBody = `
 NEW MARKET PACKAGE INQUIRY
 ==========================
+TICKET: ${ticket}
 
 CUSTOMER DETAILS
 Name:    ${name}
@@ -62,6 +65,10 @@ Thank you for your interest in the ${packageName || destination} trip!
 
 We've received your inquiry and our travel expert will contact you within 1 hour with availability, payment options, and your personalised itinerary.
 
+YOUR SUPPORT TICKET
+Ticket No: ${ticket}
+Please quote this number in all communications with us.
+
 INQUIRY SUMMARY
 Package:    ${packageName || destination}
 Guests:     ${guests || 'Not specified'}
@@ -75,10 +82,9 @@ Best regards,
 YlooTrips Team
     `.trim();
 
-    // Send admin email via Resend
+    // Send emails via Resend
     if (RESEND_API_KEY) {
       await Promise.allSettled([
-        // Admin email
         fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${RESEND_API_KEY}` },
@@ -89,21 +95,34 @@ YlooTrips Team
             text: adminBody,
           }),
         }),
-        // Customer confirmation
         fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${RESEND_API_KEY}` },
           body: JSON.stringify({
             from: 'YlooTrips <onboarding@resend.dev>',
             to: [email],
-            subject: `Your trip inquiry for ${destination} — YlooTrips`,
+            subject: `[${ticket}] Your trip inquiry for ${destination} — YlooTrips`,
             text: customerBody,
           }),
         }),
       ]);
     }
 
-    // Also try backend contact API
+    // Log to Google Sheet
+    await logLeadToSheet({
+      ticket,
+      type: 'Market Inquiry',
+      name,
+      email,
+      phone,
+      destination,
+      packageName: packageName || destination,
+      price: ourPrice ? `₹${Number(ourPrice).toLocaleString('en-IN')}` : '',
+      guests: guests || '',
+      notes: `Source: ${sourceUrl || 'N/A'} | Market: ₹${marketPrice || '?'} | Margin: ₹${priceDiff || '?'}`,
+    });
+
+    // Forward to backend contact API
     try {
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || '';
       if (backendUrl) {
@@ -113,13 +132,13 @@ YlooTrips Team
           body: JSON.stringify({
             name, email, phone,
             destination: packageName || destination,
-            message: `Market package inquiry for ${destination}. Source: ${sourceUrl}. Market price: ₹${marketPrice}. Our price: ₹${ourPrice}.`,
+            message: `[${ticket}] Market package inquiry for ${destination}. Source: ${sourceUrl}. Market price: ₹${marketPrice}. Our price: ₹${ourPrice}.`,
           }),
         });
       }
     } catch { /* non-fatal */ }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, ticket });
   } catch (err) {
     console.error('Market inquiry error:', err);
     return NextResponse.json({ error: 'Failed to send inquiry' }, { status: 500 });

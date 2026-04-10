@@ -53,6 +53,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.redirect(flightSuccessUrl, { status: 303 });
     }
 
+    // Market trip bookings
+    if (txnid.startsWith('MKT-')) {
+      const mktSuccessUrl = new URL('/market/booking-success', baseUrl);
+      mktSuccessUrl.searchParams.set('txnid', txnid);
+      mktSuccessUrl.searchParams.set('status', status);
+      if (easepayid) mktSuccessUrl.searchParams.set('easepayid', easepayid);
+      // Update status
+      fetch(`${baseUrl}/api/admin/market-bookings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ txnid, status: 'PAID' }),
+      }).catch(() => {});
+      return NextResponse.redirect(mktSuccessUrl, { status: 303 });
+    }
+
     // Hotel bookings go to hotel booking success page
     if (txnid.startsWith('HTL-')) {
       const hotelSuccessUrl = new URL('/hotels/booking-success', baseUrl);
@@ -62,9 +77,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.redirect(hotelSuccessUrl, { status: 303 });
     }
 
-    // Backend-proxied bookings arrive with EVT- prefix — check both hotels and flights
+    // Backend-proxied bookings arrive with EVT- prefix — check market, hotels, flights
     if (txnid.startsWith('EVT-')) {
-      // Check hotel bookings first
+      // Check market bookings first
+      try {
+        const lookup = await fetch(`${baseUrl}/api/admin/market-bookings?evtRef=${txnid}`);
+        if (lookup.ok) {
+          const data = await lookup.json();
+          if (data.data) {
+            const mktTxnid = (data.data as Record<string, string>).txnid || txnid;
+            await fetch(`${baseUrl}/api/admin/market-bookings`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ txnid: mktTxnid, status: 'PAID' }),
+            }).catch(() => {});
+            const mktSuccessUrl = new URL('/market/booking-success', baseUrl);
+            mktSuccessUrl.searchParams.set('txnid', mktTxnid);
+            mktSuccessUrl.searchParams.set('status', status);
+            if (easepayid) mktSuccessUrl.searchParams.set('easepayid', easepayid);
+            return NextResponse.redirect(mktSuccessUrl, { status: 303 });
+          }
+        }
+      } catch { /* fall through */ }
+
+      // Check hotel bookings
       try {
         const lookup = await fetch(`${baseUrl}/api/admin/hotel-bookings?evtRef=${txnid}`);
         if (lookup.ok) {

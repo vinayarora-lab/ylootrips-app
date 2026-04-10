@@ -63,7 +63,14 @@ export async function GET(req: NextRequest) {
       snippet?: string;
     }[];
 
-    const packages: MarketPackage[] = raw.slice(0, 5).map((r) => {
+    // Filter: only keep results that actually mention the destination
+    const destWords = destination.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+    const relevant = raw.filter((r) => {
+      const combined = `${r.title || ''} ${r.snippet || ''}`.toLowerCase();
+      return destWords.some((w) => combined.includes(w));
+    });
+
+    const packages: MarketPackage[] = relevant.slice(0, 5).map((r) => {
       const combined = `${r.title || ''} ${r.snippet || ''}`;
       const marketPrice = extractPrice(combined);
       const ourPrice = marketPrice ? Math.round(marketPrice * MARKUP) : null;

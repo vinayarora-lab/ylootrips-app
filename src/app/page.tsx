@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, Compass, Heart, Shield, Star, LucideIcon, Wallet, Gift, TrendingUp, Zap } from 'lucide-react';
 import Hero from '@/components/Hero';
+import MobileCategories from '@/components/MobileCategories';
 import DestinationCard from '@/components/DestinationCard';
 import InternationalTestimonials from '@/components/InternationalTestimonials';
 import TrustedHotels from '@/components/TrustedHotels';
@@ -130,6 +131,9 @@ export default function Home() {
         content={content?.hero}
         stats={content?.stats}
       />
+
+      {/* ── Mobile App-style Category Grid ── */}
+      <MobileCategories />
 
       {/* ── Hot Package Strip ── */}
       <section className="bg-gray-950 py-6 overflow-x-auto">

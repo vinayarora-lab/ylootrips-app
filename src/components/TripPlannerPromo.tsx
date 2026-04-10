@@ -39,7 +39,7 @@ export default function TripPlannerPromo() {
         <div className="flex justify-center mb-5">
           <div className="inline-flex items-center gap-2 bg-accent/15 border border-accent/30 text-accent text-xs font-semibold tracking-wider uppercase px-4 py-1.5 rounded-full">
             <Sparkles className="w-3.5 h-3.5" />
-            Free AI Trip Planner
+            Yloo AI Trip Planner
           </div>
         </div>
 

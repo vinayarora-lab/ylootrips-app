@@ -158,12 +158,31 @@ export default function Hero({ content, stats }: HeroProps) {
         const to = toCity.trim();
         const from = fromCity.trim();
         if (!to && !from) return;
-        const params = new URLSearchParams();
-        if (to) params.set('to', to);
-        if (from) params.set('from', from);
-        if (guests) params.set('guests', String(guests));
-        if (checkIn) params.set('date', checkIn);
-        router.push(`/search?${params.toString()}`);
+
+        // Keywords from our listed trips — if matched, go to /search; else AI planner
+        const OUR_KEYWORDS = [
+            'manali','goa','kashmir','kerala','bali','dubai','thailand','singapore','maldives',
+            'auli','jibhi','tirthan','kedarnath','lakshadweep','coorg','spiti','chopta',
+            'kedarkantha','kheerganga','hampta','sar pass','prashar','har ki dun','roopkund',
+            'chadar','ladakh','leh','kasol','solang','munnar','alleppey','kochi','srinagar',
+            'gulmarg','pahalgam','ubud','seminyak','bangkok','phuket','marina bay','sentosa',
+        ];
+
+        const query = (to || from).toLowerCase();
+        const isListed = OUR_KEYWORDS.some((k) => query.includes(k));
+
+        if (isListed) {
+            const params = new URLSearchParams();
+            if (to) params.set('to', to);
+            if (from) params.set('from', from);
+            if (guests) params.set('guests', String(guests));
+            if (checkIn) params.set('date', checkIn);
+            router.push(`/search?${params.toString()}`);
+        } else {
+            // Not in our catalogue — let Yloo AI plan it
+            const q = to || from;
+            router.push(`/trip-planner?q=${encodeURIComponent(q)}`);
+        }
     };
 
     const handleHotelSearch = () => {

@@ -91,7 +91,7 @@ export default function Header() {
                                 My Booking
                             </Link>
                             {/* Plan Journey */}
-                            <Link href="/contact"
+                            <Link href="/trip-planner"
                                 className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 transition-all duration-300 hover:scale-105 shadow-md shadow-amber-500/20">
                                 <Sparkles size={13} />
                                 Plan Journey
@@ -145,7 +145,7 @@ export default function Header() {
                             <Ticket size={15} />
                             Track My Booking
                         </Link>
-                        <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}
+                        <Link href="/trip-planner" onClick={() => setIsMobileMenuOpen(false)}
                             className={`flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white transition-all duration-500 shadow-lg shadow-amber-500/30 ${
                                 isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                             }`}

@@ -1,8 +1,45 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Send, MapPin, Clock, Lightbulb, Star, ChevronDown, ChevronUp, Loader2, Sparkles, Calendar, Wallet, Package } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Send, MapPin, Clock, Lightbulb, Star, ChevronDown, ChevronUp, Loader2, Sparkles, Calendar, Wallet, Package, CreditCard, ArrowUpRight } from 'lucide-react';
+import type { MarketPackage } from '@/app/api/search/market-packages/route';
+
+// ── Destination → our package page mapping ────────────────────────────────────
+const TRIP_LINKS: { keywords: string[]; href: string; title: string }[] = [
+  { keywords: ['manali', 'solang', 'kasol', 'rohtang'], href: '/manali-tour-package', title: 'Manali Tour Package' },
+  { keywords: ['goa', 'calangute', 'baga', 'anjuna', 'panjim'], href: '/goa-tour-package', title: 'Goa Tour Package' },
+  { keywords: ['kashmir', 'srinagar', 'gulmarg', 'pahalgam', 'sonamarg', 'dal lake'], href: '/kashmir-tour-package', title: 'Kashmir Tour Package' },
+  { keywords: ['kerala', 'munnar', 'alleppey', 'kochi', 'backwater', 'thekkady', 'kovalam'], href: '/kerala-tour-package', title: 'Kerala Tour Package' },
+  { keywords: ['bali', 'ubud', 'seminyak', 'kuta', 'indonesia'], href: '/bali-honeymoon-package', title: 'Bali Honeymoon Package' },
+  { keywords: ['dubai', 'uae', 'burj', 'abu dhabi', 'desert safari'], href: '/dubai-tour-package-from-delhi', title: 'Dubai Tour Package' },
+  { keywords: ['thailand', 'bangkok', 'phuket', 'pattaya', 'krabi', 'phi phi'], href: '/thailand-budget-trip', title: 'Thailand Budget Trip' },
+  { keywords: ['singapore', 'marina bay', 'sentosa'], href: '/singapore-tour-package', title: 'Singapore Tour Package' },
+  { keywords: ['maldives', 'overwater', 'atoll'], href: '/maldives-luxury-package', title: 'Maldives Luxury Package' },
+  { keywords: ['kedarkantha', 'sankri', 'juda ka talab'], href: '/destinations/domestic', title: 'Kedarkantha Trek' },
+  { keywords: ['spiti', 'kaza', 'tabo', 'key monastery', 'chicham'], href: '/destinations/domestic', title: 'Spiti Valley Tour' },
+  { keywords: ['chopta', 'tungnath', 'chandrashila'], href: '/destinations/domestic', title: 'Chopta Trek' },
+  { keywords: ['kedarnath', 'char dham', 'gaurikund'], href: '/destinations/domestic', title: 'Kedarnath Yatra' },
+  { keywords: ['lakshadweep', 'agatti', 'bangaram'], href: '/destinations/domestic', title: 'Lakshadweep Tour' },
+  { keywords: ['coorg', 'kodagu', 'mandalpatti', 'abbey falls'], href: '/destinations/domestic', title: 'Coorg Tour' },
+  { keywords: ['jibhi', 'tirthan', 'jalori'], href: '/destinations/domestic', title: 'Jibhi Tirthan Valley' },
+  { keywords: ['auli', 'joshimath', 'gorson'], href: '/destinations/domestic', title: 'Auli Snow Package' },
+  { keywords: ['chadar', 'zanskar', 'ladakh', 'leh'], href: '/destinations/domestic', title: 'Chadar Trek' },
+  { keywords: ['roopkund', 'lohajung', 'bedni bugyal'], href: '/destinations/domestic', title: 'Roopkund Trek' },
+  { keywords: ['har ki dun', 'garhwal', 'swargarohini'], href: '/destinations/domestic', title: 'Har Ki Dun Trek' },
+  { keywords: ['hampta', 'chandratal'], href: '/destinations/domestic', title: 'Hampta Pass Trek' },
+  { keywords: ['sar pass', 'grahan'], href: '/destinations/domestic', title: 'Sar Pass Trek' },
+  { keywords: ['kheerganga', 'barshaini'], href: '/destinations/domestic', title: 'Kheerganga Trek' },
+  { keywords: ['dayara', 'raithal', 'bugyal'], href: '/destinations/domestic', title: 'Dayara Bugyal Trek' },
+  { keywords: ['prashar', 'mandi lake'], href: '/destinations/domestic', title: 'Prashar Lake Trek' },
+  { keywords: ['nag tibba', 'pantwari'], href: '/destinations/domestic', title: 'Nag Tibba Trek' },
+];
+
+function findTrip(destination: string) {
+  const d = destination.toLowerCase();
+  return TRIP_LINKS.find((t) => t.keywords.some((k) => d.includes(k))) || null;
+}
 
 interface Activity {
   time: string;
@@ -31,11 +68,12 @@ interface Itinerary {
 }
 
 const SUGGESTIONS = [
-  "Plan a 5-day trip to Manali for 2 people on a budget of ₹25,000",
-  "7-day Kerala backwaters and beaches trip, luxury style",
-  "3-day Jaipur heritage tour for a family with kids",
-  "Ladakh road trip, 10 days, adventure style, ₹50,000 budget",
-  "5-day Coorg coffee trail, couple, mid-range budget",
+  "Plan a 5-day trip to Bali for 2 people, honeymoon, budget ₹80,000",
+  "7-day Thailand trip — Bangkok + Phuket, budget traveller",
+  "5-day Manali trip for 2 people on a budget of ₹25,000",
+  "Dubai 4 nights, family with kids, mid-range budget",
+  "7-day Kerala backwaters and beaches, luxury style",
+  "Singapore 5 days, couple, first international trip",
 ];
 
 const TIME_COLORS: Record<string, string> = {
@@ -97,7 +135,404 @@ function DayCard({ day, index }: { day: Day; index: number }) {
   );
 }
 
-function ItineraryDisplay({ itinerary, onBookNow }: { itinerary: Itinerary; onBookNow: () => void }) {
+function YlooCallbackCard({ destination }: { destination: string }) {
+  const [form, setForm] = useState({ name: '', phone: '' });
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSending(true);
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: 'not-provided@ylootrips.com',
+          phone: form.phone,
+          destination,
+          message: `Callback request from trip planner for: ${destination}. Client wants itinerary + EMI options.`,
+        }),
+      });
+    } catch { /* non-fatal */ }
+    setSent(true);
+    setSending(false);
+  };
+
+  if (sent) return (
+    <div className="bg-primary rounded-2xl p-6 text-center space-y-2">
+      <div className="text-3xl">🎉</div>
+      <p className="font-display text-lg text-cream">You're on the list!</p>
+      <p className="text-cream-dark text-sm">Our Yloo travel expert will call you within <strong className="text-accent">1 hour</strong> with a personalised {destination} itinerary, pricing & flexible EMI options.</p>
+      <p className="text-cream/50 text-xs mt-2">📱 Expect a call from +91 84278 31127</p>
+    </div>
+  );
+
+  return (
+    <div className="bg-primary rounded-2xl overflow-hidden">
+      {/* Top badge */}
+      <div className="bg-accent/20 border-b border-accent/20 px-5 py-2 flex items-center gap-2">
+        <Sparkles className="w-3.5 h-3.5 text-accent" />
+        <p className="text-accent text-xs font-semibold uppercase tracking-widest">Yloo Concierge Service</p>
+      </div>
+
+      <div className="p-5 sm:p-6">
+        <div className="flex items-start gap-4 mb-5">
+          <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-0.5">
+            <span className="text-xl">✈️</span>
+          </div>
+          <div>
+            <h3 className="font-display text-lg text-cream leading-snug mb-1">
+              We'll build your {destination} trip personally
+            </h3>
+            <p className="text-cream-dark text-sm leading-relaxed">
+              Our expert calls you within <span className="text-accent font-semibold">1 hour</span> with a custom itinerary, best prices & flexible <span className="text-accent font-semibold">EMI payment plans</span> — no advance needed.
+            </p>
+          </div>
+        </div>
+
+        {/* Quick trust points */}
+        <div className="grid grid-cols-3 gap-2 mb-5">
+          {[
+            { icon: '📞', label: 'Free callback' },
+            { icon: '💳', label: 'EMI options' },
+            { icon: '🔒', label: 'No advance' },
+          ].map(({ icon, label }) => (
+            <div key={label} className="bg-white/8 rounded-xl px-3 py-2 text-center">
+              <p className="text-lg">{icon}</p>
+              <p className="text-cream-dark text-[10px] font-medium mt-0.5">{label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-2.5">
+          <input
+            required type="text" placeholder="Your name"
+            value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="w-full px-4 py-3 bg-white/10 border border-white/15 rounded-xl text-sm text-cream placeholder:text-cream/40 outline-none focus:border-accent"
+          />
+          <input
+            required type="tel" placeholder="Phone number (we'll call you)"
+            value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            className="w-full px-4 py-3 bg-white/10 border border-white/15 rounded-xl text-sm text-cream placeholder:text-cream/40 outline-none focus:border-accent"
+          />
+          <button type="submit" disabled={sending}
+            className="w-full flex items-center justify-center gap-2 bg-accent text-primary font-bold text-sm py-3 rounded-xl hover:bg-accent/90 disabled:opacity-60 transition-colors">
+            {sending ? <Loader2 size={14} className="animate-spin" /> : '📞'}
+            {sending ? 'Booking your callback…' : 'Get Free Callback + EMI Options'}
+          </button>
+          <p className="text-cream/40 text-[10px] text-center">We'll respond within 1 hour · Mon–Sun 9am–10pm</p>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function PackageCard({ pkg, destination }: { pkg: MarketPackage; destination: string }) {
+  const [tab, setTab] = useState<'pay' | 'callback'>('pay');
+  const [form, setForm] = useState({ name: '', email: '', phone: '', guests: '2' });
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState('');
+  const [cbPhone, setCbPhone] = useState('');
+  const [cbName, setCbName] = useState('');
+  const [cbSent, setCbSent] = useState(false);
+  const [cbSending, setCbSending] = useState(false);
+  const [showPayForm, setShowPayForm] = useState(false);
+
+  // Calculate EMI (3-month approx)
+  const emiAmount = pkg.ourPrice ? Math.ceil((pkg.ourPrice * Number(form.guests || 2)) / 3) : null;
+  const savings = pkg.marketPrice && pkg.ourPrice ? pkg.marketPrice - pkg.ourPrice : null;
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPaying(true);
+    setPayError('');
+
+    if (!pkg.ourPrice) {
+      const waMsg = encodeURIComponent(
+        `Hi! I'm interested in the "${pkg.title}" trip to ${destination}.\n\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\nGuests: ${form.guests}\n\nPlease send me the price and availability.`
+      );
+      window.open(`https://wa.me/918427831127?text=${waMsg}`, '_blank');
+      setPaying(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/market/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          guests: form.guests,
+          packageTitle: pkg.title,
+          destination,
+          sourceUrl: pkg.url,
+          ourPrice: pkg.ourPrice,
+          marketPrice: pkg.marketPrice,
+          priceDiff: pkg.priceDiff,
+        }),
+      });
+      const data = await res.json();
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        setPayError(data.error || 'Payment failed. Please try again.');
+      }
+    } catch {
+      setPayError('Network error. Please try again.');
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const handleCallback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCbSending(true);
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: cbName,
+          email: 'not-provided@ylootrips.com',
+          phone: cbPhone,
+          destination,
+          message: `Callback request for package: "${pkg.title}" to ${destination}. Client wants EMI options and personalised pricing.`,
+        }),
+      });
+    } catch { /* non-fatal */ }
+    setCbSent(true);
+    setCbSending(false);
+  };
+
+  return (
+    <div className="bg-white border border-primary/10 rounded-2xl overflow-hidden shadow-sm">
+      {/* Package header */}
+      <div className="p-4 pb-3">
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <div className="flex-1 min-w-0">
+            <span className="inline-block bg-accent/15 text-primary text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mb-1">Trip Package</span>
+            <p className="font-display text-sm text-primary leading-snug">{pkg.title}</p>
+            <p className="text-xs text-secondary mt-0.5">{destination}</p>
+          </div>
+          {pkg.ourPrice ? (
+            <div className="text-right shrink-0">
+              {pkg.marketPrice && (
+                <p className="text-[11px] text-secondary line-through">₹{pkg.marketPrice.toLocaleString('en-IN')}</p>
+              )}
+              <p className="font-display text-xl text-primary">₹{pkg.ourPrice.toLocaleString('en-IN')}</p>
+              <p className="text-[10px] text-secondary">per person</p>
+              {savings && savings > 0 && (
+                <span className="inline-block bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full mt-0.5">
+                  Save ₹{savings.toLocaleString('en-IN')}
+                </span>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm font-semibold text-primary">Custom quote</p>
+          )}
+        </div>
+        {pkg.snippet && (
+          <p className="text-xs text-primary/60 leading-relaxed line-clamp-2 mb-2">{pkg.snippet}</p>
+        )}
+        {/* EMI & perks strip */}
+        {pkg.ourPrice && (
+          <div className="flex flex-wrap gap-1.5">
+            <span className="bg-blue-50 text-blue-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-blue-100">
+              💳 EMI from ₹{Math.ceil(pkg.ourPrice / 3).toLocaleString('en-IN')}/mo
+            </span>
+            <span className="bg-amber-50 text-amber-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-amber-100">
+              🔒 Secure Easebuzz PG
+            </span>
+            <span className="bg-green-50 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-green-100">
+              ✅ 100% Refund Policy
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Tab switcher */}
+      <div className="border-t border-cream-dark flex">
+        <button
+          onClick={() => setTab('pay')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold transition-colors ${
+            tab === 'pay'
+              ? 'bg-primary text-cream'
+              : 'bg-cream-light text-secondary hover:text-primary'
+          }`}
+        >
+          <CreditCard size={12} /> Book & Pay Now
+        </button>
+        <div className="w-px bg-cream-dark" />
+        <button
+          onClick={() => setTab('callback')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold transition-colors ${
+            tab === 'callback'
+              ? 'bg-primary text-cream'
+              : 'bg-cream-light text-secondary hover:text-primary'
+          }`}
+        >
+          📞 Free Callback
+        </button>
+      </div>
+
+      {/* Tab content */}
+      {tab === 'pay' && (
+        <div className="border-t border-cream-dark bg-cream-light p-4">
+          {!showPayForm ? (
+            <div className="space-y-3">
+              {/* EMI highlight */}
+              {pkg.ourPrice && emiAmount && (
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-blue-800">Pay in easy EMIs</p>
+                    <p className="text-[11px] text-blue-600 mt-0.5">3 months · No cost EMI available</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-display text-blue-800">₹{emiAmount.toLocaleString('en-IN')}</p>
+                    <p className="text-[10px] text-blue-500">/month × 3</p>
+                  </div>
+                </div>
+              )}
+              {/* Discount highlight */}
+              {savings && savings > 0 && (
+                <div className="bg-green-50 border border-green-100 rounded-xl p-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-green-800">Exclusive Yloo Price</p>
+                    <p className="text-[11px] text-green-600 mt-0.5">You save vs. market price</p>
+                  </div>
+                  <p className="text-lg font-display text-green-700">−₹{savings.toLocaleString('en-IN')}</p>
+                </div>
+              )}
+              <button
+                onClick={() => setShowPayForm(true)}
+                className="w-full flex items-center justify-center gap-2 bg-primary text-cream text-xs font-bold py-3 rounded-xl hover:bg-primary-light transition-colors"
+              >
+                <CreditCard size={13} />
+                {pkg.ourPrice ? `Proceed to Pay ₹${(pkg.ourPrice * Number(form.guests || 2)).toLocaleString('en-IN')}` : 'Get Custom Quote'}
+              </button>
+              <p className="text-[10px] text-secondary text-center">🔒 Secure payment · Full refund if trip unavailable</p>
+            </div>
+          ) : (
+            <form onSubmit={handlePay} className="space-y-2">
+              <p className="text-xs font-semibold text-primary mb-1">
+                {pkg.ourPrice ? `Booking for ${form.guests} guest(s) — ₹${(pkg.ourPrice * Number(form.guests || 2)).toLocaleString('en-IN')} total` : 'Enter your details for a custom quote'}
+              </p>
+              <input required type="text" placeholder="Full name" value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="w-full px-3 py-2.5 bg-white border border-sand/60 rounded-lg text-xs text-primary outline-none focus:border-accent" />
+              <input required type="email" placeholder="Email address" value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="w-full px-3 py-2.5 bg-white border border-sand/60 rounded-lg text-xs text-primary outline-none focus:border-accent" />
+              <input required type="tel" placeholder="Phone number" value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                className="w-full px-3 py-2.5 bg-white border border-sand/60 rounded-lg text-xs text-primary outline-none focus:border-accent" />
+              <input type="number" placeholder="Number of guests" min="1" value={form.guests}
+                onChange={(e) => setForm({ ...form, guests: e.target.value })}
+                className="w-full px-3 py-2.5 bg-white border border-sand/60 rounded-lg text-xs text-primary outline-none focus:border-accent" />
+              {payError && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{payError}</p>}
+              <div className="flex gap-2 pt-1">
+                <button type="submit" disabled={paying}
+                  className="flex-1 flex items-center justify-center gap-2 bg-primary text-cream text-xs font-bold py-2.5 rounded-xl hover:bg-primary-light disabled:opacity-60 transition-colors">
+                  {paying ? <Loader2 size={13} className="animate-spin" /> : <CreditCard size={13} />}
+                  {paying ? 'Redirecting…' : pkg.ourPrice ? `Pay ₹${(pkg.ourPrice * Number(form.guests || 2)).toLocaleString('en-IN')} via Easebuzz` : 'Request Quote'}
+                </button>
+                <button type="button" onClick={() => { setShowPayForm(false); setPayError(''); }}
+                  className="text-xs text-secondary px-3 py-2.5 border border-sand/60 rounded-xl hover:bg-white">Back</button>
+              </div>
+              <p className="text-[10px] text-secondary text-center">🔒 Secure payment via Easebuzz · No hidden charges</p>
+            </form>
+          )}
+        </div>
+      )}
+
+      {tab === 'callback' && (
+        <div className="border-t border-cream-dark bg-primary p-4">
+          {cbSent ? (
+            <div className="text-center py-2">
+              <p className="text-2xl mb-1">🎉</p>
+              <p className="text-cream font-semibold text-sm">You're all set!</p>
+              <p className="text-cream-dark text-xs mt-1">Our Yloo expert will call you within <span className="text-accent font-bold">1 hour</span> with a custom price, itinerary & EMI plan.</p>
+              <p className="text-cream/40 text-[10px] mt-2">📱 Expect call from +91 84278 31127</p>
+            </div>
+          ) : (
+            <form onSubmit={handleCallback} className="space-y-2">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
+                  <span className="text-base">✈️</span>
+                </div>
+                <div>
+                  <p className="text-cream text-xs font-bold">Yloo Concierge Callback</p>
+                  <p className="text-cream-dark text-[11px] mt-0.5">Get a personal call with custom price + flexible EMI — no advance needed.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 mb-3">
+                {[['📞', 'Free call'], ['💳', 'EMI plans'], ['🔒', 'No advance']].map(([icon, label]) => (
+                  <div key={label} className="bg-white/8 rounded-lg py-1.5 text-center">
+                    <p className="text-sm">{icon}</p>
+                    <p className="text-cream/70 text-[9px] font-medium">{label}</p>
+                  </div>
+                ))}
+              </div>
+              <input required type="text" placeholder="Your name"
+                value={cbName} onChange={(e) => setCbName(e.target.value)}
+                className="w-full px-3 py-2.5 bg-white/10 border border-white/15 rounded-xl text-xs text-cream placeholder:text-cream/40 outline-none focus:border-accent" />
+              <input required type="tel" placeholder="Phone number (we'll call you)"
+                value={cbPhone} onChange={(e) => setCbPhone(e.target.value)}
+                className="w-full px-3 py-2.5 bg-white/10 border border-white/15 rounded-xl text-xs text-cream placeholder:text-cream/40 outline-none focus:border-accent" />
+              <button type="submit" disabled={cbSending}
+                className="w-full flex items-center justify-center gap-2 bg-accent text-primary text-xs font-bold py-2.5 rounded-xl hover:bg-accent/90 disabled:opacity-60 transition-colors">
+                {cbSending ? <Loader2 size={13} className="animate-spin" /> : '📞'}
+                {cbSending ? 'Scheduling callback…' : 'Get Free Callback + EMI Options'}
+              </button>
+              <p className="text-cream/40 text-[10px] text-center">Mon–Sun 9am–10pm · Response within 1 hour</p>
+            </form>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MarketSection({ destination }: { destination: string }) {
+  const [packages, setPackages] = useState<MarketPackage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/search/market-packages?destination=${encodeURIComponent(destination)}`)
+      .then((r) => r.json())
+      .then((d) => setPackages(d.data || []))
+      .finally(() => setLoading(false));
+  }, [destination]);
+
+  if (loading) return (
+    <div className="flex items-center gap-2 text-sm text-secondary py-6 justify-center">
+      <Loader2 size={14} className="animate-spin" /> Finding packages for {destination}…
+    </div>
+  );
+
+  if (!packages.length) return <YlooCallbackCard destination={destination} />;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-secondary font-medium uppercase tracking-widest">Available Packages — {destination}</p>
+      {packages.map((pkg, i) => (
+        <PackageCard key={i} pkg={pkg} destination={destination} />
+      ))}
+    </div>
+  );
+}
+
+function ItineraryDisplay({ itinerary, onBookNow, matchedTrip, onShowMarket }: {
+  itinerary: Itinerary;
+  onBookNow: () => void;
+  matchedTrip: { href: string; title: string } | null;
+  onShowMarket: () => void;
+}) {
   return (
     <div className="space-y-6 animate-fade-up">
       {/* Trip Overview */}
@@ -135,7 +570,7 @@ function ItineraryDisplay({ itinerary, onBookNow }: { itinerary: Itinerary; onBo
       </div>
 
       {/* Highlights */}
-      {itinerary.highlights?.length > 0 && (
+      {(itinerary.highlights?.length ?? 0) > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Star className="w-4 h-4 text-accent" />
@@ -152,14 +587,16 @@ function ItineraryDisplay({ itinerary, onBookNow }: { itinerary: Itinerary; onBo
       )}
 
       {/* Day-by-Day */}
-      <div>
-        <h3 className="font-semibold text-primary mb-3 text-sm">Day-by-Day Itinerary</h3>
-        <div className="space-y-3">
-          {itinerary.days.map((day, i) => (
-            <DayCard key={i} day={day} index={i} />
-          ))}
+      {itinerary.days?.length > 0 && (
+        <div>
+          <h3 className="font-semibold text-primary mb-3 text-sm">Day-by-Day Itinerary</h3>
+          <div className="space-y-3">
+            {itinerary.days.map((day, i) => (
+              <DayCard key={i} day={day} index={i} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Local Insight */}
       {itinerary.localInsights && (
@@ -175,7 +612,7 @@ function ItineraryDisplay({ itinerary, onBookNow }: { itinerary: Itinerary; onBo
       )}
 
       {/* Packing Tips */}
-      {itinerary.packingTips?.length > 0 && (
+      {(itinerary.packingTips?.length ?? 0) > 0 && (
         <div className="bg-cream rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <Package className="w-4 h-4 text-secondary" />
@@ -195,28 +632,55 @@ function ItineraryDisplay({ itinerary, onBookNow }: { itinerary: Itinerary; onBo
       {/* Book CTA */}
       <div className="bg-gradient-warm rounded-2xl p-5 sm:p-6 text-center">
         <h3 className="font-display text-lg sm:text-xl font-semibold text-white mb-1">Love this itinerary?</h3>
-        <p className="text-white/80 text-sm mb-4">Our experts will personalise it further and handle all bookings for you.</p>
-        <button
-          onClick={onBookNow}
-          className="w-full sm:w-auto bg-white text-primary font-semibold text-sm px-8 py-3 rounded-xl hover:bg-cream transition-colors shadow-sm"
-        >
-          Book This Trip →
-        </button>
+        <p className="text-white/80 text-sm mb-4">
+          {matchedTrip
+            ? 'This trip is available in our catalogue — book directly.'
+            : 'Our experts will source this trip and handle all bookings for you.'}
+        </p>
+        {matchedTrip ? (
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href={matchedTrip.href}
+              className="inline-flex items-center justify-center gap-2 bg-white text-primary font-semibold text-sm px-8 py-3 rounded-xl hover:bg-cream transition-colors shadow-sm"
+            >
+              <ArrowUpRight className="w-4 h-4" />
+              View {matchedTrip.title}
+            </Link>
+            <button
+              onClick={onShowMarket}
+              className="inline-flex items-center justify-center gap-2 bg-white/10 border border-white/30 text-white text-sm font-medium px-6 py-3 rounded-xl hover:bg-white/20 transition-colors"
+            >
+              Compare Market Packages
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onShowMarket}
+            className="w-full sm:w-auto bg-white text-primary font-semibold text-sm px-8 py-3 rounded-xl hover:bg-cream transition-colors shadow-sm"
+          >
+            Find & Book This Trip →
+          </button>
+        )}
         <p className="text-white/60 text-xs mt-3">Free consultation · No hidden charges</p>
       </div>
+
     </div>
   );
 }
 
 export default function TripPlannerChat() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [itinerary, setItinerary] = useState<Itinerary | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null); // kept for future use
   const [hasSearched, setHasSearched] = useState(false);
+  const [showMarket, setShowMarket] = useState(false);
+  const [failedDestination, setFailedDestination] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+  const marketRef = useRef<HTMLDivElement>(null);
 
   const autoResize = () => {
     const el = textareaRef.current;
@@ -232,9 +696,9 @@ export default function TripPlannerChat() {
     }
   }, [itinerary]);
 
-  // Auto-submit if ?q= param is passed from homepage
+  // Auto-submit if ?q= or ?destination= param is passed
   useEffect(() => {
-    const q = searchParams.get('q');
+    const q = searchParams.get('q') || searchParams.get('destination');
     if (q) {
       setInput(q);
       handleSubmit(q);
@@ -250,6 +714,7 @@ export default function TripPlannerChat() {
     setLoading(true);
     setError(null);
     setItinerary(null);
+    setFailedDestination('');
     setHasSearched(true);
 
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
@@ -264,20 +729,35 @@ export default function TripPlannerChat() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Something went wrong. Please try again.');
+        // Show callback card instead of dead-end error
+        setFailedDestination(message);
         return;
       }
 
       setItinerary(data.itinerary);
+      setShowMarket(false);
     } catch {
-      setError('Network error. Please check your connection and try again.');
+      setFailedDestination(message);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleShowMarket = () => {
+    setShowMarket(true);
+    setTimeout(() => {
+      marketRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
   const handleBookNow = () => {
-    window.open('https://wa.me/918427831127?text=Hi!%20I%20got%20an%20itinerary%20from%20your%20AI%20planner%20and%20would%20like%20to%20book%20this%20trip.', '_blank');
+    if (!itinerary) return;
+    const trip = findTrip(itinerary.destination);
+    if (trip) {
+      router.push(trip.href);
+    } else {
+      handleShowMarket();
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -293,11 +773,11 @@ export default function TripPlannerChat() {
       <div className="bg-primary pt-16 pb-10 px-4 text-center">
         <div className="inline-flex items-center gap-1.5 bg-accent/20 border border-accent/30 text-accent text-xs font-medium px-3 py-1.5 rounded-full mb-4">
           <Sparkles className="w-3 h-3" />
-          AI-Powered Planner
+          Yloo AI
         </div>
-        <h1 className="font-display text-display-lg text-cream mb-3">Plan Your Perfect Indian Trip</h1>
+        <h1 className="font-display text-display-lg text-cream mb-3">Plan Any Trip, Anywhere in the World</h1>
         <p className="text-cream-dark text-sm sm:text-base max-w-md mx-auto">
-          Tell Yloo where you want to go, your budget, and travel style — get a personalised day-by-day itinerary in seconds.
+          Tell Yloo AI your destination, budget, and travel style — get a personalised day-by-day itinerary in seconds.
         </p>
       </div>
 
@@ -309,7 +789,7 @@ export default function TripPlannerChat() {
             value={input}
             onChange={(e) => { setInput(e.target.value); autoResize(); }}
             onKeyDown={handleKeyDown}
-            placeholder="e.g. Plan a 5-day trip to Goa for 2 people, beach lover, budget ₹30,000..."
+            placeholder="e.g. Plan a 5-day trip to Bali for 2 people, honeymoon, budget ₹80,000..."
             rows={2}
             className="w-full resize-none text-sm md:text-sm text-primary placeholder-secondary/50 bg-transparent outline-none leading-relaxed"
           />
@@ -360,40 +840,48 @@ export default function TripPlannerChat() {
               <div className="w-12 h-12 rounded-full bg-gradient-warm flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-white animate-pulse" />
               </div>
-              <p className="text-primary font-medium text-sm">Yloo is crafting your itinerary…</p>
+              <p className="text-primary font-medium text-sm">Yloo AI is crafting your itinerary…</p>
               <p className="text-secondary text-xs">This usually takes 10–15 seconds</p>
             </div>
           </div>
         )}
 
-        {/* Error */}
-        {error && (
-          <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
-            <p className="text-sm text-red-700">{error}</p>
-            <button
-              onClick={() => setError(null)}
-              className="text-xs text-red-500 mt-2 hover:underline"
-            >
-              Dismiss
-            </button>
+        {/* AI failed — show callback card instead of error */}
+        {failedDestination && !itinerary && (
+          <div className="mt-6 pb-12">
+            <p className="text-xs text-secondary px-1 mb-3">Our AI is busy — let our team plan this for you instead</p>
+            <YlooCallbackCard destination={failedDestination} />
           </div>
         )}
 
         {/* Itinerary Result */}
         {itinerary && (
-          <div ref={resultRef} className="mt-6 pb-12">
+          <div ref={resultRef} className="mt-6">
             <div className="flex items-center justify-between mb-4 px-1">
               <p className="text-xs text-secondary">Your personalised itinerary is ready</p>
               <button
-                onClick={() => { setItinerary(null); setHasSearched(false); }}
+                onClick={() => { setItinerary(null); setHasSearched(false); setShowMarket(false); }}
                 className="text-xs text-accent hover:underline"
               >
                 Plan another trip
               </button>
             </div>
-            <ItineraryDisplay itinerary={itinerary} onBookNow={handleBookNow} />
+            <ItineraryDisplay
+              itinerary={itinerary}
+              onBookNow={handleBookNow}
+              matchedTrip={findTrip(itinerary.destination)}
+              onShowMarket={handleShowMarket}
+            />
           </div>
         )}
+
+        {/* Market packages — rendered outside ItineraryDisplay so scroll works */}
+        {itinerary && showMarket && (
+          <div ref={marketRef} className="mt-4 pb-12">
+            <MarketSection destination={itinerary.destination} />
+          </div>
+        )}
+        {itinerary && !showMarket && <div className="pb-12" />}
       </div>
     </div>
   );

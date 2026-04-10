@@ -4,20 +4,43 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Zap, X, ArrowRight, Tag } from 'lucide-react';
 
-/* Countdown that ends ~36h from first render */
-const SALE_END = Date.now() + 36 * 3600_000 + 14 * 60_000;
+/* Countdown that ends ~36h from first client render */
+const DURATION = 36 * 3600_000 + 14 * 60_000;
 
 function pad(n: number) { return String(Math.max(0, n)).padStart(2, '0'); }
 
 function Countdown() {
-  const [diff, setDiff] = useState(SALE_END - Date.now());
+  const [mounted, setMounted] = useState(false);
+  const [diff, setDiff] = useState(0);
+
   useEffect(() => {
-    const t = setInterval(() => setDiff(SALE_END - Date.now()), 1000);
+    setMounted(true);
+    const saleEnd = Date.now() + DURATION;
+    setDiff(saleEnd - Date.now());
+    const t = setInterval(() => setDiff(saleEnd - Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
+
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const s = Math.floor((diff % 60000) / 1000);
+
+  // Render placeholder on server / before hydration to avoid mismatch
+  if (!mounted) {
+    return (
+      <div className="flex items-center gap-1.5">
+        {['HRS', 'MIN', 'SEC'].map((label, i) => (
+          <div key={label} className="flex items-center gap-1">
+            {i > 0 && <span className="text-white/60 font-bold text-sm">:</span>}
+            <div className="flex flex-col items-center">
+              <div className="bg-black/30 backdrop-blur-sm text-white font-mono font-black text-lg leading-none px-2 py-1 rounded min-w-[2.5rem] text-center tabular-nums">--</div>
+              <span className="text-white/55 text-[9px] uppercase tracking-widest mt-0.5">{label}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-1.5">

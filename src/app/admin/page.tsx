@@ -8,7 +8,7 @@ import {
     MessageSquare, BookOpen, Settings, LogOut, ChevronRight,
     Save, RefreshCw, Plus, Trash2, Eye, ChevronDown, ChevronUp,
     ShoppingBag, CheckCircle, XCircle, Clock, Mail, User, Calendar, Phone,
-    Megaphone
+    Megaphone, Star
     , Upload, Copy, Link2, X
 } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -742,6 +742,7 @@ export default function AdminDashboard() {
         { id: 'stats', icon: LayoutDashboard, label: 'Statistics' },
         { id: 'testimonials', icon: MessageSquare, label: 'Testimonials' },
         { id: 'bookings', icon: ShoppingBag, label: 'Bookings', href: '/admin/bookings' },
+        { id: 'reviews', icon: Star, label: 'Client Reviews', href: '/admin/reviews' },
         { id: 'inquiries', icon: Mail, label: 'Inquiries' },
         { id: 'ads', icon: Megaphone, label: 'Ads' },
     ];

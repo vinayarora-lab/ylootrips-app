@@ -35,6 +35,7 @@ function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
+  const [ticket, setTicket] = useState('');
 
   // Pre-fill from ?package= / ?destination= / ?activity= query params
   useEffect(() => {
@@ -77,27 +78,33 @@ function ContactForm() {
     setSubmitStatus('idle');
 
     try {
-      const response = await api.submitContactInquiry({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || undefined,
-        destination: formData.destination || undefined,
-        travelers: formData.travelers || undefined,
-        preferredDates: formData.dates || undefined,
-        message: formData.message || undefined,
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          destination: formData.destination || undefined,
+          travelers: formData.travelers || undefined,
+          preferredDates: formData.dates || undefined,
+          message: formData.message || undefined,
+        }),
       });
+      const data = await res.json();
 
-      if (response.data.success) {
+      if (res.ok && data.success) {
         setSubmitStatus('success');
-        setStatusMessage(response.data.message || "Thank you! We'll get back to you within 24 hours.");
+        setTicket(data.ticket || '');
+        setStatusMessage(data.message || "Thank you! We'll get back to you within 24 hours.");
         setFormData({ name: '', email: '', phone: '', destination: '', travelers: '', dates: '', message: '' });
       } else {
         setSubmitStatus('error');
-        setStatusMessage(response.data.error || 'Something went wrong. Please try again.');
+        setStatusMessage(data.error || 'Something went wrong. Please try again.');
       }
-    } catch (error: any) {
+    } catch {
       setSubmitStatus('error');
-      setStatusMessage(error.response?.data?.error || 'Failed to submit inquiry. Please try again later.');
+      setStatusMessage('Failed to submit inquiry. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
@@ -207,9 +214,16 @@ function ContactForm() {
                 </div>
 
                 {submitStatus === 'success' && (
-                  <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 text-green-700">
-                    <CheckCircle className="w-5 h-5 shrink-0" />
-                    <p>{statusMessage}</p>
+                  <div className="p-4 bg-green-50 border border-green-200 text-green-700 space-y-1">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 shrink-0" />
+                      <p>{statusMessage}</p>
+                    </div>
+                    {ticket && (
+                      <p className="text-xs font-semibold pl-8">
+                        Your ticket number: <span className="font-mono bg-green-100 px-2 py-0.5 rounded">{ticket}</span> — check your email for confirmation.
+                      </p>
+                    )}
                   </div>
                 )}
                 {submitStatus === 'error' && (

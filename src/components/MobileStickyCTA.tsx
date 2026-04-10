@@ -2,16 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Compass, CalendarDays, Ticket, MessageCircle } from 'lucide-react';
+import { Home, Compass, Ticket, MessageCircle, Sparkles } from 'lucide-react';
 
 const WA_NUMBER = '918427831127';
 const WA_MSG = encodeURIComponent('Hi! I want to book a trip. Please share the best package price and available dates.');
 const WA_URL = `https://wa.me/${WA_NUMBER}?text=${WA_MSG}`;
 
 const TABS = [
-    { label: 'Home',     href: '/',           icon: Home },
-    { label: 'Trips',    href: '/trips',       icon: Compass },
-    { label: 'Events',   href: '/events',      icon: CalendarDays },
+    { label: 'Home',     href: '/',            icon: Home },
+    { label: 'Trips',    href: '/destinations/domestic', icon: Compass },
     { label: 'My Trips', href: '/my-booking',  icon: Ticket },
 ] as const;
 
@@ -24,6 +23,8 @@ export default function MobileStickyCTA() {
 
     const isActive = (href: string) =>
         href === '/' ? pathname === '/' : pathname?.startsWith(href);
+
+    const isPlannerActive = pathname?.startsWith('/trip-planner');
 
     return (
         <nav
@@ -41,7 +42,6 @@ export default function MobileStickyCTA() {
                                 active ? 'text-amber-600' : 'text-gray-400'
                             }`}
                         >
-                            {/* Active indicator dot at top */}
                             {active && (
                                 <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-amber-500" />
                             )}
@@ -56,6 +56,26 @@ export default function MobileStickyCTA() {
                         </Link>
                     );
                 })}
+
+                {/* AI Planner — centre highlight tab */}
+                <Link
+                    href="/trip-planner"
+                    className="relative flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold select-none active:scale-90 transition-all duration-150"
+                >
+                    {isPlannerActive && (
+                        <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-amber-500" />
+                    )}
+                    {/* Floating pill button */}
+                    <div className={`flex flex-col items-center justify-center w-14 h-14 -mt-6 rounded-2xl shadow-lg transition-all duration-150 ${
+                        isPlannerActive
+                            ? 'bg-amber-600 shadow-amber-500/40'
+                            : 'bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-500/30'
+                    }`}>
+                        <Sparkles size={20} strokeWidth={2} className="text-white" />
+                        <span className="text-white text-[9px] font-bold mt-0.5 leading-none">Plan AI</span>
+                    </div>
+                    <span className={`mt-1 ${isPlannerActive ? 'text-amber-600' : 'text-gray-400'}`}>AI Trip</span>
+                </Link>
 
                 {/* WhatsApp — Chat tab */}
                 <a

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   Search, MapPin, Calendar, Users, ArrowUpRight, Check, ChevronDown, ChevronUp,
-  Tag, CreditCard, Phone, Loader2, AlertCircle, Sparkles, ExternalLink,
+  Tag, CreditCard, Phone, Loader2, AlertCircle, Sparkles,
 } from 'lucide-react';
 import type { MarketPackage } from '@/app/api/search/market-packages/route';
 
@@ -92,34 +92,42 @@ function OurTripCard({ trip }: { trip: typeof OUR_TRIPS[0] }) {
 
 // ── Market package card ───────────────────────────────────────────────────────
 function MarketCard({ pkg, guests }: { pkg: MarketPackage; guests: string }) {
-  const [showInquiry, setShowInquiry] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '' });
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ name: '', email: '', phone: '', guests });
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState('');
 
-  const handleInquire = async (e: React.FormEvent) => {
+  const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSending(true);
+    setPaying(true);
+    setPayError('');
     try {
-      await fetch('/api/search/market-inquiry', {
+      const res = await fetch('/api/market/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...form,
-          package: pkg.title,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          guests: form.guests,
+          packageTitle: pkg.title,
           destination: pkg.destination,
           sourceUrl: pkg.url,
-          marketPrice: pkg.marketPrice,
           ourPrice: pkg.ourPrice,
+          marketPrice: pkg.marketPrice,
           priceDiff: pkg.priceDiff,
-          guests,
         }),
       });
-      setSent(true);
+      const data = await res.json();
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        setPayError(data.error || 'Payment failed. Please try again.');
+      }
     } catch {
-      setSent(true); // show success regardless
+      setPayError('Network error. Please try again.');
     } finally {
-      setSending(false);
+      setPaying(false);
     }
   };
 
@@ -128,61 +136,58 @@ function MarketCard({ pkg, guests }: { pkg: MarketPackage; guests: string }) {
       <div className="p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">Market Package</span>
-              <span className="text-[10px] text-secondary">via {pkg.source}</span>
-            </div>
+            <span className="inline-block bg-accent/15 text-primary text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mb-1">Trip Package</span>
             <h3 className="font-display text-base text-primary leading-snug">{pkg.title}</h3>
+            <p className="text-xs text-secondary mt-0.5">{pkg.destination}</p>
           </div>
           {pkg.ourPrice && (
             <div className="text-right shrink-0">
               {pkg.marketPrice && <p className="text-[11px] text-secondary line-through">₹{pkg.marketPrice.toLocaleString('en-IN')}</p>}
               <p className="font-display text-xl text-primary">₹{pkg.ourPrice.toLocaleString('en-IN')}</p>
-              <p className="text-[10px] text-secondary">per person</p>
+              <p className="text-[10px] text-secondary">per person · all inclusive</p>
             </div>
           )}
         </div>
         {pkg.snippet && <p className="text-xs text-primary/60 leading-relaxed mb-3 line-clamp-2">{pkg.snippet}</p>}
-        {pkg.priceDiff && (
-          <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-700 mb-3">
-            All-inclusive YlooTrips service: ₹{pkg.priceDiff.toLocaleString('en-IN')} included
-          </div>
-        )}
-        {sent ? (
-          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-700">
-            <Check size={14} /> Inquiry sent! We'll respond within 1 hour.
-          </div>
-        ) : showInquiry ? (
-          <form onSubmit={handleInquire} className="space-y-2 mt-3 pt-3 border-t border-primary/8">
-            <input required type="text" placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+
+        {showForm ? (
+          <form onSubmit={handlePay} className="space-y-2 pt-3 border-t border-primary/8">
+            <p className="text-xs font-semibold text-primary">
+              Pay ₹{pkg.ourPrice?.toLocaleString('en-IN')} — complete your booking
+            </p>
+            <input required type="text" placeholder="Full name" value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
               className="w-full px-3 py-2.5 bg-cream-light border border-sand/60 rounded-xl text-sm text-primary placeholder:text-secondary/40 focus:outline-none focus:border-accent" />
-            <input required type="email" placeholder="Email address" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+            <input required type="email" placeholder="Email address" value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
               className="w-full px-3 py-2.5 bg-cream-light border border-sand/60 rounded-xl text-sm text-primary placeholder:text-secondary/40 focus:outline-none focus:border-accent" />
-            <input required type="tel" placeholder="Phone number" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            <input required type="tel" placeholder="Phone number" value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
               className="w-full px-3 py-2.5 bg-cream-light border border-sand/60 rounded-xl text-sm text-primary placeholder:text-secondary/40 focus:outline-none focus:border-accent" />
+            <input type="number" placeholder="Number of guests" min="1" value={form.guests}
+              onChange={(e) => setForm({ ...form, guests: e.target.value })}
+              className="w-full px-3 py-2.5 bg-cream-light border border-sand/60 rounded-xl text-sm text-primary placeholder:text-secondary/40 focus:outline-none focus:border-accent" />
+            {payError && (
+              <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{payError}</p>
+            )}
             <div className="flex gap-2">
-              <button type="submit" disabled={sending}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-accent text-primary text-xs font-bold py-2.5 rounded-xl hover:bg-accent/90 disabled:opacity-60">
-                {sending ? <Loader2 size={13} className="animate-spin" /> : <CreditCard size={13} />}
-                {sending ? 'Sending…' : 'Book This Trip'}
+              <button type="submit" disabled={paying}
+                className="flex-1 flex items-center justify-center gap-1.5 bg-primary text-cream text-xs font-bold py-2.5 rounded-xl hover:bg-primary-light disabled:opacity-60 transition-colors">
+                {paying ? <Loader2 size={13} className="animate-spin" /> : <CreditCard size={13} />}
+                {paying ? 'Redirecting…' : `Pay ₹${pkg.ourPrice?.toLocaleString('en-IN')} via Easebuzz`}
               </button>
-              <button type="button" onClick={() => setShowInquiry(false)}
+              <button type="button" onClick={() => { setShowForm(false); setPayError(''); }}
                 className="px-3 py-2.5 border border-sand/60 rounded-xl text-secondary text-xs hover:bg-cream-light">
                 Cancel
               </button>
             </div>
+            <p className="text-[10px] text-secondary text-center">🔒 Secure payment · 100% refund if trip unavailable</p>
           </form>
         ) : (
-          <div className="flex gap-2">
-            <button onClick={() => setShowInquiry(true)}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-accent text-primary text-xs font-bold py-2.5 rounded-xl hover:bg-accent/90 transition-colors">
-              <CreditCard size={13} /> Book Now
-            </button>
-            <a href={pkg.url} target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1 border border-primary/20 text-secondary text-xs py-2.5 px-3 rounded-xl hover:bg-cream-light transition-colors">
-              <ExternalLink size={12} /> Source
-            </a>
-          </div>
+          <button onClick={() => setShowForm(true)}
+            className="w-full flex items-center justify-center gap-1.5 bg-primary text-cream text-xs font-bold py-2.5 rounded-xl hover:bg-primary-light transition-colors">
+            <CreditCard size={13} /> Book & Pay Now
+          </button>
         )}
       </div>
     </div>
@@ -320,7 +325,7 @@ function SearchContent() {
           <div className="text-center py-16">
             <Loader2 size={32} className="animate-spin text-accent mx-auto mb-4" />
             <p className="font-display text-xl text-primary mb-2">Searching market packages…</p>
-            <p className="text-secondary text-sm">Finding best available trips for "{to}" from BanBanjara & other sources</p>
+            <p className="text-secondary text-sm">Finding best available trips for "{to}"…</p>
           </div>
         )}
 
@@ -331,7 +336,7 @@ function SearchContent() {
               <Sparkles size={18} className="text-amber-600 shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold text-amber-900 text-sm">Market packages for "{to}"</p>
-                <p className="text-xs text-amber-700 mt-0.5">We don't have a fixed package for this destination yet, but we've sourced options from BanBanjara. Our price includes full YlooTrips service + support.</p>
+                <p className="text-xs text-amber-700 mt-0.5">We've curated the best available options for this destination. Our price includes full YlooTrips service, support & EMI options.</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Star, BadgeCheck, Quote } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Star, BadgeCheck, Quote, X, Loader2, CheckCircle, PenLine } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -202,7 +202,24 @@ const stats = [
   { value: '40+', label: 'Countries Served' },
 ];
 
-function Stars({ n }: { n: number }) {
+function Stars({ n, interactive, onSelect }: { n: number; interactive?: boolean; onSelect?: (v: number) => void }) {
+  const [hover, setHover] = useState(0);
+  if (interactive) {
+    return (
+      <div className="flex gap-1">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <button key={i} type="button"
+            onClick={() => onSelect?.(i + 1)}
+            onMouseEnter={() => setHover(i + 1)}
+            onMouseLeave={() => setHover(0)}
+            className="transition-transform hover:scale-110"
+          >
+            <Star className={`w-7 h-7 ${(hover || n) > i ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
+          </button>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="flex gap-0.5">
       {Array.from({ length: 5 }).map((_, i) => (
@@ -212,7 +229,186 @@ function Stars({ n }: { n: number }) {
   );
 }
 
+interface DBReview {
+  _id: string;
+  name: string;
+  country: string;
+  trip: string;
+  rating: number;
+  text: string;
+  createdAt: string;
+}
+
+function ReviewModal({ onClose }: { onClose: () => void }) {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', country: '', trip: '', text: '' });
+  const [rating, setRating] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [err, setErr] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rating) { setErr('Please select a star rating.'); return; }
+    setSubmitting(true);
+    setErr('');
+    try {
+      const res = await fetch('/api/reviews/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, rating }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setErr(data.error || 'Failed. Please try again.'); return; }
+      setDone(true);
+    } catch {
+      setErr('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div>
+            <h3 className="font-bold text-gray-900 text-lg">Share Your Experience</h3>
+            <p className="text-xs text-gray-500 mt-0.5">Your review will be visible after admin approval</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto flex-1">
+          {done ? (
+            <div className="flex flex-col items-center justify-center py-12 px-6 text-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <h4 className="font-bold text-gray-900 text-lg">Thank you! 🎉</h4>
+              <p className="text-gray-500 text-sm max-w-xs">
+                Your review has been submitted and will go live after a quick review by our team. We truly appreciate your feedback!
+              </p>
+              <button onClick={onClose} className="mt-2 px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-semibold">
+                Done
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="p-5 space-y-4">
+              {/* Star rating */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Overall Rating *</label>
+                <Stars n={rating} interactive onSelect={setRating} />
+                {rating > 0 && (
+                  <p className="text-xs text-amber-600 mt-1 font-medium">
+                    {['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent!'][rating]}
+                  </p>
+                )}
+              </div>
+
+              {/* Name + Country in 2 cols */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Your Name *</label>
+                  <input required type="text" placeholder="Full name" maxLength={100}
+                    value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">City / Country *</label>
+                  <input required type="text" placeholder="e.g. Delhi, India" maxLength={100}
+                    value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400" />
+                </div>
+              </div>
+
+              {/* Email + Phone */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Email *</label>
+                  <input required type="email" placeholder="your@email.com"
+                    value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Phone</label>
+                  <input type="tel" placeholder="+91 98765…"
+                    value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400" />
+                </div>
+              </div>
+
+              {/* Trip name */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Which Trip / Package? *</label>
+                <input required type="text" placeholder="e.g. Bali Honeymoon Package, 5-Day Manali Trip"
+                  value={form.trip} onChange={(e) => setForm({ ...form, trip: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400" />
+              </div>
+
+              {/* Review text */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Your Review * <span className="text-gray-400 font-normal">({form.text.length}/1000)</span>
+                </label>
+                <textarea required rows={4} placeholder="Tell us about your experience — what made it special?"
+                  maxLength={1000}
+                  value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-amber-400 resize-none leading-relaxed" />
+              </div>
+
+              {err && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{err}</p>}
+
+              <button type="submit" disabled={submitting}
+                className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-3.5 rounded-xl hover:bg-gray-800 disabled:opacity-60 transition-colors">
+                {submitting ? <Loader2 size={16} className="animate-spin" /> : <PenLine size={16} />}
+                {submitting ? 'Submitting…' : 'Submit Review'}
+              </button>
+              <p className="text-[11px] text-gray-400 text-center">
+                Your review will be published after admin approval · Email not shown publicly
+              </p>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function InternationalTestimonials() {
+  const [showModal, setShowModal] = useState(false);
+  const [dbReviews, setDbReviews] = useState<DBReview[]>([]);
+
+  useEffect(() => {
+    fetch('/api/reviews/approved')
+      .then(r => r.json())
+      .then(d => setDbReviews(d.reviews || []))
+      .catch(() => {});
+  }, []);
+
+  // Map DB reviews to same shape as static reviews for display
+  const dynamicCards = dbReviews.map(r => ({
+    name: r.name,
+    flag: '⭐',
+    country: r.country,
+    rating: r.rating,
+    trip: r.trip,
+    date: new Date(r.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }),
+    platform: 'YlooTrips' as const,
+    avatar: '',
+    tripPhoto: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80',
+    text: r.text,
+    isUserSubmitted: true,
+  }));
+
+  const allReviews = [...dynamicCards, ...reviews];
+
   return (
     <section className="py-16 md:py-24 lg:py-32 bg-primary overflow-hidden">
       <div className="section-container">
@@ -250,7 +446,7 @@ export default function InternationalTestimonials() {
 
         {/* ── Reviews Grid ────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-          {reviews.map((r, i) => (
+          {allReviews.map((r, i) => (
             <article
               key={i}
               className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:bg-white/[0.08] hover:-translate-y-1 transition-all duration-300 flex flex-col"
@@ -305,6 +501,30 @@ export default function InternationalTestimonials() {
           ))}
         </div>
 
+        {/* ── Write a Review CTA ──────────────────────────────────────── */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row items-center gap-6">
+          <div className="flex-1 text-center sm:text-left">
+            <p className="text-accent text-xs font-bold uppercase tracking-widest mb-2">Traveled with us?</p>
+            <h3 className="font-display text-xl text-cream mb-2">Share your story with the world</h3>
+            <p className="text-cream/60 text-sm">
+              Your review helps thousands of travelers plan their perfect trip. Takes less than 2 minutes.
+            </p>
+            <div className="flex items-center gap-3 mt-3 justify-center sm:justify-start">
+              <div className="flex gap-0.5">
+                {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-[#FBBC05] text-[#FBBC05]" />)}
+              </div>
+              <span className="text-cream/50 text-xs">4.9 · 2,400+ verified reviews</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="shrink-0 flex items-center gap-2 bg-accent text-primary font-bold text-sm px-6 py-3.5 rounded-full hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20 whitespace-nowrap"
+          >
+            <PenLine size={16} />
+            Write a Review
+          </button>
+        </div>
+
         {/* ── CTA ─────────────────────────────────────────────────────── */}
         <div className="text-center border-t border-white/10 pt-12">
           <p className="text-cream/50 text-sm mb-4">Join 25,000+ travelers who chose YlooTrips</p>
@@ -320,6 +540,10 @@ export default function InternationalTestimonials() {
         </div>
 
       </div>
+
+      {/* Review Modal */}
+      {showModal && <ReviewModal onClose={() => setShowModal(false)} />}
+
     </section>
   );
 }

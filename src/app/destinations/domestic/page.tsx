@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -826,15 +827,27 @@ const countryReviews = [
   { flag: '🇨🇦', country: 'Canada', traveler: 'Marie-Claire D.', trip: 'Kerala & Goa', text: 'Three-week trip planned down to every detail. Guide spoke flawless English and French. India exceeded every expectation.', rating: 5 },
 ];
 
-export default function DomesticDestinationsPage() {
+function DomesticDestinationsContent() {
   const { visitor } = useVisitor();
   const isInternational = visitor === 'foreigner';
   const [activeRegion, setActiveRegion] = useState('All India');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+  const tagQuery = searchParams.get('q')?.toLowerCase().trim() ?? '';
 
-  const filtered = activeRegion === 'All India'
-    ? DOMESTIC_TRIPS
-    : DOMESTIC_TRIPS.filter((t) => t.region === activeRegion);
+  const filtered = useMemo(() => {
+    let trips = activeRegion === 'All India'
+      ? DOMESTIC_TRIPS
+      : DOMESTIC_TRIPS.filter((t) => t.region === activeRegion);
+    if (tagQuery) {
+      trips = trips.filter((t) =>
+        t.title.toLowerCase().includes(tagQuery) ||
+        t.location.toLowerCase().includes(tagQuery) ||
+        t.category.toLowerCase().includes(tagQuery)
+      );
+    }
+    return trips;
+  }, [activeRegion, tagQuery]);
 
   return (
     <>
@@ -1061,6 +1074,21 @@ export default function DomesticDestinationsPage() {
         </section>
       )}
 
+      {/* Active tag filter banner */}
+      {tagQuery && (
+        <div className="bg-amber-50 border-b border-amber-200 py-2.5">
+          <div className="section-container flex items-center justify-between gap-3">
+            <p className="text-sm text-amber-800 font-semibold">
+              🔍 Showing results for: <span className="capitalize">{tagQuery}</span>
+              <span className="ml-2 text-amber-600 font-normal">({filtered.length} trip{filtered.length !== 1 ? 's' : ''})</span>
+            </p>
+            <a href="/destinations/domestic" className="text-xs font-bold text-amber-700 border border-amber-300 px-3 py-1 rounded-full hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all">
+              Clear filter ✕
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* Region filter */}
       <section className="py-4 md:py-5 bg-cream-dark border-b border-primary/8 sticky top-16 z-30">
         <div className="section-container">
@@ -1157,5 +1185,13 @@ export default function DomesticDestinationsPage() {
         </div>
       </section>
     </>
+  );
+}
+
+export default function DomesticDestinationsPage() {
+  return (
+    <Suspense fallback={null}>
+      <DomesticDestinationsContent />
+    </Suspense>
   );
 }

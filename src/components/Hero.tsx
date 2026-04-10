@@ -53,13 +53,16 @@ const CITY_SUGGESTIONS = [
     'New York', 'London', 'Dubai', 'Singapore', 'Sydney', 'Toronto',
 ];
 
+// Only locations actually listed on ylootrips.com
 const POPULAR_DESTINATIONS = [
-    { label: 'Rajasthan', icon: '🏰', href: '/destinations?q=rajasthan' },
-    { label: 'Kerala', icon: '🌴', href: '/destinations?q=kerala' },
-    { label: 'Goa', icon: '🏖️', href: '/destinations?q=goa' },
-    { label: 'Himalayas', icon: '🏔️', href: '/destinations?q=himalayas' },
-    { label: 'Golden Triangle', icon: '✨', href: '/tours' },
-    { label: 'Varanasi', icon: '🪔', href: '/destinations?q=varanasi' },
+    { label: 'Manali',       icon: '🏔️', href: '/destinations/domestic?q=manali'       },
+    { label: 'Kedarnath',    icon: '⛪', href: '/destinations/domestic?q=kedarnath'    },
+    { label: 'Spiti',        icon: '🗻', href: '/destinations/domestic?q=spiti'        },
+    { label: 'Kasol',        icon: '🌿', href: '/destinations/domestic?q=kasol'        },
+    { label: 'Lakshadweep',  icon: '🏝️', href: '/destinations/domestic?q=lakshadweep' },
+    { label: 'Coorg',        icon: '☕', href: '/destinations/domestic?q=coorg'        },
+    { label: 'Bali',         icon: '🌴', href: '/destinations/international?q=bali'   },
+    { label: 'Dubai',        icon: '✈️', href: '/destinations/international?q=dubai'  },
 ];
 
 function fmt(n: number) { return new Intl.NumberFormat('en-IN').format(n); }

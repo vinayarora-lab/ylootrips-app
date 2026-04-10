@@ -62,19 +62,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.redirect(hotelSuccessUrl, { status: 303 });
     }
 
-    // Backend-proxied flight bookings arrive with EVT- prefix — look up in local store
+    // Backend-proxied bookings arrive with EVT- prefix — check both hotels and flights
     if (txnid.startsWith('EVT-')) {
+      // Check hotel bookings first
+      try {
+        const lookup = await fetch(`${baseUrl}/api/admin/hotel-bookings?evtRef=${txnid}`);
+        if (lookup.ok) {
+          const data = await lookup.json();
+          if (data.data) {
+            const hotelTxnid = (data.data as Record<string, string>).txnid || txnid;
+            await fetch(`${baseUrl}/api/admin/hotel-bookings`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ txnid: hotelTxnid, status: 'PAID' }),
+            }).catch(() => {});
+            const hotelSuccessUrl = new URL('/hotels/booking-success', baseUrl);
+            hotelSuccessUrl.searchParams.set('txnid', hotelTxnid);
+            hotelSuccessUrl.searchParams.set('status', status);
+            if (easepayid) hotelSuccessUrl.searchParams.set('easepayid', easepayid);
+            return NextResponse.redirect(hotelSuccessUrl, { status: 303 });
+          }
+        }
+      } catch { /* fall through to flight check */ }
+
+      // Check flight bookings
       try {
         const lookup = await fetch(`${baseUrl}/api/admin/flight-bookings?evtRef=${txnid}`);
         if (lookup.ok) {
           const data = await lookup.json();
           if (data.data) {
-            // This EVT booking is actually a flight — redirect to flight success page
             const flightTxnid = (data.data as Record<string, string>).txnid || txnid;
             const flightSuccessUrl = new URL('/flights/booking-success', baseUrl);
             flightSuccessUrl.searchParams.set('txnid', flightTxnid);
             flightSuccessUrl.searchParams.set('status', status);
-            // Mark booking as paid
             await fetch(`${baseUrl}/api/admin/flight-bookings`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },

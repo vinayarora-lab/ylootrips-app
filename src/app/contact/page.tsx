@@ -1,12 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowUpRight, Mail, Phone, MapPin, Clock, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import PageHero from '@/components/PageHero';
 import { api } from '@/lib/api';
 
+const PACKAGE_LABELS: Record<string, string> = {
+  'bali-honeymoon-package': 'Bali Honeymoon Package — 6 Nights (₹52,499/person)',
+  'dubai-tour-package-from-delhi': 'Dubai Tour Package from Delhi — 5 Nights (₹36,499/person)',
+  'thailand-budget-trip': 'Thailand Trip — Bangkok + Phuket 5 Nights (₹49,499/person)',
+  'singapore-tour-package': 'Singapore Tour Package — 4 Nights (₹32,999/person)',
+  'maldives-luxury-package': 'Maldives Luxury Package — 4 Nights (₹89,999/person)',
+  'kashmir-tour-package': 'Kashmir Tour Package — 5 Nights (₹18,999/person)',
+  'kerala-tour-package': 'Kerala Tour Package — 5 Nights (₹15,999/person)',
+  'goa-tour-package': 'Goa Tour Package — 4 Nights (₹9,999/person)',
+  'manali-tour-package': 'Manali Tour Package — 4 Nights (₹6,999/person)',
+};
+
 export default function ContactPage() {
+  const searchParams = useSearchParams();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,6 +31,43 @@ export default function ContactPage() {
     dates: '',
     message: '',
   });
+
+  // Pre-fill from ?package= or ?destination= query params
+  useEffect(() => {
+    const pkg = searchParams.get('package');
+    const dest = searchParams.get('destination');
+    const guests = searchParams.get('guests');
+    const date = searchParams.get('date');
+    const activity = searchParams.get('activity');
+    const city = searchParams.get('city');
+
+    if (pkg || dest || activity) {
+      const destinationValue = pkg
+        ? (PACKAGE_LABELS[pkg] || pkg.replace(/-/g, ' '))
+        : dest
+        ? dest.replace(/-/g, ' ')
+        : activity
+        ? `${activity.replace(/-/g, ' ')}${city ? ` — ${city}` : ''}`
+        : '';
+
+      const travelersValue = guests && parseInt(guests) > 0
+        ? (parseInt(guests) === 1 ? '1' : parseInt(guests) === 2 ? '2' : parseInt(guests) <= 4 ? '3-4' : '5+')
+        : '';
+
+      const messageValue = pkg
+        ? `Hi! I'd like to book the ${PACKAGE_LABELS[pkg] || pkg.replace(/-/g, ' ')}.${date ? ` Preferred travel date: ${date}.` : ''} Please share availability and payment details.`
+        : activity
+        ? `Hi! I'm interested in the "${activity.replace(/-/g, ' ')}" experience${city ? ` in ${city}` : ''}. Please share details and availability.`
+        : '';
+
+      setFormData((prev) => ({
+        ...prev,
+        destination: destinationValue,
+        travelers: travelersValue || prev.travelers,
+        message: messageValue,
+      }));
+    }
+  }, [searchParams]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -69,6 +121,19 @@ export default function ContactPage() {
         subtitle="Let our travel experts design a bespoke experience tailored to your dreams. Every great adventure starts with a conversation."
         breadcrumb="Contact"
       />
+
+      {/* Package selected banner */}
+      {searchParams.get('package') && (
+        <div className="bg-green-50 border-b border-green-200 px-4 py-3">
+          <div className="section-container flex items-center gap-3">
+            <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
+            <p className="text-sm text-green-800 font-medium">
+              Booking enquiry for: <span className="font-bold">{PACKAGE_LABELS[searchParams.get('package')!] || searchParams.get('package')}</span>
+              {searchParams.get('guests') && ` · ${searchParams.get('guests')} traveler${parseInt(searchParams.get('guests')!) > 1 ? 's' : ''}`}
+            </p>
+          </div>
+        </div>
+      )}
 
       <section className="py-10 md:py-16 lg:py-24 bg-cream">
         <div className="section-container">

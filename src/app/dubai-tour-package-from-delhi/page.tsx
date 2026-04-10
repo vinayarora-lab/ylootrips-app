@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import PackagePageLayout, { type PackageData } from '@/components/PackagePageLayout';
 
 export const metadata: Metadata = {
-  title: 'Dubai Tour Package from Delhi 2026 — 5 Nights Starting ₹35,999',
-  description: 'Book Dubai tour packages from Delhi starting ₹35,999. 5 nights / 6 days — Burj Khalifa, Desert Safari, Dubai Mall, Palm Jumeirah. Flights + hotel + visa assistance included.',
+  title: 'Dubai Tour Package from Delhi 2026 — 5 Nights Starting ₹36,499',
+  description: 'Book Dubai tour packages from Delhi starting ₹36,499. 5 nights / 6 days — Burj Khalifa, Desert Safari, Dubai Mall, Palm Jumeirah. Flights + hotel + visa assistance included.',
   keywords: 'Dubai tour package from Delhi, Dubai trip from India, Dubai package 2026, Delhi to Dubai holiday package, Dubai 5 nights 6 days, cheapest Dubai tour India',
   openGraph: {
-    title: 'Dubai Tour Package from Delhi 2026 — ₹35,999 Onwards',
+    title: 'Dubai Tour Package from Delhi 2026 — ₹36,499 Onwards',
     description: 'All-inclusive Dubai holiday from Delhi — flights, visa, hotel, Burj Khalifa, Desert Safari. Book with ₹5,000 advance.',
     url: 'https://www.ylootrips.com/dubai-tour-package-from-delhi',
     type: 'website',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Dubai Tour Package from Delhi — ₹35,999 Onwards | YlooTrips',
+    title: 'Dubai Tour Package from Delhi — ₹36,499 Onwards | YlooTrips',
     description: 'Flights + Hotel + Visa + Burj Khalifa + Desert Safari. Book now with ₹5,000 advance.',
     images: ['https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&q=80'],
   },
@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 const pkg: PackageData = {
   slug: 'dubai-tour-package-from-delhi',
   canonicalUrl: 'https://www.ylootrips.com/dubai-tour-package-from-delhi',
-  metaTitle: 'Dubai Tour Package from Delhi 2026 — 5 Nights Starting ₹35,999',
-  metaDescription: 'Book Dubai tour packages from Delhi starting ₹35,999. 5 nights 6 days — Burj Khalifa, Desert Safari, Dubai Mall, Palm Jumeirah. Flights included.',
+  metaTitle: 'Dubai Tour Package from Delhi 2026 — 5 Nights Starting ₹36,499',
+  metaDescription: 'Book Dubai tour packages from Delhi starting ₹36,499. 5 nights 6 days — Burj Khalifa, Desert Safari, Dubai Mall, Palm Jumeirah. Flights included.',
   keywords: 'Dubai tour package from Delhi',
   ogImage: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&q=80',
 
@@ -39,9 +39,9 @@ const pkg: PackageData = {
   difficulty: 'Easy (All Ages)',
   startLocation: 'Delhi (DEL) → Dubai (DXB)',
 
-  priceINR: 35999,
-  priceUSD: 432,
-  originalPriceINR: 44999,
+  priceINR: 36499,
+  priceUSD: 437,
+  originalPriceINR: 46999,
   depositPercent: 25,
 
   overview: [
@@ -119,7 +119,7 @@ const pkg: PackageData = {
   reviewCount: 847,
 
   faqs: [
-    { question: 'How much does a Dubai trip from Delhi actually cost in 2026?', answer: 'Our all-inclusive Dubai package from Delhi starts at ₹35,999 per person for 5 nights. This includes return flights, visa, 4-star hotel with breakfast, Burj Khalifa, desert safari, and airport transfers. Budget ₹5,000–₹10,000 extra per person for meals, shopping, and optional activities like Ski Dubai or dhow cruise.' },
+    { question: 'How much does a Dubai trip from Delhi actually cost in 2026?', answer: 'Our all-inclusive Dubai package from Delhi starts at ₹36,499 per person for 5 nights. This includes return flights, visa, 4-star hotel with breakfast, Burj Khalifa, desert safari, and airport transfers. Budget ₹5,000–₹10,000 extra per person for meals, shopping, and optional activities like Ski Dubai or dhow cruise.' },
     { question: 'Do I need a visa for Dubai from India?', answer: 'Indian passport holders can get a UAE Tourist Visa on arrival free of charge (valid for 30 days, extendable). Our package includes visa assistance at zero extra cost. Processing takes 1–3 business days. You need a valid Indian passport (6+ months validity), confirmed return tickets, and hotel booking — which we provide.' },
     { question: 'What is the best time to visit Dubai from India?', answer: 'October to April is the best time to visit Dubai — the weather is pleasant with temperatures between 18–28°C. May to September is extremely hot (40°C+) but hotels and flights are cheaper. Ramadan (dates vary) is a good time to visit for cultural experiences, though nightlife is limited.' },
     { question: 'Can I extend the Dubai package to 7 nights?', answer: 'Yes! We offer custom packages from 3 nights to 10 nights. Call or WhatsApp us at +91-84278-31127 to customise your Dubai itinerary — we can add Abu Dhabi day trip, Yas Island, Hatta mountain safari, or upgrade to a 5-star hotel.' },
@@ -133,7 +133,7 @@ const pkg: PackageData = {
     { title: 'Maldives Luxury Package — 4 Nights', href: '/maldives-luxury-package', priceINR: 89999, image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&q=80' },
   ],
 
-  whatsappMsg: "Hi! I'm interested in the Dubai Tour Package from Delhi (5 nights ₹35,999). Please share availability and details.",
+  whatsappMsg: "Hi! I'm interested in the Dubai Tour Package from Delhi (5 nights ₹36,499). Please share availability and details.",
   bookingHref: '/contact?package=dubai-tour-package-from-delhi',
 
   schemaHighlights: ['Burj Khalifa observation deck', 'Desert Safari with BBQ dinner', 'Dubai Mall and Aquarium', 'Palm Jumeirah monorail', 'Return flights from Delhi'],

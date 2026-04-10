@@ -2,18 +2,18 @@ import type { Metadata } from 'next';
 import PackagePageLayout, { type PackageData } from '@/components/PackagePageLayout';
 
 export const metadata: Metadata = {
-  title: 'Bali Honeymoon Package 2026 — 6 Nights Starting ₹42,999 | YlooTrips',
-  description: 'Romantic Bali honeymoon packages from India starting ₹42,999 for 2. 6 nights in Ubud + Seminyak — private villa, rice terraces, temple tours, sunset dinner. Flights included.',
+  title: 'Bali Honeymoon Package 2026 — 6 Nights Starting ₹52,499 | YlooTrips',
+  description: 'Romantic Bali honeymoon packages from India starting ₹52,499 for 2. 6 nights in Ubud + Seminyak — private villa, rice terraces, temple tours, sunset dinner. Flights included.',
   keywords: 'Bali honeymoon package, Bali tour package from India, Bali trip cost from India 2026, Bali romantic holiday, honeymoon packages under 1 lakh, Bali Indonesia tour',
   openGraph: {
-    title: 'Bali Honeymoon Package 2026 — ₹42,999 Per Person | YlooTrips',
+    title: 'Bali Honeymoon Package 2026 — ₹52,499 Per Person | YlooTrips',
     description: 'Romantic Bali honeymoon — private villa in Ubud, sunrise at Tegalalang, couples spa, sunset at Tanah Lot. Flights + visa free for Indians.',
     url: 'https://www.ylootrips.com/bali-honeymoon-package',
     images: [{ url: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1200&q=80', width: 1200, height: 630, alt: 'Bali honeymoon package rice terraces Ubud Indonesia' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Bali Honeymoon Package 2026 — ₹42,999 Per Person | YlooTrips',
+    title: 'Bali Honeymoon Package 2026 — ₹52,499 Per Person | YlooTrips',
     description: 'Private villa · Rice terraces · Couples spa · Tanah Lot sunset. Book your Bali honeymoon now.',
     images: ['https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1200&q=80'],
   },
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 const pkg: PackageData = {
   slug: 'bali-honeymoon-package',
   canonicalUrl: 'https://www.ylootrips.com/bali-honeymoon-package',
-  metaTitle: 'Bali Honeymoon Package 2026 — 6 Nights Starting ₹42,999',
-  metaDescription: 'Romantic Bali honeymoon packages from India starting ₹42,999 per person. 6 nights in Ubud & Seminyak — private villa, Tegalalang, Tanah Lot. Flights included.',
+  metaTitle: 'Bali Honeymoon Package 2026 — 6 Nights Starting ₹52,499',
+  metaDescription: 'Romantic Bali honeymoon packages from India starting ₹52,499 per person. 6 nights in Ubud & Seminyak — private villa, Tegalalang, Tanah Lot. Flights included.',
   keywords: 'Bali honeymoon package India',
   ogImage: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1200&q=80',
 
@@ -38,9 +38,9 @@ const pkg: PackageData = {
   difficulty: 'Easy (Couples)',
   startLocation: 'Delhi/Mumbai/Chennai → Bali (DPS)',
 
-  priceINR: 42999,
-  priceUSD: 516,
-  originalPriceINR: 55999,
+  priceINR: 52499,
+  priceUSD: 629,
+  originalPriceINR: 65999,
   depositPercent: 25,
 
   overview: [
@@ -120,7 +120,7 @@ const pkg: PackageData = {
   reviewCount: 623,
 
   faqs: [
-    { question: 'How much does a Bali honeymoon trip from India cost in 2026?', answer: 'Our Bali honeymoon package starts at ₹42,999 per person (₹85,998 for a couple) for 6 nights. This includes return flights, private pool villa, breakfast, all listed activities, and transfers. Budget ₹15,000–₹25,000 extra per couple for additional dining, shopping, and optional activities like Mount Batur trek or Nusa Penida.' },
+    { question: 'How much does a Bali honeymoon trip from India cost in 2026?', answer: 'Our Bali honeymoon package starts at ₹52,499 per person (₹85,998 for a couple) for 6 nights. This includes return flights, private pool villa, breakfast, all listed activities, and transfers. Budget ₹15,000–₹25,000 extra per couple for additional dining, shopping, and optional activities like Mount Batur trek or Nusa Penida.' },
     { question: 'Do Indians need a visa for Bali?', answer: 'No! Indian passport holders get a free Visa on Arrival in Bali (Indonesia) for 30 days. You just need a valid Indian passport with 6+ months validity, a return ticket, proof of hotel booking, and USD $50 equivalent in cash or card for the visa fee (which our package includes as an assistance service).' },
     { question: 'Which is the best time to visit Bali for a honeymoon?', answer: 'April to October is Bali\'s dry season — the best time to visit. July and August are the busiest months but also the most beautiful. November to March is the wet season with heavier afternoon showers but fewer tourists and lower prices. We recommend avoiding July–August if you prefer quieter experiences.' },
     { question: 'Is Ubud or Seminyak better for a Bali honeymoon?', answer: 'Both! Ubud is Bali\'s cultural heart — jungle, rice terraces, temples, and spiritual experiences. Seminyak is the chic beach side — sunset cocktails, luxury boutiques, infinity pools, and world-class dining. Our package gives you the best of both worlds with 3 nights in each.' },
@@ -134,7 +134,7 @@ const pkg: PackageData = {
     { title: 'Maldives Luxury Package — 4 Nights', href: '/maldives-luxury-package', priceINR: 89999, image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&q=80' },
   ],
 
-  whatsappMsg: "Hi! I'm interested in the Bali Honeymoon Package (6 nights ₹42,999/person). Please share availability.",
+  whatsappMsg: "Hi! I'm interested in the Bali Honeymoon Package (6 nights ₹52,499/person). Please share availability.",
   bookingHref: '/contact?package=bali-honeymoon-package',
   schemaHighlights: ['Tegalalang Rice Terrace sunrise', 'Private pool villa Ubud', 'Tanah Lot sunset dinner', 'Balinese couples spa', 'Uluwatu Kecak Fire Dance'],
 };

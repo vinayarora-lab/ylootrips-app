@@ -2,18 +2,18 @@ import type { Metadata } from 'next';
 import PackagePageLayout, { type PackageData } from '@/components/PackagePageLayout';
 
 export const metadata: Metadata = {
-  title: 'Thailand Budget Trip 2026 — 5 Nights from ₹28,999 | YlooTrips',
-  description: 'Cheapest Thailand tour packages from India starting ₹28,999. 5 nights Bangkok + Phuket — temples, street food, islands, nightlife. Flights + hotel + transfers included.',
+  title: 'Thailand Budget Trip 2026 — 5 Nights from ₹49,499 | YlooTrips',
+  description: 'Cheapest Thailand tour packages from India starting ₹49,499. 5 nights Bangkok + Phuket — temples, street food, islands, nightlife. Flights + hotel + transfers included.',
   keywords: 'Thailand budget trip from India, Thailand tour package cheap, Bangkok Phuket package, Thailand trip cost from India 2026, cheap Thailand holiday, Thailand 5 nights 6 days',
   openGraph: {
-    title: 'Thailand Budget Trip 2026 — ₹28,999 Per Person | YlooTrips',
+    title: 'Thailand Budget Trip 2026 — ₹49,499 Per Person | YlooTrips',
     description: 'Bangkok temples, Phi Phi islands, floating markets, street food, nightlife. All-inclusive Thailand on a budget from India.',
     url: 'https://www.ylootrips.com/thailand-budget-trip',
     images: [{ url: 'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=1200&q=80', width: 1200, height: 630, alt: 'Thailand Bangkok temple Wat Phra Kaew budget trip from India' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Thailand Budget Trip 2026 — ₹28,999 | YlooTrips',
+    title: 'Thailand Budget Trip 2026 — ₹49,499 | YlooTrips',
     description: 'Bangkok + Phuket on a budget. Temples, islands, street food, nightlife. Book with ₹5,000 advance.',
     images: ['https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=1200&q=80'],
   },
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 const pkg: PackageData = {
   slug: 'thailand-budget-trip',
   canonicalUrl: 'https://www.ylootrips.com/thailand-budget-trip',
-  metaTitle: 'Thailand Budget Trip 2026 — 5 Nights from ₹28,999',
-  metaDescription: 'Cheapest Thailand packages from India starting ₹28,999. 5 nights Bangkok + Phuket — temples, islands, street food. Flights + hotel included.',
+  metaTitle: 'Thailand Budget Trip 2026 — 5 Nights from ₹49,499',
+  metaDescription: 'Cheapest Thailand packages from India starting ₹49,499. 5 nights Bangkok + Phuket — temples, islands, street food. Flights + hotel included.',
   keywords: 'Thailand budget trip from India',
   ogImage: 'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=1200&q=80',
 
@@ -38,15 +38,15 @@ const pkg: PackageData = {
   difficulty: 'Easy (All Budgets)',
   startLocation: 'Delhi/Mumbai/Bangalore → Bangkok (BKK)',
 
-  priceINR: 28999,
-  priceUSD: 348,
-  originalPriceINR: 36999,
+  priceINR: 49499,
+  priceUSD: 593,
+  originalPriceINR: 61999,
   depositPercent: 25,
 
   overview: [
     'Thailand is hands-down the best value international destination from India — incredible food, stunning beaches, exotic temples, vibrant nightlife, and warm smiles everywhere you go, all at prices that leave you shocked at how little you spent. India to Bangkok is just 4 hours by air, making it ideal for long weekends and short breaks.',
     'Our budget Thailand trip splits your time between Bangkok (2 nights — temples, markets, street food, rooftop bars) and Phuket (3 nights — white sand beaches, island-hopping, snorkeling, Thai boxing shows). Both are connected by a quick 1-hour domestic flight included in your package price.',
-    'This is India\'s most booked international package for good reason: you get everything — flights, hotels, transfers, guided city tour, Phi Phi island day trip, Thai cooking class, night market dinner, and more — for under ₹30,000 per person. Thailand doesn\'t require a visa for Indians (30 days visa-free since 2024), and the baht is very favorable against the rupee.',
+    'This is India\'s most booked international package for good reason: you get everything — flights, hotels, transfers, guided city tour, Phi Phi island day trip, Thai cooking class, night market dinner, and more — for ₹49,499 per person. Thailand doesn\'t require a visa for Indians (30 days visa-free since 2024), and the baht is very favorable against the rupee.',
     'Whether you\'re planning your first international trip, a bachelor/bachelorette trip, a honeymoon on a budget, or a solo adventure — Thailand delivers every time. Our coordinator is on WhatsApp throughout your trip for instant support.',
   ],
 
@@ -117,7 +117,7 @@ const pkg: PackageData = {
   reviewCount: 1124,
 
   faqs: [
-    { question: 'What is the total cost of a Thailand trip from India in 2026?', answer: 'Our all-inclusive Thailand budget package starts at ₹28,999 per person (5 nights, Bangkok + Phuket). This includes return international flights, Bangkok–Phuket domestic flight, hotels, breakfast, and all listed activities. Budget ₹8,000–₹15,000 extra per person for meals, shopping, nightlife, and optional add-ons.' },
+    { question: 'What is the total cost of a Thailand trip from India in 2026?', answer: 'Our all-inclusive Thailand budget package starts at ₹49,499 per person (5 nights, Bangkok + Phuket). This includes return international flights, Bangkok–Phuket domestic flight, hotels, breakfast, and all listed activities. Budget ₹8,000–₹15,000 extra per person for meals, shopping, nightlife, and optional add-ons.' },
     { question: 'Do Indians need a visa for Thailand?', answer: 'No! Indians get a 30-day visa-free entry to Thailand since November 2024. You need a valid Indian passport (6+ months validity), a return ticket, and hotel booking proof. No advance application needed — you simply clear immigration on arrival.' },
     { question: 'Is Thailand budget-friendly for Indian travelers?', answer: 'Thailand is one of the most affordable international destinations for Indians. Meals cost ₹150–₹500, local transport ₹50–₹200, and accommodation ₹1,500–₹3,000/night. The exchange rate is approximately ₹2.4 per Thai Baht, making it very favorable for Indian tourists.' },
     { question: 'Which is better — Bangkok or Phuket for a first-time visitor?', answer: 'Both! Bangkok is the cultural and urban experience — temples, markets, street food, nightlife, and city energy. Phuket is the beach and island experience — crystal clear water, island hopping, snorkeling, and beach clubs. Our package gives you both in 6 days.' },
@@ -131,7 +131,7 @@ const pkg: PackageData = {
     { title: 'Maldives Luxury Package — 4 Nights', href: '/maldives-luxury-package', priceINR: 89999, image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&q=80' },
   ],
 
-  whatsappMsg: "Hi! I'm interested in the Thailand Budget Trip (5 nights ₹28,999). Please share availability and details.",
+  whatsappMsg: "Hi! I'm interested in the Thailand Budget Trip (5 nights ₹49,499). Please share availability and details.",
   bookingHref: '/contact?package=thailand-budget-trip',
   schemaHighlights: ['Phi Phi Islands speedboat trip', 'Grand Palace Bangkok', 'Damnoen Saduak floating market', 'Ethical elephant sanctuary', 'Bangla Road nightlife'],
 };

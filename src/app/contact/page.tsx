@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowUpRight, Mail, Phone, MapPin, Clock, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
@@ -19,7 +19,7 @@ const PACKAGE_LABELS: Record<string, string> = {
   'manali-tour-package': 'Manali Tour Package — 4 Nights (₹6,999/person)',
 };
 
-export default function ContactPage() {
+function ContactForm() {
   const searchParams = useSearchParams();
 
   const [formData, setFormData] = useState({
@@ -32,7 +32,11 @@ export default function ContactPage() {
     message: '',
   });
 
-  // Pre-fill from ?package= or ?destination= query params
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [statusMessage, setStatusMessage] = useState('');
+
+  // Pre-fill from ?package= / ?destination= / ?activity= query params
   useEffect(() => {
     const pkg = searchParams.get('package');
     const dest = searchParams.get('destination');
@@ -46,9 +50,7 @@ export default function ContactPage() {
         ? (PACKAGE_LABELS[pkg] || pkg.replace(/-/g, ' '))
         : dest
         ? dest.replace(/-/g, ' ')
-        : activity
-        ? `${activity.replace(/-/g, ' ')}${city ? ` — ${city}` : ''}`
-        : '';
+        : `${activity!.replace(/-/g, ' ')}${city ? ` — ${city}` : ''}`;
 
       const travelersValue = guests && parseInt(guests) > 0
         ? (parseInt(guests) === 1 ? '1' : parseInt(guests) === 2 ? '2' : parseInt(guests) <= 4 ? '3-4' : '5+')
@@ -69,10 +71,6 @@ export default function ContactPage() {
     }
   }, [searchParams]);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [statusMessage, setStatusMessage] = useState('');
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -91,17 +89,8 @@ export default function ContactPage() {
 
       if (response.data.success) {
         setSubmitStatus('success');
-        setStatusMessage(response.data.message || 'Thank you! We\'ll get back to you within 24 hours.');
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          destination: '',
-          travelers: '',
-          dates: '',
-          message: '',
-        });
+        setStatusMessage(response.data.message || "Thank you! We'll get back to you within 24 hours.");
+        setFormData({ name: '', email: '', phone: '', destination: '', travelers: '', dates: '', message: '' });
       } else {
         setSubmitStatus('error');
         setStatusMessage(response.data.error || 'Something went wrong. Please try again.');
@@ -114,22 +103,19 @@ export default function ContactPage() {
     }
   };
 
+  const pkg = searchParams.get('package');
+  const guests = searchParams.get('guests');
+
   return (
     <>
-      <PageHero
-        title="Plan Your Journey"
-        subtitle="Let our travel experts design a bespoke experience tailored to your dreams. Every great adventure starts with a conversation."
-        breadcrumb="Contact"
-      />
-
       {/* Package selected banner */}
-      {searchParams.get('package') && (
+      {pkg && (
         <div className="bg-green-50 border-b border-green-200 px-4 py-3">
           <div className="section-container flex items-center gap-3">
             <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
             <p className="text-sm text-green-800 font-medium">
-              Booking enquiry for: <span className="font-bold">{PACKAGE_LABELS[searchParams.get('package')!] || searchParams.get('package')}</span>
-              {searchParams.get('guests') && ` · ${searchParams.get('guests')} traveler${parseInt(searchParams.get('guests')!) > 1 ? 's' : ''}`}
+              Booking enquiry for: <span className="font-bold">{PACKAGE_LABELS[pkg] || pkg}</span>
+              {guests && ` · ${guests} traveler${parseInt(guests) > 1 ? 's' : ''}`}
             </p>
           </div>
         </div>
@@ -138,7 +124,7 @@ export default function ContactPage() {
       <section className="py-10 md:py-16 lg:py-24 bg-cream">
         <div className="section-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16">
-            {/* Contact Form */}
+            {/* Form */}
             <div>
               <h2 className="font-display text-display-lg text-primary mb-6 md:mb-8">
                 Tell us about your dream trip
@@ -147,25 +133,17 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">
-                      Your Name *
-                    </label>
+                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">Your Name *</label>
                     <input
-                      type="text"
-                      required
-                      value={formData.name}
+                      type="text" required value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-5 py-4 bg-cream-dark border border-primary/10 text-primary focus:outline-none focus:border-secondary transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">
-                      Email Address *
-                    </label>
+                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">Email Address *</label>
                     <input
-                      type="email"
-                      required
-                      value={formData.email}
+                      type="email" required value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-5 py-4 bg-cream-dark border border-primary/10 text-primary focus:outline-none focus:border-secondary transition-colors"
                     />
@@ -174,23 +152,17 @@ export default function ContactPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">
-                      Phone Number
-                    </label>
+                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">Phone Number</label>
                     <input
-                      type="tel"
-                      value={formData.phone}
+                      type="tel" value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full px-5 py-4 bg-cream-dark border border-primary/10 text-primary focus:outline-none focus:border-secondary transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">
-                      Dream Destination
-                    </label>
+                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">Dream Destination</label>
                     <input
-                      type="text"
-                      placeholder="e.g., Bali, Japan, Iceland"
+                      type="text" placeholder="e.g., Bali, Japan, Iceland"
                       value={formData.destination}
                       onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
                       className="w-full px-5 py-4 bg-cream-dark border border-primary/10 text-primary placeholder:text-primary/30 focus:outline-none focus:border-secondary transition-colors"
@@ -200,9 +172,7 @@ export default function ContactPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">
-                      Number of Travelers
-                    </label>
+                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">Number of Travelers</label>
                     <select
                       value={formData.travelers}
                       onChange={(e) => setFormData({ ...formData, travelers: e.target.value })}
@@ -216,12 +186,9 @@ export default function ContactPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">
-                      Preferred Dates
-                    </label>
+                    <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">Preferred Dates</label>
                     <input
-                      type="text"
-                      placeholder="e.g., March 2025, flexible"
+                      type="text" placeholder="e.g., March 2025, flexible"
                       value={formData.dates}
                       onChange={(e) => setFormData({ ...formData, dates: e.target.value })}
                       className="w-full px-5 py-4 bg-cream-dark border border-primary/10 text-primary placeholder:text-primary/30 focus:outline-none focus:border-secondary transition-colors"
@@ -230,26 +197,21 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">
-                    Tell us about your ideal trip
-                  </label>
+                  <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">Tell us about your ideal trip</label>
                   <textarea
-                    rows={5}
-                    value={formData.message}
+                    rows={5} value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="What kind of experiences are you looking for? Any specific interests, requirements, or dreams?"
                     className="w-full px-5 py-4 bg-cream-dark border border-primary/10 text-primary placeholder:text-primary/30 focus:outline-none focus:border-secondary transition-colors resize-none"
                   />
                 </div>
 
-                {/* Status Messages */}
                 {submitStatus === 'success' && (
                   <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 text-green-700">
                     <CheckCircle className="w-5 h-5 shrink-0" />
                     <p>{statusMessage}</p>
                   </div>
                 )}
-
                 {submitStatus === 'error' && (
                   <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-700">
                     <AlertCircle className="w-5 h-5 shrink-0" />
@@ -258,20 +220,13 @@ export default function ContactPage() {
                 )}
 
                 <button
-                  type="submit"
-                  disabled={isSubmitting}
+                  type="submit" disabled={isSubmitting}
                   className="btn-primary w-full md:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Sending...</span>
-                    </>
+                    <><Loader2 className="w-4 h-4 animate-spin" /><span>Sending...</span></>
                   ) : (
-                    <>
-                      <span>Send Inquiry</span>
-                      <Send className="w-4 h-4" />
-                    </>
+                    <><span>Send Inquiry</span><Send className="w-4 h-4" /></>
                   )}
                 </button>
               </form>
@@ -280,33 +235,27 @@ export default function ContactPage() {
             {/* Contact Info */}
             <div className="lg:pl-12">
               <div className="bg-primary text-cream p-6 md:p-10 lg:p-12 mb-6 md:mb-8">
-                <h3 className="font-display text-xl md:text-2xl mb-6 md:mb-8">
-                  Prefer to speak directly?
-                </h3>
+                <h3 className="font-display text-xl md:text-2xl mb-6 md:mb-8">Prefer to speak directly?</h3>
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
                     <Mail className="w-5 h-5 text-accent mt-1" />
                     <div>
                       <p className="text-caption uppercase tracking-widest text-cream/50 mb-1">Email</p>
-                      <a href="mailto:connectylootrips@gmail.com" className="text-lg hover:text-accent transition-colors">
-                      connectylootrips@gmail.com
-                      </a>
+                      <a href="mailto:connectylootrips@gmail.com" className="text-lg hover:text-accent transition-colors">connectylootrips@gmail.com</a>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
                     <Phone className="w-5 h-5 text-accent mt-1" />
                     <div>
                       <p className="text-caption uppercase tracking-widest text-cream/50 mb-1">Phone</p>
-                      <a href="tel:+91 8427831127" className="text-lg hover:text-accent transition-colors">
-                    +91 8427831127
-                      </a>
+                      <a href="tel:+918427831127" className="text-lg hover:text-accent transition-colors">+91 84278 31127</a>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
                     <Clock className="w-5 h-5 text-accent mt-1" />
                     <div>
                       <p className="text-caption uppercase tracking-widest text-cream/50 mb-1">Hours</p>
-                      <p className="text-lg">Mon - Sun: 9am - 6pm EST</p>
+                      <p className="text-lg">Mon – Sun: 9am – 9pm IST</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -320,28 +269,41 @@ export default function ContactPage() {
               </div>
 
               <div className="bg-cream-dark p-6 md:p-10 lg:p-12">
-                <h3 className="font-display text-xl md:text-2xl text-primary mb-4">
-                  What happens next?
-                </h3>
+                <h3 className="font-display text-xl md:text-2xl text-primary mb-4">What happens next?</h3>
                 <ul className="space-y-4 text-primary/70">
-                  <li className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-secondary text-cream text-sm flex items-center justify-center shrink-0">1</span>
-                    <span>We&apos;ll review your inquiry within 24 hours</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-secondary text-cream text-sm flex items-center justify-center shrink-0">2</span>
-                    <span>A travel expert will schedule a call to discuss your vision</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-secondary text-cream text-sm flex items-center justify-center shrink-0">3</span>
-                    <span>We&apos;ll craft a personalized itinerary just for you</span>
-                  </li>
+                  {[
+                    "We'll review your inquiry within 24 hours",
+                    'A travel expert will schedule a call to discuss your vision',
+                    "We'll craft a personalized itinerary just for you",
+                  ].map((step, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="w-6 h-6 rounded-full bg-secondary text-cream text-sm flex items-center justify-center shrink-0">{i + 1}</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
           </div>
         </div>
       </section>
+    </>
+  );
+}
+
+export default function ContactPage() {
+  return (
+    <>
+      <PageHero
+        title="Plan Your Journey"
+        subtitle="Let our travel experts design a bespoke experience tailored to your dreams. Every great adventure starts with a conversation."
+        breadcrumb="Contact"
+      />
+      <Suspense fallback={
+        <div className="py-24 text-center text-primary/40 text-sm">Loading...</div>
+      }>
+        <ContactForm />
+      </Suspense>
     </>
   );
 }

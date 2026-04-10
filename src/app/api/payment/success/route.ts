@@ -53,6 +53,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.redirect(flightSuccessUrl, { status: 303 });
     }
 
+    // Hotel bookings go to hotel booking success page
+    if (txnid.startsWith('HTL-')) {
+      const hotelSuccessUrl = new URL('/hotels/booking-success', baseUrl);
+      hotelSuccessUrl.searchParams.set('txnid', txnid);
+      hotelSuccessUrl.searchParams.set('status', status);
+      if (easepayid) hotelSuccessUrl.searchParams.set('easepayid', easepayid);
+      return NextResponse.redirect(hotelSuccessUrl, { status: 303 });
+    }
+
     // Backend-proxied flight bookings arrive with EVT- prefix — look up in local store
     if (txnid.startsWith('EVT-')) {
       try {

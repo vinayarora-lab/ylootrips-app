@@ -4,8 +4,8 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Search, Star, Wifi, Waves, Dumbbell, UtensilsCrossed, Car, MapPin,
-  Calendar, Users, BedDouble, ChevronDown, ChevronUp, ExternalLink,
-  Info, Loader2, AlertCircle,
+  Calendar, Users, BedDouble, ChevronDown, ChevronUp,
+  Info, Loader2, AlertCircle, X, CreditCard,
 } from 'lucide-react';
 import Image from 'next/image';
 import type { HotelResult } from '@/app/api/hotels/search/route';
@@ -49,136 +49,258 @@ function StarRating({ stars }: { stars: number }) {
   );
 }
 
-function HotelCard({ hotel, nights }: { hotel: HotelResult; nights: number }) {
+interface BookingModalProps {
+  hotel: HotelResult;
+  nights: number;
+  checkIn: string;
+  checkOut: string;
+  rooms: number;
+  adults: number;
+  onClose: () => void;
+}
+
+function BookingModal({ hotel, nights, checkIn, checkOut, rooms, adults, onClose }: BookingModalProps) {
+  const [guest, setGuest] = useState({ name: '', email: '', phone: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const fmt = (n: number) => n ? `₹${n.toLocaleString('en-IN')}` : 'Price on request';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/hotels/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hotel, guest, checkIn, checkOut, rooms, adults, nights }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.paymentUrl) {
+        setError(data.error || 'Failed to initiate payment. Please try again.');
+        setLoading(false);
+        return;
+      }
+      window.location.href = data.paymentUrl;
+    } catch {
+      setError('Something went wrong. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="bg-primary text-white p-5 flex items-start justify-between gap-3">
+          <div>
+            <h2 className="font-display text-xl leading-snug">{hotel.name}</h2>
+            <p className="text-white/70 text-xs mt-1">
+              {checkIn} → {checkOut} · {nights} night{nights > 1 ? 's' : ''} · {rooms} room{rooms > 1 ? 's' : ''} · {adults} guest{adults > 1 ? 's' : ''}
+            </p>
+          </div>
+          <button onClick={onClose} className="shrink-0 text-white/70 hover:text-white transition-colors mt-0.5">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Price summary */}
+        <div className="bg-cream-light px-5 py-3 flex items-center justify-between">
+          <span className="text-sm text-secondary">Total amount</span>
+          <span className="font-display text-2xl text-primary">{fmt(hotel.totalPrice)}</span>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <div>
+            <label className="block text-[11px] uppercase tracking-widest text-secondary mb-1.5">Full Name *</label>
+            <input
+              type="text" required value={guest.name}
+              onChange={(e) => setGuest({ ...guest, name: e.target.value })}
+              placeholder="As per ID proof"
+              className="w-full px-4 py-3 bg-cream-light border border-sand/60 rounded-xl text-primary text-sm placeholder:text-secondary/40 focus:outline-none focus:border-accent transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-[11px] uppercase tracking-widest text-secondary mb-1.5">Email Address *</label>
+            <input
+              type="email" required value={guest.email}
+              onChange={(e) => setGuest({ ...guest, email: e.target.value })}
+              placeholder="Confirmation will be sent here"
+              className="w-full px-4 py-3 bg-cream-light border border-sand/60 rounded-xl text-primary text-sm placeholder:text-secondary/40 focus:outline-none focus:border-accent transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-[11px] uppercase tracking-widest text-secondary mb-1.5">Phone Number *</label>
+            <input
+              type="tel" required value={guest.phone}
+              onChange={(e) => setGuest({ ...guest, phone: e.target.value })}
+              placeholder="+91 XXXXX XXXXX"
+              className="w-full px-4 py-3 bg-cream-light border border-sand/60 rounded-xl text-primary text-sm placeholder:text-secondary/40 focus:outline-none focus:border-accent transition-colors"
+            />
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+              <AlertCircle size={15} className="shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 bg-accent text-primary font-semibold py-3.5 rounded-xl hover:bg-accent/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <><Loader2 size={16} className="animate-spin" /><span>Redirecting to payment…</span></>
+            ) : (
+              <><CreditCard size={16} /><span>Pay {fmt(hotel.totalPrice)}</span></>
+            )}
+          </button>
+          <p className="text-center text-[11px] text-secondary">
+            Secure payment powered by Easebuzz · SSL encrypted
+          </p>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+interface HotelCardProps {
+  hotel: HotelResult;
+  nights: number;
+  checkIn: string;
+  checkOut: string;
+  rooms: number;
+  adults: number;
+}
+
+function HotelCard({ hotel, nights, checkIn, checkOut, rooms, adults }: HotelCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const fmt = (n: number) =>
     n ? `₹${n.toLocaleString('en-IN')}` : 'Price on request';
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-sand/50 shadow-sm hover:shadow-md transition-shadow">
-      {/* Image + badge row */}
-      <div className="relative h-48 overflow-hidden">
-        {hotel.thumbnail ? (
-          <Image
-            src={hotel.thumbnail}
-            alt={hotel.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            unoptimized // SerpAPI thumbnails are CDN links, skip Next optimisation
-          />
-        ) : (
-          <div className="h-full bg-sand/40 flex items-center justify-center">
-            <BedDouble size={40} className="text-secondary/30" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-
-        {/* Type badge */}
-        <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-primary text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
-          {hotel.type}
-        </span>
-
-        {/* Demo badge */}
-        {hotel.isDemo && (
-          <span className="absolute top-3 right-3 bg-amber-400/90 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full">
-            Sample prices
-          </span>
-        )}
-
-        {/* Stars */}
-        <div className="absolute bottom-3 left-3">
-          <StarRating stars={hotel.starClass} />
-        </div>
-      </div>
-
-      {/* Body */}
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <div>
-            <h3 className="font-display text-lg text-primary leading-snug">{hotel.name}</h3>
-            {hotel.overallRating > 0 && (
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="bg-green-600 text-white text-[11px] font-bold px-1.5 py-0.5 rounded">
-                  {hotel.overallRating.toFixed(1)}
-                </span>
-                <span className="text-xs text-secondary">
-                  {hotel.reviewCount > 0 && `${hotel.reviewCount.toLocaleString('en-IN')} reviews`}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Price */}
-          <div className="text-right shrink-0">
-            <p className="font-display text-xl text-primary">{fmt(hotel.pricePerNight)}</p>
-            <p className="text-[11px] text-secondary">per night</p>
-            {nights > 1 && (
-              <p className="text-xs text-secondary/70 mt-0.5">
-                {fmt(hotel.totalPrice)} total ({nights}N)
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Description */}
-        {hotel.description && (
-          <p className={`text-xs text-secondary leading-relaxed mb-3 ${expanded ? '' : 'line-clamp-2'}`}>
-            {hotel.description}
-          </p>
-        )}
-
-        {/* Amenities */}
-        {hotel.amenities.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {hotel.amenities.slice(0, expanded ? undefined : 4).map((a) => (
-              <AmenityPill key={a} label={a} />
-            ))}
-            {!expanded && hotel.amenities.length > 4 && (
-              <span className="text-[11px] text-accent font-medium self-center">
-                +{hotel.amenities.length - 4} more
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Check-in/out */}
-        <div className="flex gap-4 text-[11px] text-secondary/70 mb-4">
-          <span>Check-in: <strong className="text-primary">{hotel.checkIn}</strong></span>
-          <span>Check-out: <strong className="text-primary">{hotel.checkOut}</strong></span>
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-2">
-          {hotel.link ? (
-            <a
-              href={hotel.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 bg-accent text-primary text-sm font-semibold py-2.5 rounded-xl hover:bg-accent/90 transition-colors"
-            >
-              <ExternalLink size={14} />
-              View & Book
-            </a>
+    <>
+      {showModal && (
+        <BookingModal
+          hotel={hotel}
+          nights={nights}
+          checkIn={checkIn}
+          checkOut={checkOut}
+          rooms={rooms}
+          adults={adults}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+      <div className="bg-white rounded-2xl overflow-hidden border border-sand/50 shadow-sm hover:shadow-md transition-shadow">
+        {/* Image + badge row */}
+        <div className="relative h-48 overflow-hidden">
+          {hotel.thumbnail ? (
+            <Image
+              src={hotel.thumbnail}
+              alt={hotel.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              unoptimized
+            />
           ) : (
-            <a
-              href={`https://wa.me/919999999999?text=${encodeURIComponent(`Hi! I'd like to book ${hotel.name} through YlooTrips.`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 bg-accent text-primary text-sm font-semibold py-2.5 rounded-xl hover:bg-accent/90 transition-colors"
-            >
-              Book via WhatsApp
-            </a>
+            <div className="h-full bg-sand/40 flex items-center justify-center">
+              <BedDouble size={40} className="text-secondary/30" />
+            </div>
           )}
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            className="px-3 py-2.5 rounded-xl border border-sand/60 text-secondary hover:bg-cream-light transition-colors"
-          >
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+
+          <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-primary text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+            {hotel.type}
+          </span>
+
+          {hotel.isDemo && (
+            <span className="absolute top-3 right-3 bg-amber-400/90 text-primary text-[10px] font-bold px-2.5 py-1 rounded-full">
+              Sample prices
+            </span>
+          )}
+
+          <div className="absolute bottom-3 left-3">
+            <StarRating stars={hotel.starClass} />
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="p-4">
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <div>
+              <h3 className="font-display text-lg text-primary leading-snug">{hotel.name}</h3>
+              {hotel.overallRating > 0 && (
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="bg-green-600 text-white text-[11px] font-bold px-1.5 py-0.5 rounded">
+                    {hotel.overallRating.toFixed(1)}
+                  </span>
+                  <span className="text-xs text-secondary">
+                    {hotel.reviewCount > 0 && `${hotel.reviewCount.toLocaleString('en-IN')} reviews`}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="text-right shrink-0">
+              <p className="font-display text-xl text-primary">{fmt(hotel.pricePerNight)}</p>
+              <p className="text-[11px] text-secondary">per night</p>
+              {nights > 1 && (
+                <p className="text-xs text-secondary/70 mt-0.5">
+                  {fmt(hotel.totalPrice)} total ({nights}N)
+                </p>
+              )}
+            </div>
+          </div>
+
+          {hotel.description && (
+            <p className={`text-xs text-secondary leading-relaxed mb-3 ${expanded ? '' : 'line-clamp-2'}`}>
+              {hotel.description}
+            </p>
+          )}
+
+          {hotel.amenities.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {hotel.amenities.slice(0, expanded ? undefined : 4).map((a) => (
+                <AmenityPill key={a} label={a} />
+              ))}
+              {!expanded && hotel.amenities.length > 4 && (
+                <span className="text-[11px] text-accent font-medium self-center">
+                  +{hotel.amenities.length - 4} more
+                </span>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-4 text-[11px] text-secondary/70 mb-4">
+            <span>Check-in: <strong className="text-primary">{hotel.checkIn}</strong></span>
+            <span>Check-out: <strong className="text-primary">{hotel.checkOut}</strong></span>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowModal(true)}
+              disabled={!hotel.totalPrice}
+              className="flex-1 flex items-center justify-center gap-2 bg-accent text-primary text-sm font-semibold py-2.5 rounded-xl hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <CreditCard size={14} />
+              Book Now
+            </button>
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="px-3 py-2.5 rounded-xl border border-sand/60 text-secondary hover:bg-cream-light transition-colors"
+            >
+              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -433,7 +555,15 @@ export default function HotelSearch() {
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {sorted.map((hotel) => (
-                <HotelCard key={hotel.id} hotel={hotel} nights={nights} />
+                <HotelCard
+                  key={hotel.id}
+                  hotel={hotel}
+                  nights={nights}
+                  checkIn={checkIn}
+                  checkOut={checkOut}
+                  rooms={rooms}
+                  adults={adults}
+                />
               ))}
             </div>
 

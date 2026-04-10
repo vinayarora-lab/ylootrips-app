@@ -10,6 +10,7 @@ import DestinationCard from '@/components/DestinationCard';
 import InternationalTestimonials from '@/components/InternationalTestimonials';
 import TrustHub from '@/components/TrustHub';
 import PlanningHub from '@/components/PlanningHub';
+import ReelToTripTeaser from '@/components/ReelToTripTeaser';
 import HiddenSpots from '@/components/HiddenSpots';
 import TrendingPackages from '@/components/TrendingPackages';
 import LimitedOffersBanner from '@/components/LimitedOffersBanner';
@@ -686,6 +687,9 @@ export default function Home() {
 
       {/* Planning Hub — How it works + AI Planner + Holiday Planner */}
       <PlanningHub />
+
+      {/* Reel to Trip — compact teaser section */}
+      <ReelToTripTeaser />
 
       {/* International Testimonials — static, from real traveler countries */}
       <InternationalTestimonials />

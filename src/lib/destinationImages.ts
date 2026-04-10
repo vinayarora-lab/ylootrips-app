@@ -312,8 +312,6 @@ export const DEST_IMAGES: Record<string, string> = {
   'kedarkantha':         'https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?w=1200&q=85',
   // Brahmatal trek → frozen alpine lake ✓
   'brahmatal':           'https://images.unsplash.com/photo-1548933122-5fedf3661c57?w=1200&q=85',
-  // Lakshadweep → coral lagoon turquoise water ✓
-  'lakshadweep':         'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=1200&q=85',
 };
 
 const INDIA_FALLBACK = 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80';

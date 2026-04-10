@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, ArrowUpRight, Compass, Heart, Shield, Star, LucideIcon, Wallet, Gift, TrendingUp, Zap } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Compass, Heart, Shield, Star, LucideIcon, Wallet, Gift, TrendingUp, Zap, X, CreditCard, Loader2, CheckCircle, BadgePercent, ShieldCheck } from 'lucide-react';
 import Hero from '@/components/Hero';
 import MobileCategories from '@/components/MobileCategories';
 import DestinationCard from '@/components/DestinationCard';
@@ -65,6 +65,260 @@ const iconMap: Record<string, LucideIcon> = {
   star: Star,
 };
 
+// ── Home package type ─────────────────────────────────────────────────────────
+interface HomePkg {
+  label: string;
+  price: string;   // display string e.g. "₹9,999"
+  priceNum: number;
+  nights: string;
+  tag: string;
+  href: string;
+  urgency: string;
+}
+
+// ── Payment drawer for homepage strip ────────────────────────────────────────
+function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void }) {
+  const [tab, setTab] = useState<'pay' | 'callback'>('pay');
+  const [guests, setGuests] = useState('2');
+  const [form, setForm] = useState({ name: '', email: '', phone: '' });
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [cbName, setCbName] = useState('');
+  const [cbPhone, setCbPhone] = useState('');
+  const [cbSent, setCbSent] = useState(false);
+  const [cbSending, setCbSending] = useState(false);
+
+  const totalPrice = pkg.priceNum * Number(guests || 2);
+  const discountAmt = Math.round(totalPrice * 0.05);
+  const finalPrice = totalPrice - discountAmt;
+  const emi = Math.ceil(finalPrice / 3);
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPaying(true); setPayError('');
+    try {
+      const res = await fetch('/api/market/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name, email: form.email, phone: form.phone, guests,
+          packageTitle: `${pkg.label} ${pkg.nights} Package`,
+          destination: pkg.label,
+          sourceUrl: `https://ylootrips.com${pkg.href}`,
+          ourPrice: finalPrice, marketPrice: totalPrice, priceDiff: discountAmt,
+        }),
+      });
+      const data = await res.json();
+      if (data.paymentUrl) { window.location.href = data.paymentUrl; }
+      else { setPayError(data.error || 'Payment failed. Please try again.'); }
+    } catch { setPayError('Network error. Please try again.'); }
+    finally { setPaying(false); }
+  };
+
+  const handleCallback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCbSending(true);
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: cbName, email: 'not-provided@ylootrips.com', phone: cbPhone,
+          destination: pkg.label,
+          message: `Callback request for ${pkg.label} (${pkg.nights}, ${pkg.price}/person). Guests: ${guests}. Client wants EMI options.`,
+        }),
+      });
+    } catch { /* non-fatal */ }
+    setCbSent(true); setCbSending(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-amber-600 uppercase tracking-wide bg-amber-50 px-2 py-0.5 rounded-full">{pkg.tag}</span>
+              <span className="text-xs text-gray-400">{pkg.nights}</span>
+            </div>
+            <h3 className="font-bold text-gray-900 text-lg mt-0.5">{pkg.label} Package</h3>
+            <p className="text-xs text-red-500 font-medium mt-0.5">⚡ {pkg.urgency}</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 shrink-0 ml-3"><X size={18} /></button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-gray-100">
+          {(['pay', 'callback'] as const).map((t) => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-bold transition-colors ${tab === t ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-400 hover:text-gray-600'}`}>
+              {t === 'pay' ? <><CreditCard size={14} /> Book & Pay</> : <>📞 Free Callback</>}
+            </button>
+          ))}
+        </div>
+
+        <div className="overflow-y-auto flex-1">
+          {/* ── PAY TAB ── */}
+          {tab === 'pay' && (
+            <div className="p-5 space-y-4">
+              {/* Guests */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Number of Guests</label>
+                <div className="flex gap-2">
+                  {['1','2','3','4','5','6'].map(n => (
+                    <button key={n} onClick={() => setGuests(n)}
+                      className={`w-10 h-10 rounded-xl text-sm font-bold border transition-all ${guests === n ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}>{n}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price breakdown */}
+              <div className="bg-gray-50 rounded-2xl p-4 space-y-2.5">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">{pkg.price} × {guests} guest{Number(guests) > 1 ? 's' : ''}</span>
+                  <span className="text-gray-700 font-medium">₹{totalPrice.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between text-sm text-green-700">
+                  <span className="flex items-center gap-1"><BadgePercent size={13} /> Early bird 5% off</span>
+                  <span className="font-semibold">− ₹{discountAmt.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="border-t border-gray-200 pt-2.5 flex justify-between">
+                  <span className="font-bold text-gray-900">Total payable</span>
+                  <div className="text-right">
+                    <p className="font-display text-2xl text-gray-900">₹{finalPrice.toLocaleString('en-IN')}</p>
+                    <p className="text-[10px] text-gray-400">incl. all taxes</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* EMI highlight */}
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-3.5 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-blue-900">0% EMI available</p>
+                  <p className="text-xs text-blue-500 mt-0.5">3 / 6 / 12 month plans · No cost</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-2xl text-blue-800">₹{emi.toLocaleString('en-IN')}</p>
+                  <p className="text-[10px] text-blue-400">/month × 3</p>
+                </div>
+              </div>
+
+              {/* Trust row */}
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { icon: <ShieldCheck size={14} className="text-green-600" />, label: '100% Refund', sub: 'if unavailable' },
+                  { icon: <CreditCard size={14} className="text-blue-600" />, label: 'Easebuzz PG', sub: 'PCI-DSS secure' },
+                  { icon: <BadgePercent size={14} className="text-amber-600" />, label: '5% Discount', sub: 'early bird' },
+                ].map(({ icon, label, sub }) => (
+                  <div key={label} className="bg-gray-50 rounded-xl p-2.5 text-center">
+                    <div className="flex justify-center mb-1">{icon}</div>
+                    <p className="text-[11px] font-bold text-gray-800">{label}</p>
+                    <p className="text-[9px] text-gray-400">{sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Payment methods */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-[10px] text-gray-400 font-medium">Pay via:</p>
+                {['Visa', 'Mastercard', 'UPI', 'Net Banking', 'RuPay'].map(m => (
+                  <span key={m} className="text-[10px] border border-gray-200 text-gray-600 px-2 py-0.5 rounded-md font-medium">{m}</span>
+                ))}
+              </div>
+
+              {!showForm ? (
+                <button onClick={() => setShowForm(true)}
+                  className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-4 rounded-xl hover:bg-gray-800 transition-colors shadow-lg">
+                  <CreditCard size={16} /> Proceed to Pay ₹{finalPrice.toLocaleString('en-IN')}
+                </button>
+              ) : (
+                <form onSubmit={handlePay} className="space-y-2.5">
+                  <p className="text-xs font-semibold text-gray-700">Enter your details</p>
+                  <input required type="text" placeholder="Full name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+                    className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
+                  <input required type="email" placeholder="Email address" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                    className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
+                  <input required type="tel" placeholder="Phone number" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+                    className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
+                  {payError && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{payError}</p>}
+                  <div className="flex gap-2 pt-1">
+                    <button type="submit" disabled={paying}
+                      className="flex-1 flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-3.5 rounded-xl hover:bg-gray-800 disabled:opacity-60 transition-colors">
+                      {paying ? <Loader2 size={15} className="animate-spin" /> : <CreditCard size={15} />}
+                      {paying ? 'Redirecting to payment…' : `Pay ₹${finalPrice.toLocaleString('en-IN')} via Easebuzz`}
+                    </button>
+                    <button type="button" onClick={() => { setShowForm(false); setPayError(''); }}
+                      className="px-4 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50">Back</button>
+                  </div>
+                  <p className="text-[10px] text-gray-400 text-center">🔒 256-bit SSL · Secured by Easebuzz · No card details stored</p>
+                </form>
+              )}
+            </div>
+          )}
+
+          {/* ── CALLBACK TAB ── */}
+          {tab === 'callback' && (
+            <div className="p-5 bg-[#1a2535] min-h-full">
+              {cbSent ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
+                  <div className="w-14 h-14 rounded-full bg-amber-400/20 flex items-center justify-center">
+                    <CheckCircle className="w-7 h-7 text-amber-400" />
+                  </div>
+                  <p className="font-display text-xl text-white">All set! 🎉</p>
+                  <p className="text-white/60 text-sm max-w-xs">Our expert calls you within <span className="text-amber-400 font-bold">1 hour</span> with best {pkg.label} price + EMI plan.</p>
+                  <p className="text-white/30 text-[11px] mt-1">📱 Expect call from +91 84278 31127</p>
+                  <button onClick={onClose} className="mt-3 px-6 py-2.5 bg-amber-400 text-gray-900 font-bold rounded-xl text-sm">Done</button>
+                </div>
+              ) : (
+                <form onSubmit={handleCallback} className="space-y-4">
+                  <div className="flex items-start gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-full bg-amber-400/20 flex items-center justify-center shrink-0">
+                      <span className="text-xl">✈️</span>
+                    </div>
+                    <div>
+                      <p className="text-white font-bold text-sm">Yloo Concierge Callback</p>
+                      <p className="text-white/60 text-xs mt-0.5">Get best price for {pkg.label} + EMI options — no advance needed.</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[['📞','Free call'],['💳','EMI plans'],['🔒','No advance']].map(([icon,label]) => (
+                      <div key={label} className="bg-white/8 rounded-xl py-2 text-center">
+                        <p className="text-lg">{icon}</p>
+                        <p className="text-white/60 text-[10px] font-medium mt-0.5">{label}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3 space-y-1.5">
+                    {[`Custom dates & pricing for ${pkg.label}`, 'Group discount for 4+ pax', '0% EMI upto 12 months', 'Visa & travel insurance help'].map(item => (
+                      <p key={item} className="text-white/70 text-xs flex items-center gap-2">
+                        <span className="text-amber-400">✓</span> {item}
+                      </p>
+                    ))}
+                  </div>
+                  <input required type="text" placeholder="Your name" value={cbName} onChange={e => setCbName(e.target.value)}
+                    className="w-full px-3 py-3 bg-white/10 border border-white/15 rounded-xl text-sm text-white placeholder:text-white/40 outline-none focus:border-amber-400" />
+                  <input required type="tel" placeholder="Phone number (we'll call you)" value={cbPhone} onChange={e => setCbPhone(e.target.value)}
+                    className="w-full px-3 py-3 bg-white/10 border border-white/15 rounded-xl text-sm text-white placeholder:text-white/40 outline-none focus:border-amber-400" />
+                  <button type="submit" disabled={cbSending}
+                    className="w-full flex items-center justify-center gap-2 bg-amber-400 text-gray-900 font-bold text-sm py-3.5 rounded-xl hover:bg-amber-300 disabled:opacity-60 transition-colors">
+                    {cbSending ? <Loader2 size={14} className="animate-spin" /> : '📞'}
+                    {cbSending ? 'Booking callback…' : 'Get Free Callback + EMI Options'}
+                  </button>
+                  <p className="text-white/30 text-[10px] text-center">Mon–Sun 9am–10pm · Response within 1 hour</p>
+                </form>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const { visitor } = useVisitor();
   const { balance } = useWallet();
@@ -72,6 +326,7 @@ export default function Home() {
   const fp = (p: number) => formatPriceWithCurrency(p, currency);
   const [content, setContent] = useState<CmsContent | null>(null);
   const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [activePackage, setActivePackage] = useState<HomePkg | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -143,18 +398,18 @@ export default function Home() {
             <span className="text-gray-500 text-xs">Booked {Math.floor(Date.now() / 3600000) % 60 + 140}+ times</span>
           </div>
           <div className="flex gap-3 min-w-max pb-1">
-            {[
-              { label: 'Goa', price: '₹9,999', nights: '3N', tag: 'Best Seller', href: '/goa-tour-package', urgency: 'Only 4 slots left' },
-              { label: 'Manali', price: '₹12,999', nights: '4N', tag: 'Most Popular', href: '/manali-tour-package', urgency: 'Only 3 slots left' },
-              { label: 'Kashmir', price: '₹18,999', nights: '5N', tag: 'Trending', href: '/kashmir-tour-package', urgency: 'Only 5 slots left' },
-              { label: 'Dubai', price: '₹35,999', nights: '5N', tag: 'International', href: '/dubai-tour-package-from-delhi', urgency: 'Only 2 slots left' },
-              { label: 'Bali', price: '₹42,999', nights: '6N', tag: 'Honeymoon', href: '/bali-honeymoon-package', urgency: 'Only 3 slots left' },
-              { label: 'Singapore', price: '₹32,999', nights: '4N', tag: 'New', href: '/singapore-tour-package', urgency: 'Only 4 slots left' },
-              { label: 'Thailand', price: '₹28,999', nights: '5N', tag: 'Budget', href: '/thailand-budget-trip', urgency: 'Only 6 slots left' },
-              { label: 'Maldives', price: '₹89,999', nights: '4N', tag: 'Luxury', href: '/maldives-luxury-package', urgency: 'Only 2 slots left' },
-            ].map((pkg) => (
-              <Link key={pkg.href} href={pkg.href}
-                className="group flex-shrink-0 bg-gray-900 border border-gray-800 hover:border-amber-500/50 rounded-xl px-4 py-3 transition-all hover:bg-gray-800 min-w-[140px]">
+            {([
+              { label: 'Goa', price: '₹9,999', priceNum: 9999, nights: '3N', tag: 'Best Seller', href: '/goa-tour-package', urgency: 'Only 4 slots left' },
+              { label: 'Manali', price: '₹12,999', priceNum: 12999, nights: '4N', tag: 'Most Popular', href: '/manali-tour-package', urgency: 'Only 3 slots left' },
+              { label: 'Kashmir', price: '₹18,999', priceNum: 18999, nights: '5N', tag: 'Trending', href: '/kashmir-tour-package', urgency: 'Only 5 slots left' },
+              { label: 'Dubai', price: '₹35,999', priceNum: 35999, nights: '5N', tag: 'International', href: '/dubai-tour-package-from-delhi', urgency: 'Only 2 slots left' },
+              { label: 'Bali', price: '₹42,999', priceNum: 42999, nights: '6N', tag: 'Honeymoon', href: '/bali-honeymoon-package', urgency: 'Only 3 slots left' },
+              { label: 'Singapore', price: '₹32,999', priceNum: 32999, nights: '4N', tag: 'New', href: '/singapore-tour-package', urgency: 'Only 4 slots left' },
+              { label: 'Thailand', price: '₹28,999', priceNum: 28999, nights: '5N', tag: 'Budget', href: '/thailand-budget-trip', urgency: 'Only 6 slots left' },
+              { label: 'Maldives', price: '₹89,999', priceNum: 89999, nights: '4N', tag: 'Luxury', href: '/maldives-luxury-package', urgency: 'Only 2 slots left' },
+            ] as HomePkg[]).map((pkg) => (
+              <button key={pkg.href} onClick={() => setActivePackage(pkg)}
+                className="group flex-shrink-0 bg-gray-900 border border-gray-800 hover:border-amber-500/50 rounded-xl px-4 py-3 transition-all hover:bg-gray-800 min-w-[140px] text-left">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-amber-400 text-[10px] font-bold uppercase tracking-wide">{pkg.tag}</span>
                   <span className="text-[9px] text-gray-500">{pkg.nights}</span>
@@ -165,7 +420,7 @@ export default function Home() {
                 <div className="mt-2 bg-amber-500 group-hover:bg-amber-400 text-black text-[10px] font-bold uppercase tracking-widest text-center rounded-lg py-1.5 transition-colors">
                   Book Now
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
         </div>
@@ -465,6 +720,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Home package booking drawer */}
+      {activePackage && <HomeBookingDrawer pkg={activePackage} onClose={() => setActivePackage(null)} />}
     </>
   );
 }

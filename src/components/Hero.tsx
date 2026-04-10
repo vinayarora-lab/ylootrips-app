@@ -155,8 +155,15 @@ export default function Hero({ content, stats }: HeroProps) {
     };
 
     const handleTourSearch = () => {
-        const q = toCity || fromCity;
-        router.push(`/tours${q ? `?q=${encodeURIComponent(q)}` : ''}`);
+        const to = toCity.trim();
+        const from = fromCity.trim();
+        if (!to && !from) return;
+        const params = new URLSearchParams();
+        if (to) params.set('to', to);
+        if (from) params.set('from', from);
+        if (guests) params.set('guests', String(guests));
+        if (checkIn) params.set('date', checkIn);
+        router.push(`/search?${params.toString()}`);
     };
 
     const handleHotelSearch = () => {

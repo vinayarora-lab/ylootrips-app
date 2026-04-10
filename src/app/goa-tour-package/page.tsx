@@ -202,8 +202,8 @@ const pkg: PackageData = {
 
   related: [
     { title: 'Kerala Tour Package — 5 Nights', href: '/kerala-tour-package', priceINR: 15999, image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=600&q=80' },
-    { title: 'Manali Tour Package — 4 Nights', href: '/manali-tour-package', priceINR: 12999, image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600&q=80' },
-    { title: 'Bali Honeymoon Package — 6 Nights', href: '/bali-honeymoon-package', priceINR: 42999, image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=80' },
+    { title: 'Manali Tour Package — 4 Nights', href: '/manali-tour-package', priceINR: 6999, image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600&q=80' },
+    { title: 'Bali Honeymoon Package — 6 Nights', href: '/bali-honeymoon-package', priceINR: 52499, image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=80' },
   ],
 
   whatsappMsg: "Hi! I'm interested in the Goa Tour Package (3 nights ₹9,999). Please share availability and details.",

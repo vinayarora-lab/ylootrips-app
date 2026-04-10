@@ -120,7 +120,7 @@ const pkg: PackageData = {
   reviewCount: 623,
 
   faqs: [
-    { question: 'How much does a Bali honeymoon trip from India cost in 2026?', answer: 'Our Bali honeymoon package starts at ₹52,499 per person (₹85,998 for a couple) for 6 nights. This includes return flights, private pool villa, breakfast, all listed activities, and transfers. Budget ₹15,000–₹25,000 extra per couple for additional dining, shopping, and optional activities like Mount Batur trek or Nusa Penida.' },
+    { question: 'How much does a Bali honeymoon trip from India cost in 2026?', answer: 'Our Bali honeymoon package starts at ₹52,499 per person (₹1,04,998 for a couple) for 6 nights. This includes return flights, private pool villa, breakfast, all listed activities, and transfers. Budget ₹15,000–₹25,000 extra per couple for additional dining, shopping, and optional activities like Mount Batur trek or Nusa Penida.' },
     { question: 'Do Indians need a visa for Bali?', answer: 'No! Indian passport holders get a free Visa on Arrival in Bali (Indonesia) for 30 days. You just need a valid Indian passport with 6+ months validity, a return ticket, proof of hotel booking, and USD $50 equivalent in cash or card for the visa fee (which our package includes as an assistance service).' },
     { question: 'Which is the best time to visit Bali for a honeymoon?', answer: 'April to October is Bali\'s dry season — the best time to visit. July and August are the busiest months but also the most beautiful. November to March is the wet season with heavier afternoon showers but fewer tourists and lower prices. We recommend avoiding July–August if you prefer quieter experiences.' },
     { question: 'Is Ubud or Seminyak better for a Bali honeymoon?', answer: 'Both! Ubud is Bali\'s cultural heart — jungle, rice terraces, temples, and spiritual experiences. Seminyak is the chic beach side — sunset cocktails, luxury boutiques, infinity pools, and world-class dining. Our package gives you the best of both worlds with 3 nights in each.' },
@@ -129,8 +129,8 @@ const pkg: PackageData = {
   ],
 
   related: [
-    { title: 'Dubai Tour Package from Delhi — 5 Nights', href: '/dubai-tour-package-from-delhi', priceINR: 35999, image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=80' },
-    { title: 'Thailand Budget Trip — 5 Nights', href: '/thailand-budget-trip', priceINR: 28999, image: 'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=600&q=80' },
+    { title: 'Dubai Tour Package from Delhi — 5 Nights', href: '/dubai-tour-package-from-delhi', priceINR: 36499, image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=80' },
+    { title: 'Thailand Budget Trip — 5 Nights', href: '/thailand-budget-trip', priceINR: 49499, image: 'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=600&q=80' },
     { title: 'Maldives Luxury Package — 4 Nights', href: '/maldives-luxury-package', priceINR: 89999, image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&q=80' },
   ],
 

@@ -211,8 +211,8 @@ const pkg: PackageData = {
 
   related: [
     { title: 'Kashmir Tour Package — 5 Nights', href: '/kashmir-tour-package', priceINR: 18999, image: 'https://images.unsplash.com/photo-1566837945700-30057527ade0?w=600&q=80' },
-    { title: 'Dubai Tour Package from Delhi — 5 Nights', href: '/dubai-tour-package-from-delhi', priceINR: 35999, image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=80' },
-    { title: 'Thailand Budget Trip — 5 Nights', href: '/thailand-budget-trip', priceINR: 28999, image: 'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=600&q=80' },
+    { title: 'Dubai Tour Package from Delhi — 5 Nights', href: '/dubai-tour-package-from-delhi', priceINR: 36499, image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=80' },
+    { title: 'Thailand Budget Trip — 5 Nights', href: '/thailand-budget-trip', priceINR: 49499, image: 'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=600&q=80' },
   ],
 
   whatsappMsg: "Hi! I'm interested in the Manali Tour Package (4 nights ₹12,999). Please share availability and details.",

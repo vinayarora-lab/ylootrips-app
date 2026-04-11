@@ -252,7 +252,14 @@ export default function AdminBookingsPage() {
         exportToExcel(rows, `YlooTrips_Flight_Bookings_${new Date().toISOString().slice(0,10)}.xls`);
     };
 
-    // PG Dashboard: group trip bookings by customer, show PG collected vs sale
+    // PG Dashboard: only confirmed/paid bookings
+    const CONFIRMED_STATUSES = ['CONFIRMED', 'COMPLETED', 'PAID', 'SUCCESS', 'CAPTURED', 'TICKET_SENT'];
+    const confirmedTripBookings = tripBookings.filter((b: Record<string, unknown>) => {
+        const status = String(b.status || '').toUpperCase();
+        const payStatus = String(b.paymentStatus || b.payment_status || '').toUpperCase();
+        return CONFIRMED_STATUSES.includes(status) || CONFIRMED_STATUSES.includes(payStatus);
+    });
+
     interface PGRow {
         customerName: string;
         customerEmail: string;
@@ -263,7 +270,7 @@ export default function AdminBookingsPage() {
         gap: number;
     }
     const pgRows: PGRow[] = Object.values(
-        tripBookings.reduce((acc: Record<string, PGRow>, b: Record<string, unknown>) => {
+        confirmedTripBookings.reduce((acc: Record<string, PGRow>, b: Record<string, unknown>) => {
             const key = String(b.customerEmail || b.customerPhone || b.customerName || 'unknown');
             if (!acc[key]) acc[key] = {
                 customerName: String(b.customerName || ''),
@@ -275,7 +282,6 @@ export default function AdminBookingsPage() {
                 gap: 0,
             };
             acc[key].bookings.push(b);
-            // finalAmount = PG collected (what customer paid), totalAmount = sale amount
             const pgCollected = Number(b.finalAmount || b.totalAmount || 0);
             const saleAmount = Number(b.totalAmount || b.finalAmount || 0);
             acc[key].totalPGCollected += pgCollected;
@@ -292,7 +298,7 @@ export default function AdminBookingsPage() {
         { id: 'flights' as BookingTab, label: 'Flight Bookings', count: flightBookings.length, icon: Plane },
         { id: 'trips' as BookingTab, label: 'Trip Bookings', count: tripBookings.length, icon: Luggage },
         { id: 'events' as BookingTab, label: 'Event Bookings', count: eventBookings.length, icon: Calendar },
-        { id: 'pg-dashboard' as BookingTab, label: 'PG vs Sale', count: pgRows.length, icon: BarChart3 },
+        { id: 'pg-dashboard' as BookingTab, label: 'PG vs Sale', count: confirmedTripBookings.length, icon: BarChart3 },
     ];
 
     return (
@@ -664,7 +670,7 @@ export default function AdminBookingsPage() {
                                     <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                                         <p className="text-xs text-gray-500 font-medium mb-1">Total Sale Amount</p>
                                         <p className="text-2xl font-bold text-gray-900">₹{fmt(totalSale)}</p>
-                                        <p className="text-xs text-gray-400 mt-1">Booking value across all trips</p>
+                                        <p className="text-xs text-gray-400 mt-1">Confirmed bookings only · {confirmedTripBookings.length} bookings</p>
                                     </div>
                                     <div className="bg-white rounded-xl border border-green-200 p-5 shadow-sm">
                                         <p className="text-xs text-gray-500 font-medium mb-1">PG Collected (Easebuzz)</p>

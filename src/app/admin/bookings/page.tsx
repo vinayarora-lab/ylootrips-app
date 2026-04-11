@@ -433,16 +433,16 @@ export default function AdminBookingsPage() {
                                                     </p>
                                                     {/* Show all relevant IDs */}
                                                     <div className="flex gap-3 mt-1 flex-wrap">
-                                                        {b.bookingReference && <span className="text-[10px] font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">Ref: {String(b.bookingReference)}</span>}
-                                                        {b.txnid && <span className="text-[10px] font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">TxnID: {String(b.txnid)}</span>}
-                                                        {b.easepayid && <span className="text-[10px] font-mono bg-green-100 px-1.5 py-0.5 rounded text-green-700">PG: {String(b.easepayid)}</span>}
-                                                        {b.id && <span className="text-[10px] font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-400">ID: {String(b.id)}</span>}
+                                                        {!!b.bookingReference && <span className="text-[10px] font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">Ref: {String(b.bookingReference)}</span>}
+                                                        {!!b.txnid && <span className="text-[10px] font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">TxnID: {String(b.txnid)}</span>}
+                                                        {!!b.easepayid && <span className="text-[10px] font-mono bg-green-100 px-1.5 py-0.5 rounded text-green-700">PG: {String(b.easepayid)}</span>}
+                                                        {!!b.id && <span className="text-[10px] font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-400">ID: {String(b.id)}</span>}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-3 shrink-0">
                                                     <div className="text-right">
                                                         <p className="font-bold text-gray-900 text-lg">₹{fmt(Number(b.finalAmount || b.totalAmount || b.amount || 0))}</p>
-                                                        {b.totalAmount && b.finalAmount && Number(b.totalAmount) !== Number(b.finalAmount) && (
+                                                        {!!(b.totalAmount && b.finalAmount && Number(b.totalAmount) !== Number(b.finalAmount)) && (
                                                             <p className="text-xs text-gray-400 line-through">₹{fmt(Number(b.totalAmount))}</p>
                                                         )}
                                                         <p className="text-[10px] text-gray-400">{b.createdAt ? fmtDate(String(b.createdAt)) : ''}</p>

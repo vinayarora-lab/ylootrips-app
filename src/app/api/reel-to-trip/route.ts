@@ -53,6 +53,23 @@ export async function POST(req: NextRequest) {
   }
 
   if (!process.env.GROQ_API_KEY) {
+    // Proxy to the configured deployment that has the API key
+    try {
+      const proxy = await fetch('https://trip-frontend-ecru.vercel.app/api/reel-to-trip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description }),
+      });
+      if (proxy.ok && proxy.body) {
+        return new Response(proxy.body, {
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Transfer-Encoding': 'chunked',
+            'Cache-Control': 'no-cache',
+          },
+        });
+      }
+    } catch { /* fall through */ }
     return new Response(JSON.stringify({ error: 'API not configured' }), { status: 500 });
   }
 

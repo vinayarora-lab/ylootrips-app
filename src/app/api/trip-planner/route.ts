@@ -155,7 +155,24 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // All providers failed
+  // All local providers failed — proxy to the configured deployment as fallback
+  try {
+    const proxy = await fetch('https://trip-frontend-ecru.vercel.app/api/trip-planner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    });
+    if (proxy.ok) {
+      const data = await proxy.json();
+      if (data.itinerary) {
+        console.log('[trip-planner] Served via proxy fallback');
+        return NextResponse.json(data);
+      }
+    }
+  } catch (proxyErr) {
+    console.error('[trip-planner] Proxy fallback failed:', proxyErr);
+  }
+
   console.error('[trip-planner] All providers failed:', lastErr);
   return NextResponse.json({ error: 'All AI providers busy. Please try again in a moment.' }, { status: 503 });
 }

@@ -138,9 +138,12 @@ function CheckoutContent() {
             }
 
             if (paymentData.paymentUrl) {
-                // Apply wallet deduction and credit 10% cashback
-                if (walletDeduction > 0) deductBalance(walletDeduction, booking.bookingReference);
-                addCashback(totalPrice, booking.bookingReference, trip.title);
+                // Store pending wallet/cashback info — credited only after payment confirmed
+                sessionStorage.setItem(`ylootrips-pending-${booking.bookingReference}`, JSON.stringify({
+                    walletDeduction,
+                    totalPrice,
+                    tripName: trip.title,
+                }));
                 window.location.href = paymentData.paymentUrl;
             } else {
                 throw new Error(paymentData.error || 'Failed to get payment URL from Easebuzz. Please check your payment gateway configuration.');

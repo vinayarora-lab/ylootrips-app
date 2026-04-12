@@ -216,8 +216,12 @@ function TourCheckoutContent() {
         const paymentData = paymentResponse.data;
 
         if (paymentData?.paymentUrl) {
-          if (walletDeduction > 0) deductBalance(walletDeduction, booking.bookingReference);
-          addCashback(totalPrice, booking.bookingReference, tour.title);
+          // Store pending wallet/cashback info — credited only after payment confirmed
+          sessionStorage.setItem(`ylootrips-pending-${booking.bookingReference}`, JSON.stringify({
+              walletDeduction,
+              totalPrice,
+              tripName: tour.title,
+          }));
           window.location.href = paymentData.paymentUrl;
           return;
         }
@@ -237,8 +241,7 @@ function TourCheckoutContent() {
         preferredDates: formData.travelDate,
         message: `TOUR BOOKING REQUEST\nTour: ${tour.title}\nGuests: ${formData.numberOfGuests}\nDate: ${formData.travelDate || 'TBD'}\nPayment: ${resolvedPaymentMethod} (${paymentType})\nTotal: ${fp(totalPrice)}\n${walletDeduction > 0 ? `Wallet Applied: ${fp(walletDeduction)}\n` : ''}${formData.specialRequests ? 'Requests: ' + formData.specialRequests : ''}`,
       });
-      if (walletDeduction > 0) deductBalance(walletDeduction, 'inquiry-' + Date.now());
-      addCashback(totalPrice, 'inquiry-' + Date.now(), tour.title);
+      // No cashback for manual inquiry — credited only after confirmed online payment
       setDoneViaContact(true);
     } catch {
       setPaymentError('Could not process. Please WhatsApp us directly.');

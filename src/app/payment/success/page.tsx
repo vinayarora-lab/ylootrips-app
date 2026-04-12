@@ -6,12 +6,14 @@ import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatPriceWithCurrency } from '@/lib/utils';
 import { useCurrency } from '@/context/CurrencyContext';
+import { useWallet } from '@/context/WalletContext';
 import PaintSplashBg from '@/components/PaintSplashBg';
 
 function PaymentSuccessContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { currency } = useCurrency();
+    const { addCashback, deductBalance } = useWallet();
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
@@ -135,6 +137,22 @@ function PaymentSuccessContent() {
 
                 // Check payment status
                 if (bookingData.paymentStatus === 'PAID' || status === 'success') {
+                    // Credit cashback + deduct wallet — only once per booking reference
+                    const ref = bookingData.bookingReference || urlTxnid;
+                    const dedupKey = `ylootrips-cashback-done-${ref}`;
+                    if (ref && !localStorage.getItem(dedupKey)) {
+                        const pendingRaw = sessionStorage.getItem(`ylootrips-pending-${ref}`);
+                        if (pendingRaw) {
+                            try {
+                                const { walletDeduction, totalPrice, tripName } = JSON.parse(pendingRaw);
+                                if (walletDeduction > 0) deductBalance(walletDeduction, ref);
+                                addCashback(totalPrice, ref, tripName);
+                                sessionStorage.removeItem(`ylootrips-pending-${ref}`);
+                            } catch { /* malformed data, skip */ }
+                        }
+                        localStorage.setItem(dedupKey, '1');
+                    }
+
                     // Payment successful - send confirmation email
                     const customerEmail = bookingData.customerEmail || bookingData.email;
                     if (customerEmail) {

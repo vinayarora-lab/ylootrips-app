@@ -123,8 +123,12 @@ function EventCheckoutContent() {
             const paymentData = paymentRes.data;
             if (paymentData.success === false) throw new Error(paymentData.error || 'Failed to initiate payment');
             if (paymentData.paymentUrl) {
-                if (walletDeduction > 0) deductBalance(walletDeduction, ref);
-                addCashback(finalTotal, ref, event.title);
+                // Store pending wallet/cashback info — credited only after payment confirmed
+                sessionStorage.setItem(`ylootrips-pending-${ref}`, JSON.stringify({
+                    walletDeduction,
+                    totalPrice: finalTotal,
+                    tripName: event.title,
+                }));
                 window.location.href = paymentData.paymentUrl;
             } else {
                 throw new Error('No payment URL received');

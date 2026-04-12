@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Send, MapPin, Clock, Lightbulb, Star, ChevronDown, ChevronUp, Loader2, Sparkles, Calendar, Wallet, Package, CreditCard, ArrowUpRight } from 'lucide-react';
+import { Send, MapPin, Clock, Lightbulb, Star, ChevronDown, ChevronUp, Loader2, Sparkles, Calendar, Wallet, Package, CreditCard, ArrowUpRight, Instagram } from 'lucide-react';
 import type { MarketPackage } from '@/app/api/search/market-packages/route';
 
 // ── Destination → our package page mapping ────────────────────────────────────
@@ -846,7 +846,23 @@ export default function TripPlannerChat() {
   return (
     <div className="min-h-screen bg-cream-light">
       {/* Hero Header */}
-      <div className="bg-primary pt-16 pb-10 px-4 text-center">
+      <div className="bg-primary pt-16 pb-10 px-4 text-center relative overflow-hidden">
+        {/* Real Trips highlight — top right */}
+        <a
+          href="/reel-to-trip"
+          className="absolute top-20 right-3 sm:right-6 z-10 flex flex-col items-center gap-1.5 bg-gradient-to-br from-pink-500/90 via-purple-600/90 to-indigo-600/90 backdrop-blur border border-white/20 rounded-2xl px-3 py-3 shadow-xl shadow-purple-500/30 hover:scale-105 active:scale-95 transition-transform group max-w-[90px]"
+        >
+          <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+            <Instagram className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-white text-[10px] font-black text-center leading-tight">Real<br/>Trips ✨</span>
+          <span className="text-white/70 text-[9px] text-center leading-tight">Reel → Trip</span>
+          <div className="absolute -top-1.5 -right-1.5 flex items-center gap-0.5 bg-rose-500 rounded-full px-1.5 py-0.5">
+            <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
+            <span className="text-white text-[8px] font-black">NEW</span>
+          </div>
+        </a>
+
         <div className="inline-flex items-center gap-1.5 bg-accent/20 border border-accent/30 text-accent text-xs font-medium px-3 py-1.5 rounded-full mb-4">
           <Calendar className="w-3 h-3" />
           Holiday Planner · Yloo AI

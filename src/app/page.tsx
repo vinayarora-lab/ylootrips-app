@@ -61,12 +61,14 @@ const iconMap: Record<string, LucideIcon> = {
 // ── Home package type ─────────────────────────────────────────────────────────
 interface HomePkg {
   label: string;
-  price: string;   // display string e.g. "₹9,999"
+  price: string;
   priceNum: number;
   nights: string;
   tag: string;
   href: string;
   urgency: string;
+  emoji?: string;
+  tagColor?: string;
 }
 
 // ── Static details for each package ───────────────────────────────────────────
@@ -478,34 +480,50 @@ export default function Home() {
       <MobileCategories />
 
       {/* ── Hot Package Strip ── */}
-      <section className="bg-gray-950 py-6 overflow-x-auto">
+      <section className="bg-gray-950 py-5 overflow-x-hidden">
         <div className="section-container">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-amber-400 text-xs font-bold uppercase tracking-widest">🔥 Top Packages This Week</span>
-            <span className="text-gray-500 text-xs">Booked {Math.floor(Date.now() / 3600000) % 60 + 140}+ times</span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-400 text-[11px] font-black uppercase tracking-widest">🔥 Top Packages</span>
+              <span className="bg-amber-500/20 text-amber-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30">This Week</span>
+            </div>
+            <span className="text-gray-600 text-[10px] font-medium">{Math.floor(Date.now() / 3600000) % 60 + 140}+ booked</span>
           </div>
-          <div className="flex gap-3 min-w-max pb-1">
+          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {([
-              { label: 'Goa', price: '₹9,999', priceNum: 9999, nights: '3N', tag: 'Best Seller', href: '/goa-tour-package', urgency: 'Only 4 slots left' },
-              { label: 'Manali', price: '₹12,999', priceNum: 12999, nights: '4N', tag: 'Most Popular', href: '/manali-tour-package', urgency: 'Only 3 slots left' },
-              { label: 'Kashmir', price: '₹18,999', priceNum: 18999, nights: '5N', tag: 'Trending', href: '/kashmir-tour-package', urgency: 'Only 5 slots left' },
-              { label: 'Dubai', price: '₹35,999', priceNum: 35999, nights: '5N', tag: 'International', href: '/dubai-tour-package-from-delhi', urgency: 'Only 2 slots left' },
-              { label: 'Bali', price: '₹42,999', priceNum: 42999, nights: '6N', tag: 'Honeymoon', href: '/bali-honeymoon-package', urgency: 'Only 3 slots left' },
-              { label: 'Singapore', price: '₹32,999', priceNum: 32999, nights: '4N', tag: 'New', href: '/singapore-tour-package', urgency: 'Only 4 slots left' },
-              { label: 'Thailand', price: '₹28,999', priceNum: 28999, nights: '5N', tag: 'Budget', href: '/thailand-budget-trip', urgency: 'Only 6 slots left' },
-              { label: 'Maldives', price: '₹89,999', priceNum: 89999, nights: '4N', tag: 'Luxury', href: '/maldives-luxury-package', urgency: 'Only 2 slots left' },
+              { label: 'Goa', price: '₹9,999', priceNum: 9999, nights: '3N/4D', tag: 'Best Seller', href: '/goa-tour-package', urgency: '4 slots left', emoji: '🏖️', tagColor: 'from-orange-500 to-amber-500' },
+              { label: 'Manali', price: '₹12,999', priceNum: 12999, nights: '4N/5D', tag: 'Most Popular', href: '/manali-tour-package', urgency: '3 slots left', emoji: '🏔️', tagColor: 'from-blue-500 to-cyan-500' },
+              { label: 'Kashmir', price: '₹18,999', priceNum: 18999, nights: '5N/6D', tag: 'Trending', href: '/kashmir-tour-package', urgency: '5 slots left', emoji: '🌸', tagColor: 'from-rose-500 to-pink-500' },
+              { label: 'Dubai', price: '₹35,999', priceNum: 35999, nights: '5N/6D', tag: 'International', href: '/dubai-tour-package-from-delhi', urgency: '2 slots left', emoji: '🏙️', tagColor: 'from-amber-500 to-yellow-500' },
+              { label: 'Bali', price: '₹42,999', priceNum: 42999, nights: '6N/7D', tag: 'Honeymoon', href: '/bali-honeymoon-package', urgency: '3 slots left', emoji: '🌴', tagColor: 'from-green-500 to-emerald-500' },
+              { label: 'Singapore', price: '₹32,999', priceNum: 32999, nights: '4N/5D', tag: 'New', href: '/singapore-tour-package', urgency: '4 slots left', emoji: '🦁', tagColor: 'from-red-500 to-rose-500' },
+              { label: 'Thailand', price: '₹28,999', priceNum: 28999, nights: '5N/6D', tag: 'Budget', href: '/thailand-budget-trip', urgency: '6 slots left', emoji: '🐘', tagColor: 'from-purple-500 to-violet-500' },
+              { label: 'Maldives', price: '₹89,999', priceNum: 89999, nights: '4N/5D', tag: 'Luxury', href: '/maldives-luxury-package', urgency: '2 slots left', emoji: '🏝️', tagColor: 'from-sky-500 to-blue-500' },
             ] as HomePkg[]).map((pkg) => (
               <button key={pkg.href} onClick={() => setActivePackage(pkg)}
-                className="group flex-shrink-0 bg-gray-900 border border-gray-800 hover:border-amber-500/50 rounded-xl px-4 py-3 transition-all hover:bg-gray-800 min-w-[140px] text-left">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-amber-400 text-[10px] font-bold uppercase tracking-wide">{pkg.tag}</span>
-                  <span className="text-[9px] text-gray-500">{pkg.nights}</span>
+                className="group flex-shrink-0 relative bg-gray-900 border border-gray-800/80 hover:border-amber-500/40 rounded-2xl overflow-hidden transition-all duration-300 active:scale-95 text-left"
+                style={{ minWidth: '155px' }}>
+                {/* Emoji header */}
+                <div className="relative h-20 flex items-center justify-center overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${pkg.tagColor ?? 'from-amber-500 to-orange-500'} opacity-20`} />
+                  <span className="text-4xl">{pkg.emoji ?? '✈️'}</span>
+                  {/* Tag badge */}
+                  <span className={`absolute top-2 left-2 text-[9px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full bg-gradient-to-r ${pkg.tagColor ?? 'from-amber-500 to-orange-500'} text-white`}>
+                    {pkg.tag}
+                  </span>
+                  <span className="absolute top-2 right-2 text-[9px] text-gray-400 font-medium">{pkg.nights}</span>
                 </div>
-                <p className="text-white font-bold text-sm">{pkg.label}</p>
-                <p className="text-amber-300 font-black text-base mt-0.5">{pkg.price}</p>
-                <p className="text-red-400 text-[10px] mt-1 font-medium">{pkg.urgency}</p>
-                <div className="mt-2 bg-amber-500 group-hover:bg-amber-400 text-black text-[10px] font-bold uppercase tracking-widest text-center rounded-lg py-1.5 transition-colors">
-                  Book Now
+                {/* Content */}
+                <div className="px-3.5 pb-3.5">
+                  <p className="text-white font-bold text-base leading-tight">{pkg.label}</p>
+                  <p className="text-amber-400 font-black text-lg leading-tight mt-0.5">{pkg.price}</p>
+                  <p className="text-red-400/80 text-[10px] mt-1 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse inline-block" />
+                    {pkg.urgency}
+                  </p>
+                  <div className="mt-2.5 bg-gradient-to-r from-amber-500 to-orange-500 group-hover:from-amber-400 group-hover:to-orange-400 text-black text-[10px] font-black uppercase tracking-widest text-center rounded-xl py-2 transition-all shadow-md shadow-amber-500/20">
+                    Book Now →
+                  </div>
                 </div>
               </button>
             ))}

@@ -782,9 +782,6 @@ export default function Home() {
       {/* Hidden Gems section */}
       <HiddenSpots />
 
-      {/* Reel to Trip — compact teaser section */}
-      <ReelToTripTeaser />
-
       {/* International Testimonials — static, from real traveler countries */}
       <InternationalTestimonials />
 

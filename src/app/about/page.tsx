@@ -41,7 +41,7 @@ export default function AboutPage() {
         {/* Ambient glow */}
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-amber-500/10 rounded-full blur-3xl" />
 
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto pt-24 pb-16">
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto pt-40 pb-16">
           <div className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 rounded-full px-4 py-1.5 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
             <span className="text-amber-400 text-xs font-bold uppercase tracking-widest">Our Story</span>

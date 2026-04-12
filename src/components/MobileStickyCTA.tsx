@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Compass, Ticket, Sparkles, Wallet, Globe, Mountain, X } from 'lucide-react';
+import { Home, Compass, Ticket, Sparkles, Wallet, Globe, Mountain, X, Instagram } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useWallet } from '@/context/WalletContext';
 
@@ -32,7 +32,8 @@ export default function MobileStickyCTA() {
     const isHome = pathname === '/';
     const isDomestic = pathname?.startsWith('/destinations/domestic');
     const isInternational = pathname?.startsWith('/destinations/international');
-    const isTrips = isDomestic || isInternational;
+    const isReelTrip = pathname?.startsWith('/reel-to-trip');
+    const isTrips = isDomestic || isInternational || isReelTrip;
     const isPlannerActive = pathname?.startsWith('/trip-planner');
     const isWallet = pathname?.startsWith('/cashback');
     const isMyTrips = pathname?.startsWith('/my-booking');
@@ -60,40 +61,70 @@ export default function MobileStickyCTA() {
                         </button>
                     </div>
 
-                    {/* Options */}
+                    {/* 4-option grid */}
                     <div className="grid grid-cols-2 gap-3 p-4">
+                        {/* Domestic */}
                         <Link
                             href="/destinations/domestic"
                             onClick={() => setTripsOpen(false)}
-                            className="group flex flex-col items-center gap-3 py-5 px-3 rounded-2xl bg-gradient-to-b from-amber-50 to-orange-50 border border-amber-100/80 active:scale-95 transition-all duration-150"
+                            className="flex flex-col items-center gap-2.5 py-4 px-3 rounded-2xl bg-gradient-to-b from-amber-50 to-orange-50 border border-amber-100/80 active:scale-95 transition-all duration-150"
                         >
-                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-300/40">
-                                <Mountain size={24} className="text-white" />
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-300/40">
+                                <Mountain size={22} className="text-white" />
                             </div>
                             <div className="text-center">
                                 <div className="font-bold text-sm text-gray-900">Domestic</div>
-                                <div className="text-[11px] text-amber-600 font-semibold mt-0.5">150+ India trips</div>
+                                <div className="text-[10px] text-amber-600 font-semibold mt-0.5">150+ India trips</div>
                             </div>
-                            {isDomestic && (
-                                <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full border border-amber-200">● Active</span>
-                            )}
+                            {isDomestic && <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200">● Active</span>}
                         </Link>
 
+                        {/* International */}
                         <Link
                             href="/destinations/international"
                             onClick={() => setTripsOpen(false)}
-                            className="group flex flex-col items-center gap-3 py-5 px-3 rounded-2xl bg-gradient-to-b from-blue-50 to-indigo-50 border border-blue-100/80 active:scale-95 transition-all duration-150"
+                            className="flex flex-col items-center gap-2.5 py-4 px-3 rounded-2xl bg-gradient-to-b from-blue-50 to-indigo-50 border border-blue-100/80 active:scale-95 transition-all duration-150"
                         >
-                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-300/40">
-                                <Globe size={24} className="text-white" />
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-300/40">
+                                <Globe size={22} className="text-white" />
                             </div>
                             <div className="text-center">
                                 <div className="font-bold text-sm text-gray-900">International</div>
-                                <div className="text-[11px] text-blue-600 font-semibold mt-0.5">50+ countries</div>
+                                <div className="text-[10px] text-blue-600 font-semibold mt-0.5">50+ countries</div>
                             </div>
-                            {isInternational && (
-                                <span className="text-[9px] font-bold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full border border-blue-200">● Active</span>
-                            )}
+                            {isInternational && <span className="text-[9px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">● Active</span>}
+                        </Link>
+
+                        {/* Real Trips (Reel → Trip) */}
+                        <Link
+                            href="/reel-to-trip"
+                            onClick={() => setTripsOpen(false)}
+                            className="flex flex-col items-center gap-2.5 py-4 px-3 rounded-2xl bg-gradient-to-b from-pink-50 to-purple-50 border border-pink-100/80 active:scale-95 transition-all duration-150"
+                        >
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-pink-300/40">
+                                <Instagram size={22} className="text-white" />
+                            </div>
+                            <div className="text-center">
+                                <div className="font-bold text-sm text-gray-900">Real Trips</div>
+                                <div className="text-[10px] text-purple-600 font-semibold mt-0.5">Reel → Your trip ✨</div>
+                            </div>
+                            {isReelTrip && <span className="text-[9px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full border border-purple-200">● Active</span>}
+                        </Link>
+
+                        {/* Holiday Planner */}
+                        <Link
+                            href="/trip-planner"
+                            onClick={() => setTripsOpen(false)}
+                            className="flex flex-col items-center gap-2.5 py-4 px-3 rounded-2xl bg-gradient-to-b from-emerald-50 to-teal-50 border border-emerald-100/80 active:scale-95 transition-all duration-150"
+                        >
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-300/40">
+                                <Sparkles size={22} className="text-white" />
+                            </div>
+                            <div className="text-center">
+                                <div className="font-bold text-sm text-gray-900">Holiday Planner</div>
+                                <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">AI plans your trip</div>
+                            </div>
+                            {isPlannerActive && <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">● Active</span>}
                         </Link>
                     </div>
 

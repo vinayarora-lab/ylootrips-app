@@ -782,9 +782,6 @@ export default function Home() {
       {/* Hidden Gems section */}
       <HiddenSpots />
 
-      {/* Planning Hub — How it works + AI Planner + Holiday Planner */}
-      <PlanningHub />
-
       {/* Reel to Trip — compact teaser section */}
       <ReelToTripTeaser />
 

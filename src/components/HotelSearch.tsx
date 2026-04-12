@@ -90,7 +90,7 @@ function BookingModal({ hotel, nights, checkIn, checkOut, rooms, adults, onClose
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="bg-primary text-white p-5 flex items-start justify-between gap-3">

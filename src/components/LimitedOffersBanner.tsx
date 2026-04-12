@@ -140,9 +140,9 @@ function FlashSaleDrawer({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+      <div className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[calc(92vh-64px)] sm:max-h-[92vh] flex flex-col mb-16 sm:mb-0">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-[#1C1C1C] to-[#2d1f0e] border-b border-white/10">

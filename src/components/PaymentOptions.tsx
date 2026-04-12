@@ -27,6 +27,7 @@ interface PaymentPayload {
   amountNow: number;
   emiPlan?: EmiPlan;
   bank?: string;
+  paymentMethod?: string;
 }
 
 // Payment is processed via Easebuzz — see api.initiatePayment() in src/lib/api.ts
@@ -79,10 +80,19 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+const PAYMENT_METHODS = [
+  { id: 'upi',          label: 'UPI',          icon: '📱', sub: '5% instant discount', discount: 5 },
+  { id: 'credit_card',  label: 'Credit Card',  icon: '💳', sub: '3% off · Visa / MC / Amex', discount: 3 },
+  { id: 'debit_card',   label: 'Debit Card',   icon: '🏦', sub: 'All major banks', discount: 0 },
+  { id: 'net_banking',  label: 'Net Banking',  icon: '🏛️', sub: 'HDFC / ICICI / SBI / Axis', discount: 0 },
+  { id: 'wallet',       label: 'Wallets',      icon: '👛', sub: 'Paytm · PhonePe · GPay', discount: 0 },
+];
+
 export default function PaymentOptions({ tripPrice, tripTitle, onProceed }: PaymentOptionsProps) {
   const [tab, setTab] = useState<'full' | 'emi' | 'partial'>('full');
   const [selectedEmi, setSelectedEmi] = useState<EmiPlan | null>(null);
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<string>('upi');
   const [processing, setProcessing] = useState(false);
 
   const emiPlans = buildEmiPlans(tripPrice);
@@ -110,6 +120,7 @@ export default function PaymentOptions({ tripPrice, tripTitle, onProceed }: Paym
       amountNow,
       emiPlan: tab === 'emi' ? (selectedEmi ?? undefined) : undefined,
       bank:    tab === 'emi' ? (selectedBank ?? undefined) : undefined,
+      paymentMethod: tab === 'emi' ? 'credit_card' : selectedMethod,
     };
 
     console.log('[PaymentOptions] Selected:', payload);
@@ -178,24 +189,43 @@ export default function PaymentOptions({ tripPrice, tripTitle, onProceed }: Paym
         {/* PAY FULL */}
         {tab === 'full' && (
           <div className="space-y-3 pt-3">
-            <div className="flex items-center justify-between p-4 bg-cream rounded-xl border border-cream-dark">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                  <CreditCard className="w-5 h-5 text-cream" />
-                </div>
-                <div>
-                  <p className="font-semibold text-primary text-sm">Pay the full amount</p>
-                  <p className="text-secondary text-xs mt-0.5">UPI · Cards · Net Banking · Wallets</p>
-                </div>
-              </div>
-              <p className="font-display text-xl font-semibold text-primary">{fmt(tripPrice)}</p>
+            {/* Payment method selector */}
+            <p className="text-xs font-semibold text-secondary uppercase tracking-wider">Choose Payment Method</p>
+            <div className="space-y-2">
+              {PAYMENT_METHODS.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setSelectedMethod(m.id)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all text-left ${
+                    selectedMethod === m.id
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                      : 'border-cream-dark hover:border-secondary/40 bg-cream'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                      selectedMethod === m.id ? 'border-primary' : 'border-secondary/30'
+                    }`}>
+                      {selectedMethod === m.id && <div className="w-2 h-2 rounded-full bg-primary" />}
+                    </div>
+                    <span className="text-lg">{m.icon}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-primary">{m.label}</p>
+                      <p className="text-xs text-secondary mt-0.5">{m.sub}</p>
+                    </div>
+                  </div>
+                  {m.discount > 0 && (
+                    <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full shrink-0">
+                      {m.discount}% OFF
+                    </span>
+                  )}
+                </button>
+              ))}
             </div>
 
-            {/* Perks */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* Perks row */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
               {[
-                { icon: Percent, text: '5% off on UPI payment' },
-                { icon: Shield,  text: '3% off on credit card' },
                 { icon: CheckCircle, text: 'Instant confirmation' },
                 { icon: Wallet,  text: 'Earn 10% cashback' },
               ].map(({ icon: Icon, text }) => (
@@ -428,7 +458,7 @@ export default function PaymentOptions({ tripPrice, tripTitle, onProceed }: Paym
           )}
         </button>
         <p className="text-center text-[11px] text-secondary mt-2.5">
-          Powered by Razorpay · Your payment info is never stored on our servers
+          Powered by Easebuzz · UPI · Cards · EMI · Net Banking · Wallets
         </p>
       </div>
     </div>

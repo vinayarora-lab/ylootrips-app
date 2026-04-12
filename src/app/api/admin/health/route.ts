@@ -64,20 +64,38 @@ async function checkGroq(aiTest: { works: boolean; latencyMs: number; viaProxy: 
   }
   const t = Date.now();
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/models', {
-      headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
-      signal: AbortSignal.timeout(5000),
+    // Make a minimal chat completion to get rate-limit headers
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'llama3-8b-8192', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 }),
+      signal: AbortSignal.timeout(6000),
     });
     const latencyMs = Date.now() - t;
     if (res.status === 429) return { status: 'rate_limited', latencyMs, message: 'Daily limit reached — get a new key' };
     if (res.status === 401) return { status: 'error', latencyMs, message: 'Invalid key' };
     if (!res.ok) return { status: 'error', latencyMs, message: `Error ${res.status}` };
-    return {
-      status: 'ok', latencyMs,
-      planLabel: 'Free tier · Direct',
-      limitLabel: '14,400 req / day · 6,000 tokens / min',
-      usageLabel: 'Limit resets daily at midnight UTC',
-    };
+
+    // Read rate-limit headers
+    const limitReq = parseInt(res.headers.get('x-ratelimit-limit-requests') || '0');
+    const remainReq = parseInt(res.headers.get('x-ratelimit-remaining-requests') || '0');
+    const limitTok = res.headers.get('x-ratelimit-limit-tokens') || '';
+    const remainTok = res.headers.get('x-ratelimit-remaining-tokens') || '';
+    const resetReq = res.headers.get('x-ratelimit-reset-requests') || '';
+
+    let usageLabel = 'Limit resets daily at midnight UTC';
+    let usagePercent: number | undefined;
+    if (limitReq > 0) {
+      const used = limitReq - remainReq;
+      const pct = Math.max(0, Math.min(100, Math.round((used / limitReq) * 100)));
+      usageLabel = `${used.toLocaleString()} used · ${remainReq.toLocaleString()} remaining${resetReq ? ` · resets in ${resetReq}` : ''}`;
+      usagePercent = pct;
+    }
+    const limitLabel = limitReq > 0
+      ? `${limitReq.toLocaleString()} req/day · ${limitTok ? limitTok + ' tokens/min' : '6,000 tokens/min'}`
+      : `14,400 req/day · ${remainTok ? remainTok + ' tokens remaining' : '6,000 tokens/min'}`;
+
+    return { status: 'ok', latencyMs, planLabel: 'Free tier · Direct', limitLabel, usageLabel, usagePercent };
   } catch (e) {
     return { status: 'error', latencyMs: Date.now() - t, message: String(e) };
   }
@@ -96,38 +114,41 @@ async function checkOpenAI(aiTest: { works: boolean; latencyMs: number; viaProxy
   }
   const t = Date.now();
   try {
-    const res = await fetch('https://api.openai.com/v1/models', {
-      headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-      signal: AbortSignal.timeout(5000),
+    // Minimal chat completion to get rate-limit headers
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'user', content: 'hi' }], max_tokens: 1 }),
+      signal: AbortSignal.timeout(8000),
     });
     const latencyMs = Date.now() - t;
-    if (res.status === 429) return { status: 'rate_limited', latencyMs, message: 'Quota exceeded — add credits' };
+    if (res.status === 429) return { status: 'rate_limited', latencyMs, message: 'Quota exceeded — add credits or upgrade plan' };
     if (res.status === 401) return { status: 'error', latencyMs, message: 'Invalid key' };
     if (!res.ok) return { status: 'error', latencyMs, message: `Error ${res.status}` };
 
-    // Try to get billing/usage info
-    const now = new Date();
-    const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-    const endDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    // Read rate-limit headers
+    const limitReq = parseInt(res.headers.get('x-ratelimit-limit-requests') || '0');
+    const remainReq = parseInt(res.headers.get('x-ratelimit-remaining-requests') || '0');
+    const limitTok = parseInt(res.headers.get('x-ratelimit-limit-tokens') || '0');
+    const remainTok = parseInt(res.headers.get('x-ratelimit-remaining-tokens') || '0');
+    const resetReq = res.headers.get('x-ratelimit-reset-requests') || '';
 
     let usageLabel = 'Pay-as-you-go (charged per token)';
-    let planLabel = 'Paid account';
+    let usagePercent: number | undefined;
+    if (limitReq > 0) {
+      const used = limitReq - remainReq;
+      const pct = Math.max(0, Math.min(100, Math.round((used / limitReq) * 100)));
+      usageLabel = `${used.toLocaleString()} req used · ${remainReq.toLocaleString()} remaining${resetReq ? ` · resets in ${resetReq}` : ''}`;
+      usagePercent = pct;
+    } else if (remainTok > 0) {
+      usageLabel = `${remainTok.toLocaleString()} tokens remaining this minute`;
+    }
 
-    try {
-      const usageRes = await fetch(
-        `https://api.openai.com/v1/usage?date=${endDate}`,
-        { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` }, signal: AbortSignal.timeout(4000) }
-      );
-      if (usageRes.ok) {
-        const data = await usageRes.json();
-        const totalTokens = (data.data || []).reduce((s: number, d: Record<string, number>) => s + (d.n_context_tokens_total || 0) + (d.n_generated_tokens_total || 0), 0);
-        if (totalTokens > 0) {
-          usageLabel = `~${(totalTokens / 1000).toFixed(1)}K tokens used today`;
-        }
-      }
-    } catch { /* usage endpoint not critical */ }
+    const limitLabel = limitReq > 0
+      ? `${limitReq.toLocaleString()} req/min · ${limitTok > 0 ? limitTok.toLocaleString() + ' tokens/min' : 'gpt-4o-mini'}`
+      : 'gpt-4o-mini · $0.15/1M input tokens';
 
-    return { status: 'ok', latencyMs, planLabel, usageLabel, limitLabel: 'gpt-4o-mini: $0.15/1M input tokens' };
+    return { status: 'ok', latencyMs, planLabel: 'Paid account · Direct', limitLabel, usageLabel, usagePercent };
   } catch (e) {
     return { status: 'error', latencyMs: Date.now() - t, message: String(e) };
   }
@@ -146,19 +167,41 @@ async function checkGemini(aiTest: { works: boolean; latencyMs: number; viaProxy
   }
   const t = Date.now();
   try {
+    // Make a minimal generateContent call to get rate-limit headers
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`,
-      { signal: AbortSignal.timeout(5000) }
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: 'hi' }] }], generationConfig: { maxOutputTokens: 1 } }),
+        signal: AbortSignal.timeout(8000),
+      }
     );
     const latencyMs = Date.now() - t;
     if (res.status === 429) return { status: 'rate_limited', latencyMs, message: 'Quota exceeded — check Google AI Studio' };
     if (res.status === 400 || res.status === 403) return { status: 'error', latencyMs, message: 'Invalid key' };
     if (!res.ok) return { status: 'error', latencyMs, message: `Error ${res.status}` };
+
+    // Read rate-limit headers (Gemini uses x-ratelimit-* on some endpoints)
+    const limitReq = parseInt(res.headers.get('x-ratelimit-limit-requests') || res.headers.get('ratelimit-limit') || '0');
+    const remainReq = parseInt(res.headers.get('x-ratelimit-remaining-requests') || res.headers.get('ratelimit-remaining') || '0');
+    const resetReq = res.headers.get('x-ratelimit-reset-requests') || res.headers.get('ratelimit-reset') || '';
+
+    let usageLabel = 'Gemini 2.0 Flash · free with Google account';
+    let usagePercent: number | undefined;
+    if (limitReq > 0) {
+      const used = limitReq - remainReq;
+      const pct = Math.max(0, Math.min(100, Math.round((used / limitReq) * 100)));
+      usageLabel = `${used.toLocaleString()} used · ${remainReq.toLocaleString()} remaining${resetReq ? ` · resets in ${resetReq}` : ''}`;
+      usagePercent = pct;
+    }
+
     return {
       status: 'ok', latencyMs,
-      planLabel: 'Free tier',
+      planLabel: 'Free tier · Direct',
       limitLabel: '15 req/min · 1,500 req/day · 1M tokens/min',
-      usageLabel: 'Gemini 2.0 Flash — free with Google account',
+      usageLabel,
+      usagePercent,
     };
   } catch (e) {
     return { status: 'error', latencyMs: Date.now() - t, message: String(e) };
@@ -180,8 +223,8 @@ async function checkSerpApi(): Promise<Partial<ApiStatus>> {
 
     const searchesLeft = data.total_searches_left ?? 0;
     const monthlyLimit = data.plan_monthly_searches ?? 100;
-    const used = monthlyLimit - searchesLeft;
-    const pct = Math.min(100, Math.round((used / monthlyLimit) * 100));
+    const used = Math.max(0, monthlyLimit - searchesLeft);
+    const pct = Math.max(0, Math.min(100, Math.round((used / monthlyLimit) * 100)));
 
     if (searchesLeft === 0) {
       return { status: 'rate_limited', latencyMs, message: 'Monthly quota exhausted', usagePercent: 100, usageLabel: `${used} / ${monthlyLimit} searches used`, limitLabel: `Plan: ${data.plan_name || 'Free'}` };

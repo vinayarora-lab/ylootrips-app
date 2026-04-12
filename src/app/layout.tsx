@@ -83,6 +83,17 @@ export const metadata: Metadata = {
       "en": "https://www.ylootrips.com",
     },
   },
+  icons: {
+    icon: [
+      { url: '/favicon.png', type: 'image/png', sizes: '512x512' },
+      { url: '/favicon.png', type: 'image/png', sizes: '192x192' },
+      { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/favicon.png',
+  },
   robots: {
     index: true,
     follow: true,

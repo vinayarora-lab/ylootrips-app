@@ -17,7 +17,7 @@ export default function MobileStickyBookingBar({ price, onBook, disabled, spotsL
     const fp = (p: number | string) => formatPriceWithCurrency(p, currency);
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-primary/10 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 py-3">
+        <div className="fixed bottom-16 left-0 right-0 z-[60] md:hidden bg-white border-t border-primary/10 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 py-3">
             <div className="flex items-center justify-between gap-3">
                 <div>
                     <div className="text-xl font-semibold text-primary">{fp(price)}</div>

@@ -56,7 +56,7 @@ function CheckoutContent() {
         numberOfGuests: guests,
         travelDate: date,
         specialRequests: '',
-        paymentMethod: 'credit_card',
+        paymentMethod: 'upi',
     });
 
     useEffect(() => {
@@ -89,11 +89,6 @@ function CheckoutContent() {
 
         if (!trip) return;
 
-        if (!formData.paymentMethod || formData.paymentMethod.trim() === '') {
-            setErrorMessage('Please select a payment method');
-            return;
-        }
-
         setErrorMessage(null);
         setSubmitting(true);
 
@@ -106,6 +101,11 @@ function CheckoutContent() {
                 paymentType = 'HALF_PAYMENT';
             }
 
+            // paymentMethod sent to backend — empty string signals "show all Easebuzz modes"
+            const effectiveMethod = formData.paymentMethod === 'half_payment'
+                ? (halfPaymentCardType === 'credit' ? 'credit_card' : 'debit_card')
+                : formData.paymentMethod || 'upi';
+
             const bookingData = {
                 trip: { id: trip.id },
                 customerName: formData.customerName,
@@ -114,9 +114,8 @@ function CheckoutContent() {
                 numberOfGuests: formData.numberOfGuests,
                 travelDate: formData.travelDate,
                 specialRequests: formData.specialRequests,
-                paymentMethod: formData.paymentMethod === 'half_payment'
-                    ? (halfPaymentCardType === 'credit' ? 'credit_card' : 'debit_card')
-                    : formData.paymentMethod,
+                paymentMethod: effectiveMethod,
+                pg: '',           // tell backend: empty pg → Easebuzz shows all payment modes
                 paymentType: paymentType,
                 // EMI details
                 emiEnabled: selectedEmi !== null,
@@ -130,7 +129,8 @@ function CheckoutContent() {
             const booking = bookingResponse.data;
             setBookingReference(booking.bookingReference);
 
-            const paymentResponse = await api.initiatePayment(booking.bookingReference);
+            // Pass pg: '' so backend sends empty pg to Easebuzz → all payment options shown
+            const paymentResponse = await api.initiatePayment(booking.bookingReference, { pg: '' });
             const paymentData = paymentResponse.data;
 
             if (paymentData.success === false) {
@@ -370,7 +370,7 @@ function CheckoutContent() {
                                                 setSelectedEmi(null);
                                             } else {
                                                 setSelectedEmi(null);
-                                                setFormData(f => ({ ...f, paymentMethod: 'credit_card' }));
+                                                setFormData(f => ({ ...f, paymentMethod: payload.paymentMethod || 'upi' }));
                                             }
                                         }}
                                     />

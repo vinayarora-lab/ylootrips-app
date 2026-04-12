@@ -69,6 +69,50 @@ interface HomePkg {
   urgency: string;
 }
 
+// ── Static details for each package ───────────────────────────────────────────
+const PKG_DETAILS: Record<string, { includes: string[]; excludes: string[]; itinerary: string[] }> = {
+  '/goa-tour-package': {
+    includes: ['3 nights hotel (3★/4★)', 'Airport/railway transfers', 'North & South Goa sightseeing', 'Water sports session (1 hr)', 'Old Goa churches visit', '24/7 travel coordinator'],
+    excludes: ['Flights/train tickets', 'Meals (unless specified)', 'Personal expenses & tips', 'Dudhsagar jeep safari (optional ₹1,500)'],
+    itinerary: ['Day 1: Arrive Goa → hotel check-in → Baga Beach evening', 'Day 2: North Goa (Calangute, Anjuna, Fort Aguada)', 'Day 3: South Goa (Palolem, Colva) + water sports', 'Day 4: Old Goa churches → departure'],
+  },
+  '/manali-tour-package': {
+    includes: ['4 nights hotel', 'Volvo/cab pickup-drop (Manali)', 'Solang Valley & snow activities', 'Rohtang Pass (subject to permit)', 'Kullu/Manikaran sightseeing', 'Inner-line permit fees'],
+    excludes: ['Delhi–Manali flights or Volvo bus fare', 'Rohtang jeep charges (₹1,800–2,200)', 'Meals', 'Personal expenses'],
+    itinerary: ['Day 1: Arrival Manali → hotel check-in → Mall Road', 'Day 2: Solang Valley / Rohtang Pass', 'Day 3: Manali local sightseeing (Hadimba, Vashisht)', 'Day 4: Kullu + Manikaran Sahib', 'Day 5: Departure'],
+  },
+  '/kashmir-tour-package': {
+    includes: ['5 nights (hotel + 1N houseboat)', 'Shikara ride on Dal Lake', 'Gulmarg, Pahalgam & Sonamarg day trips', 'All transfers within Kashmir', 'Mughal Gardens & Shankaracharya visit'],
+    excludes: ['Flights to Srinagar', 'Gulmarg Gondola (₹700–1,400 extra)', 'Pahalgam pony/ATV (extra)', 'Meals', 'Personal expenses'],
+    itinerary: ['Day 1: Arrive Srinagar → Mughal Gardens → houseboat', 'Day 2: Gulmarg (snow activities)', 'Day 3: Pahalgam (Betaab Valley, Aru)', 'Day 4: Sonamarg (Thajiwas Glacier)', 'Day 5: Srinagar local → check-in hotel', 'Day 6: Departure'],
+  },
+  '/dubai-tour-package-from-delhi': {
+    includes: ['5 nights 4★ hotel', 'Visa assistance', 'Desert Safari (dune bashing + BBQ dinner)', 'Burj Khalifa 124th floor entry', 'Dubai Frame + Dubai Frame', 'All airport transfers'],
+    excludes: ['Return flights', 'Meals (breakfast only)', 'Dubai visa fee (₹4,500–6,000)', 'Personal shopping', 'Optional tours'],
+    itinerary: ['Day 1: Arrive Dubai → hotel → Dubai Marina walk', 'Day 2: Dubai city tour (Gold Souk, Spice Souk, Burj Al Arab)', 'Day 3: Desert Safari + BBQ dinner', 'Day 4: Abu Dhabi day trip (Sheikh Zayed Mosque)', 'Day 5: Burj Khalifa + Dubai Mall', 'Day 6: Departure'],
+  },
+  '/bali-honeymoon-package': {
+    includes: ['6 nights 4★ hotel/villa', 'Airport transfers', 'Uluwatu sunset temple + Kecak show', 'Tegallalang Rice Terraces', 'Ubud art & culture day', 'Tanah Lot temple visit'],
+    excludes: ['International flights', 'Visa on arrival (free for Indians)', 'Meals (breakfast only)', 'Personal expenses', 'Nusa Penida boat extra (₹2,500)'],
+    itinerary: ['Day 1: Arrive Bali (DPS) → Seminyak hotel', 'Day 2: Seminyak & Kuta beach day', 'Day 3: Ubud (rice terraces + monkey forest)', 'Day 4: Uluwatu sunset temple', 'Day 5: Nusa Penida day trip', 'Day 6: Tanah Lot + spa day', 'Day 7: Departure'],
+  },
+  '/singapore-tour-package': {
+    includes: ['4 nights hotel (Orchard/City area)', 'Sentosa cable car', 'Gardens by the Bay (Cloud Forest)', 'Universal Studios entry', 'MRT city pass (3 days)', 'Airport transfers'],
+    excludes: ['Flights', 'Meals', 'Singapore visa (₹3,500–4,500)', 'Personal shopping', 'Night Safari (optional ₹3,200)'],
+    itinerary: ['Day 1: Arrive Singapore → Marina Bay Sands view', 'Day 2: Sentosa (Universal Studios)', 'Day 3: Gardens by the Bay + Clarke Quay evening', 'Day 4: Little India, Chinatown, Orchard Rd', 'Day 5: Departure'],
+  },
+  '/thailand-budget-trip': {
+    includes: ['5 nights hotel (Bangkok 3★ + Pattaya 2★)', 'Bangkok–Pattaya–Bangkok transfers', 'Pattaya city tour & Walking Street', 'Floating Market visit', 'Coral Island speedboat trip', 'Airport pickup & drop'],
+    excludes: ['Flights to Bangkok', 'Visa on arrival fee (~₹2,000)', 'Meals (breakfast only)', 'Personal expenses', 'Alcazar Show (optional ₹1,200)'],
+    itinerary: ['Day 1: Arrive Bangkok → hotel → night bazaar', 'Day 2: Bangkok temples (Grand Palace, Wat Pho)', 'Day 3: Transfer to Pattaya → Coral Island', 'Day 4: Pattaya city tour + Floating Market', 'Day 5: Return Bangkok → shopping (MBK, Chatuchak)', 'Day 6: Departure'],
+  },
+  '/maldives-luxury-package': {
+    includes: ['4 nights overwater/beach villa', 'Speedboat or seaplane transfer', 'Breakfast & dinner (half board)', 'Snorkeling equipment', 'Sunset dolphin cruise', 'Complimentary kayaking'],
+    excludes: ['International flights to Malé', 'Lunch & alcoholic beverages', 'Spa treatments', 'Water sports add-ons', 'Personal expenses'],
+    itinerary: ['Day 1: Arrive Malé → seaplane/speedboat → resort check-in + beach', 'Day 2: Snorkeling, lagoon swim, sunset cruise', 'Day 3: Sandbank picnic, kayaking, free day at beach', 'Day 4: Early morning dolphin watching → checkout', 'Day 5: Transfer Malé → departure'],
+  },
+};
+
 // ── Payment drawer for homepage strip ────────────────────────────────────────
 function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void }) {
   const [tab, setTab] = useState<'pay' | 'callback'>('pay');
@@ -81,7 +125,9 @@ function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void
   const [cbPhone, setCbPhone] = useState('');
   const [cbSent, setCbSent] = useState(false);
   const [cbSending, setCbSending] = useState(false);
+  const [showItinerary, setShowItinerary] = useState(false);
 
+  const details = PKG_DETAILS[pkg.href];
   const totalPrice = pkg.priceNum * Number(guests || 2);
   const discountAmt = Math.round(totalPrice * 0.05);
   const finalPrice = totalPrice - discountAmt;
@@ -127,9 +173,10 @@ function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+      {/* max-h accounts for bottom nav bar (64px) on mobile */}
+      <div className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[calc(92vh-64px)] sm:max-h-[90vh] flex flex-col mb-16 sm:mb-0">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
@@ -154,10 +201,10 @@ function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void
           ))}
         </div>
 
-        <div className="overflow-y-auto flex-1">
+        <div className="overflow-y-auto flex-1 overscroll-contain">
           {/* ── PAY TAB ── */}
           {tab === 'pay' && (
-            <div className="p-5 space-y-4">
+            <div className="p-5 space-y-4 pb-6">
               {/* Guests */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5">Number of Guests</label>
@@ -187,6 +234,40 @@ function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void
                   </div>
                 </div>
               </div>
+
+              {/* What's included / excluded */}
+              {details && (
+                <div className="space-y-2">
+                  <div className="bg-green-50 border border-green-100 rounded-xl p-3.5">
+                    <p className="text-xs font-bold text-green-800 mb-2 uppercase tracking-wide">✅ What&apos;s Included</p>
+                    <ul className="space-y-1">
+                      {details.includes.map((item) => (
+                        <li key={item} className="text-xs text-green-700 flex items-start gap-1.5"><span className="text-green-500 shrink-0 mt-0.5">✓</span>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-red-50 border border-red-100 rounded-xl p-3.5">
+                    <p className="text-xs font-bold text-red-800 mb-2 uppercase tracking-wide">❌ Not Included</p>
+                    <ul className="space-y-1">
+                      {details.excludes.map((item) => (
+                        <li key={item} className="text-xs text-red-600 flex items-start gap-1.5"><span className="text-red-400 shrink-0 mt-0.5">✗</span>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <button onClick={() => setShowItinerary(v => !v)}
+                    className="w-full text-left text-xs font-bold text-gray-600 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 flex items-center justify-between hover:bg-gray-100 transition-colors">
+                    <span>📅 Day-by-Day Itinerary</span>
+                    <span className="text-gray-400">{showItinerary ? '▲' : '▼'}</span>
+                  </button>
+                  {showItinerary && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-3.5 space-y-1.5">
+                      {details.itinerary.map((day) => (
+                        <p key={day} className="text-xs text-gray-700">{day}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* EMI highlight */}
               <div className="bg-blue-50 border border-blue-100 rounded-xl p-3.5 flex items-center justify-between">

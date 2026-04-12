@@ -552,7 +552,7 @@ function BookingSidebar({ pkg, onOpenDrawer }: { pkg: PackageData; onOpenDrawer:
 /* ─────────────────────────────────────────────────────────────────── */
 function MobileBar({ pkg, onOpenDrawer }: { pkg: PackageData; onOpenDrawer: () => void }) {
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-primary/10 shadow-2xl px-4 py-3 flex items-center gap-3">
+    <div className="lg:hidden fixed bottom-16 left-0 right-0 z-[60] bg-white border-t border-primary/10 shadow-2xl px-4 py-3 flex items-center gap-3">
       <div className="flex-1 min-w-0">
         <p className="text-[10px] text-primary/50 uppercase tracking-wider">Starting from</p>
         <p className="font-display text-xl text-primary leading-none">{fmt(pkg.priceINR)}<span className="text-sm font-sans text-primary/40"> /person</span></p>

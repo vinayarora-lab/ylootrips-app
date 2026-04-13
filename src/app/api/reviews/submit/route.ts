@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, id: review._id });
   } catch (err) {
-    console.error('[review/submit]', err);
-    return NextResponse.json({ error: 'Server error. Please try again.' }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[review/submit]', msg);
+    return NextResponse.json({ error: `Server error: ${msg}` }, { status: 500 });
   }
 }

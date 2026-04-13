@@ -17,11 +17,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Review too long (max 1000 characters).' }, { status: 400 });
     }
 
+    // Guard: base64 photos must be reasonable size (< 1.5 MB each after compression)
+    const MAX_B64 = 1_500_000;
+    const safeAvatar = avatarUrl && avatarUrl.length <= MAX_B64 ? avatarUrl : undefined;
+    const safeTripPhoto = tripPhotoUrl && tripPhotoUrl.length <= MAX_B64 ? tripPhotoUrl : undefined;
+
     await connectDB();
     const review = await Review.create({
       name, email, phone, country, trip, rating: Number(rating), text,
-      ...(avatarUrl ? { avatarUrl } : {}),
-      ...(tripPhotoUrl ? { tripPhotoUrl } : {}),
+      ...(safeAvatar ? { avatarUrl: safeAvatar } : {}),
+      ...(safeTripPhoto ? { tripPhotoUrl: safeTripPhoto } : {}),
     });
 
     // Notify admin

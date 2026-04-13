@@ -4,27 +4,87 @@ import { useState } from 'react';
 import { Plane, ArrowUpDown, Calendar, Users, Search, Clock, Zap, MessageCircle, AlertCircle } from 'lucide-react';
 
 const CITIES = [
-  { name: 'New Delhi',            code: 'DEL' },
-  { name: 'Mumbai',               code: 'BOM' },
-  { name: 'Bangalore',            code: 'BLR' },
-  { name: 'Chennai',              code: 'MAA' },
-  { name: 'Hyderabad',            code: 'HYD' },
-  { name: 'Kolkata',              code: 'CCU' },
-  { name: 'Jaipur',               code: 'JAI' },
-  { name: 'Goa (Dabolim)',        code: 'GOI' },
-  { name: 'Kochi',                code: 'COK' },
-  { name: 'Pune',                 code: 'PNQ' },
-  { name: 'Ahmedabad',            code: 'AMD' },
-  { name: 'Varanasi',             code: 'VNS' },
-  { name: 'Amritsar',             code: 'ATQ' },
-  { name: 'Leh',                  code: 'IXL' },
-  { name: 'Srinagar',             code: 'SXR' },
-  { name: 'Port Blair (Andaman)', code: 'IXZ' },
-  { name: 'Udaipur',              code: 'UDR' },
-  { name: 'Jodhpur',              code: 'JDH' },
-  { name: 'Bagdogra (Darjeeling)',code: 'IXB' },
-  { name: 'Chandigarh',           code: 'IXC' },
-  { name: 'Dehradun',             code: 'DED' },
+  // ── India ──────────────────────────────────────────────
+  { name: 'New Delhi',             code: 'DEL', intl: false },
+  { name: 'Mumbai',                code: 'BOM', intl: false },
+  { name: 'Bangalore',             code: 'BLR', intl: false },
+  { name: 'Chennai',               code: 'MAA', intl: false },
+  { name: 'Hyderabad',             code: 'HYD', intl: false },
+  { name: 'Kolkata',               code: 'CCU', intl: false },
+  { name: 'Jaipur',                code: 'JAI', intl: false },
+  { name: 'Goa (Dabolim)',         code: 'GOI', intl: false },
+  { name: 'Kochi',                 code: 'COK', intl: false },
+  { name: 'Pune',                  code: 'PNQ', intl: false },
+  { name: 'Ahmedabad',             code: 'AMD', intl: false },
+  { name: 'Varanasi',              code: 'VNS', intl: false },
+  { name: 'Amritsar',              code: 'ATQ', intl: false },
+  { name: 'Leh',                   code: 'IXL', intl: false },
+  { name: 'Srinagar',              code: 'SXR', intl: false },
+  { name: 'Port Blair (Andaman)',  code: 'IXZ', intl: false },
+  { name: 'Udaipur',               code: 'UDR', intl: false },
+  { name: 'Jodhpur',               code: 'JDH', intl: false },
+  { name: 'Bagdogra (Darjeeling)', code: 'IXB', intl: false },
+  { name: 'Chandigarh',            code: 'IXC', intl: false },
+  { name: 'Dehradun',              code: 'DED', intl: false },
+  { name: 'Indore',                code: 'IDR', intl: false },
+  { name: 'Bhopal',                code: 'BHO', intl: false },
+  { name: 'Nagpur',                code: 'NAG', intl: false },
+  { name: 'Patna',                 code: 'PAT', intl: false },
+  { name: 'Bhubaneswar',           code: 'BBI', intl: false },
+  { name: 'Guwahati',              code: 'GAU', intl: false },
+  { name: 'Thiruvananthapuram',    code: 'TRV', intl: false },
+  { name: 'Coimbatore',            code: 'CJB', intl: false },
+  { name: 'Mangalore',             code: 'IXE', intl: false },
+  // ── South-East Asia ────────────────────────────────────
+  { name: 'Dubai (UAE)',           code: 'DXB', intl: true },
+  { name: 'Abu Dhabi (UAE)',       code: 'AUH', intl: true },
+  { name: 'Bangkok, Thailand',     code: 'BKK', intl: true },
+  { name: 'Phuket, Thailand',      code: 'HKT', intl: true },
+  { name: 'Bali (Denpasar)',       code: 'DPS', intl: true },
+  { name: 'Singapore',             code: 'SIN', intl: true },
+  { name: 'Kuala Lumpur',          code: 'KUL', intl: true },
+  { name: 'Colombo (Sri Lanka)',   code: 'CMB', intl: true },
+  { name: 'Kathmandu (Nepal)',     code: 'KTM', intl: true },
+  { name: 'Dhaka (Bangladesh)',    code: 'DAC', intl: true },
+  { name: 'Male (Maldives)',       code: 'MLE', intl: true },
+  { name: 'Hanoi (Vietnam)',       code: 'HAN', intl: true },
+  { name: 'Ho Chi Minh City',      code: 'SGN', intl: true },
+  { name: 'Manila (Philippines)',  code: 'MNL', intl: true },
+  { name: 'Jakarta (Indonesia)',   code: 'CGK', intl: true },
+  // ── Middle East ────────────────────────────────────────
+  { name: 'Riyadh (Saudi Arabia)', code: 'RUH', intl: true },
+  { name: 'Doha (Qatar)',          code: 'DOH', intl: true },
+  { name: 'Muscat (Oman)',         code: 'MCT', intl: true },
+  { name: 'Kuwait City',           code: 'KWI', intl: true },
+  { name: 'Bahrain',               code: 'BAH', intl: true },
+  { name: 'Istanbul (Turkey)',     code: 'IST', intl: true },
+  // ── Europe ─────────────────────────────────────────────
+  { name: 'London (Heathrow)',     code: 'LHR', intl: true },
+  { name: 'Paris (CDG)',           code: 'CDG', intl: true },
+  { name: 'Frankfurt (Germany)',   code: 'FRA', intl: true },
+  { name: 'Amsterdam',             code: 'AMS', intl: true },
+  { name: 'Zurich (Switzerland)',  code: 'ZRH', intl: true },
+  { name: 'Rome (Italy)',          code: 'FCO', intl: true },
+  { name: 'Barcelona (Spain)',     code: 'BCN', intl: true },
+  { name: 'Vienna (Austria)',      code: 'VIE', intl: true },
+  { name: 'Moscow (Russia)',       code: 'SVO', intl: true },
+  // ── East Asia & Pacific ────────────────────────────────
+  { name: 'Tokyo (Japan)',         code: 'NRT', intl: true },
+  { name: 'Osaka (Japan)',         code: 'KIX', intl: true },
+  { name: 'Seoul (South Korea)',   code: 'ICN', intl: true },
+  { name: 'Beijing (China)',       code: 'PEK', intl: true },
+  { name: 'Shanghai (China)',      code: 'PVG', intl: true },
+  { name: 'Hong Kong',             code: 'HKG', intl: true },
+  { name: 'Sydney (Australia)',    code: 'SYD', intl: true },
+  { name: 'Melbourne (Australia)', code: 'MEL', intl: true },
+  // ── Americas ───────────────────────────────────────────
+  { name: 'New York (JFK)',        code: 'JFK', intl: true },
+  { name: 'San Francisco',         code: 'SFO', intl: true },
+  { name: 'Toronto (Canada)',      code: 'YYZ', intl: true },
+  { name: 'Vancouver (Canada)',    code: 'YVR', intl: true },
+  // ── Africa ─────────────────────────────────────────────
+  { name: 'Nairobi (Kenya)',       code: 'NBO', intl: true },
+  { name: 'Johannesburg (SA)',     code: 'JNB', intl: true },
 ];
 
 interface FlightResult {
@@ -156,7 +216,12 @@ export default function FlightSearch() {
                 <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary rotate-45 pointer-events-none" />
                 <select value={from} onChange={(e) => { setFrom(e.target.value); setResults(null); }}
                   className="w-full pl-9 pr-3 py-3 bg-cream-dark text-sm text-primary focus:outline-none focus:ring-1 focus:ring-secondary">
-                  {CITIES.map((c) => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
+                  <optgroup label="🇮🇳 India">
+                    {CITIES.filter(c => !c.intl).map((c) => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
+                  </optgroup>
+                  <optgroup label="✈️ International">
+                    {CITIES.filter(c => c.intl).map((c) => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
+                  </optgroup>
                 </select>
               </div>
             </div>
@@ -171,7 +236,12 @@ export default function FlightSearch() {
                 <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary pointer-events-none" />
                 <select value={to} onChange={(e) => { setTo(e.target.value); setResults(null); }}
                   className="w-full pl-9 pr-3 py-3 bg-cream-dark text-sm text-primary focus:outline-none focus:ring-1 focus:ring-secondary">
-                  {CITIES.map((c) => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
+                  <optgroup label="🇮🇳 India">
+                    {CITIES.filter(c => !c.intl).map((c) => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
+                  </optgroup>
+                  <optgroup label="✈️ International">
+                    {CITIES.filter(c => c.intl).map((c) => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
+                  </optgroup>
                 </select>
               </div>
             </div>

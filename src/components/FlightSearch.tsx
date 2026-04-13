@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Plane, ArrowUpDown, Calendar, Users, Search, Clock, Zap, MessageCircle, AlertCircle } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Plane, ArrowUpDown, Calendar, Users, Search, Clock, Zap, MessageCircle, AlertCircle, X, ChevronDown } from 'lucide-react';
 
 const CITIES = [
   // ── India ──────────────────────────────────────────────
@@ -114,6 +114,104 @@ function airlineInitials(name: string) {
   return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 }
 
+const DOMESTIC = CITIES.filter(c => !c.intl);
+const INTERNATIONAL = CITIES.filter(c => c.intl);
+
+function CityPicker({ value, onChange, icon }: {
+  value: string;
+  onChange: (code: string) => void;
+  icon?: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const selected = CITIES.find(c => c.code === value);
+
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 80);
+  }, [open]);
+
+  const filter = (list: typeof CITIES) =>
+    query.trim()
+      ? list.filter(c =>
+          c.name.toLowerCase().includes(query.toLowerCase()) ||
+          c.code.toLowerCase().includes(query.toLowerCase())
+        )
+      : list;
+
+  const domestic = filter(DOMESTIC);
+  const international = filter(INTERNATIONAL);
+
+  const pick = (code: string) => { onChange(code); setOpen(false); setQuery(''); };
+
+  return (
+    <>
+      {/* Trigger */}
+      <button type="button" onClick={() => setOpen(true)}
+        className="w-full pl-9 pr-3 py-3 bg-cream-dark text-sm text-primary text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-secondary">
+        <span className="truncate">{selected ? `${selected.name} (${selected.code})` : 'Select city'}</span>
+        <ChevronDown size={14} className="shrink-0 text-primary/40 ml-1" />
+      </button>
+
+      {/* Bottom-sheet modal */}
+      {open && (
+        <div className="fixed inset-0 z-[9999] flex flex-col justify-end sm:items-center sm:justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setOpen(false); setQuery(''); }} />
+          <div className="relative w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col"
+            style={{ maxHeight: '85dvh' }}>
+            {/* Header */}
+            <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-gray-100 shrink-0">
+              <Search size={16} className="text-gray-400 shrink-0" />
+              <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)}
+                placeholder="Search city or airport code…"
+                className="flex-1 text-sm text-gray-900 outline-none placeholder:text-gray-400" />
+              <button onClick={() => { setOpen(false); setQuery(''); }}
+                className="p-1 rounded-full hover:bg-gray-100 text-gray-400 shrink-0">
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* City list */}
+            <div className="overflow-y-auto flex-1 pb-6">
+              {domestic.length > 0 && (
+                <>
+                  <div className="sticky top-0 bg-amber-50 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-amber-700">
+                    🇮🇳 India
+                  </div>
+                  {domestic.map(c => (
+                    <button key={c.code} type="button" onClick={() => pick(c.code)}
+                      className={`w-full text-left px-4 py-3 text-sm flex items-center justify-between hover:bg-gray-50 active:bg-amber-50 transition-colors ${value === c.code ? 'bg-amber-50 text-amber-700 font-semibold' : 'text-gray-800'}`}>
+                      <span>{c.name}</span>
+                      <span className="text-xs text-gray-400 font-mono">{c.code}</span>
+                    </button>
+                  ))}
+                </>
+              )}
+              {international.length > 0 && (
+                <>
+                  <div className="sticky top-0 bg-blue-50 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-blue-700">
+                    ✈️ International
+                  </div>
+                  {international.map(c => (
+                    <button key={c.code} type="button" onClick={() => pick(c.code)}
+                      className={`w-full text-left px-4 py-3 text-sm flex items-center justify-between hover:bg-gray-50 active:bg-blue-50 transition-colors ${value === c.code ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-800'}`}>
+                      <span>{c.name}</span>
+                      <span className="text-xs text-gray-400 font-mono">{c.code}</span>
+                    </button>
+                  ))}
+                </>
+              )}
+              {domestic.length === 0 && international.length === 0 && (
+                <p className="text-center text-gray-400 text-sm py-10">No cities found</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function FlightSearch() {
   const [from, setFrom]         = useState('DEL');
   const [to, setTo]             = useState('GOI');
@@ -213,16 +311,8 @@ export default function FlightSearch() {
             <div>
               <label className="block text-[10px] uppercase tracking-widest text-primary/45 mb-1.5">From</label>
               <div className="relative">
-                <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary rotate-45 pointer-events-none" />
-                <select value={from} onChange={(e) => { setFrom(e.target.value); setResults(null); }}
-                  className="w-full pl-9 pr-3 py-3 bg-cream-dark text-sm text-primary focus:outline-none focus:ring-1 focus:ring-secondary">
-                  <optgroup label="🇮🇳 India">
-                    {CITIES.filter(c => !c.intl).map((c) => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
-                  </optgroup>
-                  <optgroup label="✈️ International">
-                    {CITIES.filter(c => c.intl).map((c) => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
-                  </optgroup>
-                </select>
+                <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary rotate-45 pointer-events-none z-10" />
+                <CityPicker value={from} onChange={(v) => { setFrom(v); setResults(null); }} />
               </div>
             </div>
 
@@ -233,16 +323,8 @@ export default function FlightSearch() {
             <div>
               <label className="block text-[10px] uppercase tracking-widest text-primary/45 mb-1.5">To</label>
               <div className="relative">
-                <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary pointer-events-none" />
-                <select value={to} onChange={(e) => { setTo(e.target.value); setResults(null); }}
-                  className="w-full pl-9 pr-3 py-3 bg-cream-dark text-sm text-primary focus:outline-none focus:ring-1 focus:ring-secondary">
-                  <optgroup label="🇮🇳 India">
-                    {CITIES.filter(c => !c.intl).map((c) => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
-                  </optgroup>
-                  <optgroup label="✈️ International">
-                    {CITIES.filter(c => c.intl).map((c) => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
-                  </optgroup>
-                </select>
+                <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary pointer-events-none z-10" />
+                <CityPicker value={to} onChange={(v) => { setTo(v); setResults(null); }} />
               </div>
             </div>
           </div>

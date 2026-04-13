@@ -37,6 +37,18 @@ function Avatar({ src, name }: { src: string; name: string }) {
 const reviews = [
   // ── Indian travelers ──────────────────────────────────────────────────────
   {
+    name: 'Avnish and Shivani',
+    flag: '🇮🇳',
+    country: 'Gurugram, Haryana',
+    rating: 5,
+    trip: 'Lakshadweep Island Package',
+    date: 'April 2026',
+    platform: 'Google',
+    avatar: '/reviews/lakshadweep-couple.jpg',
+    tripPhoto: '/reviews/lakshadweep-couple.jpg',
+    text: 'Recently visited Lakshadweep through Ylootrips.com and it was an incredible experience! The itinerary was well-planned, accommodations were comfortable, and the entire trip was smooth from start to finish. The team was supportive and always available for assistance. Lakshadweep itself is breathtaking, and Ylootrips made the journey even more memorable. Highly recommend booking with them!',
+  },
+  {
     name: 'Neha & Rohan Sharma',
     flag: '🇮🇳',
     country: 'Mumbai, Maharashtra',

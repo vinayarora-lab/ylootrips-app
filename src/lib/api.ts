@@ -118,7 +118,7 @@ export const api = {
   getEventBooking: (reference: string) => apiClient.get(`/event-bookings/${reference}`),
 
   // Payment
-  initiatePayment: (bookingReference: string, options?: { pg?: string }) => apiClient.post(`/payment/initiate/${bookingReference}`, options || { pg: '' }),
+  initiatePayment: (bookingReference: string, options?: { pg?: string; amount?: number }) => apiClient.post(`/payment/initiate/${bookingReference}`, options || { pg: '' }),
   initiateEventPayment: (bookingReference: string) => apiClient.post(`/payment/event/initiate/${bookingReference}`),
   getPaymentStatus: (bookingReference: string) => apiClient.get(`/payment/status/${bookingReference}`, {
     headers: {

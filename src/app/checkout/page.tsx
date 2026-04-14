@@ -38,6 +38,7 @@ function CheckoutContent() {
     const [applyWallet, setApplyWallet] = useState(false);
     const [promoCode, setPromoCode] = useState<string | null>(null);
     const [promoDiscount, setPromoDiscount] = useState(0);
+    const [advanceAmountNow, setAdvanceAmountNow] = useState<number | null>(null); // null = full payment
     const [selectedEmi, setSelectedEmi] = useState<{
         tenure: number;
         monthlyAmount: number;
@@ -106,6 +107,9 @@ function CheckoutContent() {
                 ? (halfPaymentCardType === 'credit' ? 'credit_card' : 'debit_card')
                 : formData.paymentMethod || 'upi';
 
+            // Amount to charge NOW: partial advance or full price
+            const chargeNow = advanceAmountNow !== null ? advanceAmountNow : totalPrice;
+
             const bookingData = {
                 trip: { id: trip.id },
                 customerName: formData.customerName,
@@ -117,6 +121,8 @@ function CheckoutContent() {
                 paymentMethod: effectiveMethod,
                 pg: '',           // tell backend: empty pg → Easebuzz shows all payment modes
                 paymentType: paymentType,
+                totalAmount: totalPrice,      // full trip cost
+                chargeNow,                    // amount to collect right now
                 // EMI details
                 emiEnabled: selectedEmi !== null,
                 emiTenure: selectedEmi?.tenure || null,
@@ -130,7 +136,8 @@ function CheckoutContent() {
             setBookingReference(booking.bookingReference);
 
             // Pass pg: '' so backend sends empty pg to Easebuzz → all payment options shown
-            const paymentResponse = await api.initiatePayment(booking.bookingReference, { pg: '' });
+            // Pass chargeNow so backend uses partial amount (20%/50%) instead of full price
+            const paymentResponse = await api.initiatePayment(booking.bookingReference, { pg: '', amount: chargeNow });
             const paymentData = paymentResponse.data;
 
             if (paymentData.success === false) {
@@ -371,8 +378,10 @@ function CheckoutContent() {
                                             } else if (payload.mode === 'partial') {
                                                 setFormData(f => ({ ...f, paymentMethod: 'half_payment' }));
                                                 setSelectedEmi(null);
+                                                setAdvanceAmountNow(payload.amountNow); // 20% advance
                                             } else {
                                                 setSelectedEmi(null);
+                                                setAdvanceAmountNow(null); // full payment
                                                 setFormData(f => ({ ...f, paymentMethod: payload.paymentMethod || 'upi' }));
                                             }
                                         }}
@@ -528,9 +537,18 @@ function CheckoutContent() {
 
                                 <div className="pt-6 border-t border-primary/10 mb-3">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-lg md:text-xl font-light">Total Payable</span>
-                                        <span className="text-2xl md:text-3xl font-light">{fp(totalPrice)}</span>
+                                        <span className="text-lg md:text-xl font-light">
+                                            {advanceAmountNow !== null ? 'Pay Now (Advance)' : 'Total Payable'}
+                                        </span>
+                                        <span className="text-2xl md:text-3xl font-light">
+                                            {fp(advanceAmountNow !== null ? advanceAmountNow : totalPrice)}
+                                        </span>
                                     </div>
+                                    {advanceAmountNow !== null && (
+                                        <p className="text-xs text-amber-700 font-medium mt-1">
+                                            Remaining {fp(totalPrice - advanceAmountNow)} payable before travel
+                                        </p>
+                                    )}
                                     <p className="text-xs text-green-700 font-medium mt-1 flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
                                         No hidden fees · all taxes included

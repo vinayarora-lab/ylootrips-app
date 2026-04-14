@@ -20,6 +20,8 @@ import { useVisitor } from '@/context/VisitorContext';
 import { useWallet } from '@/context/WalletContext';
 import { formatPriceWithCurrency } from '@/lib/utils';
 import { useCurrency } from '@/context/CurrencyContext';
+import PaymentOptions from '@/components/PaymentOptions';
+import PromoCodeInput from '@/components/PromoCodeInput';
 
 interface CmsContent {
   pageKey: string;
@@ -117,12 +119,18 @@ const PKG_DETAILS: Record<string, { includes: string[]; excludes: string[]; itin
 
 // ── Payment drawer for homepage strip ────────────────────────────────────────
 function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void }) {
+  const { balance: walletBalance, addCashback, deductBalance } = useWallet();
   const [tab, setTab] = useState<'pay' | 'callback'>('pay');
   const [guests, setGuests] = useState('2');
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  const [payStep, setPayStep] = useState<'options' | 'form'>('options');
+  const [chargeNow, setChargeNow] = useState<number | null>(null);
+  const [paymentMode, setPaymentMode] = useState<string>('');
+  const [promoCode, setPromoCode] = useState<string | null>(null);
+  const [promoCashback, setPromoCashback] = useState(0);
+  const [applyWallet, setApplyWallet] = useState(false);
   const [cbName, setCbName] = useState('');
   const [cbPhone, setCbPhone] = useState('');
   const [cbSent, setCbSent] = useState(false);
@@ -132,8 +140,16 @@ function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void
   const details = PKG_DETAILS[pkg.href];
   const totalPrice = pkg.priceNum * Number(guests || 2);
   const discountAmt = Math.round(totalPrice * 0.05);
-  const finalPrice = totalPrice - discountAmt;
-  const emi = Math.ceil(finalPrice / 3);
+  const priceAfterDiscount = totalPrice - discountAmt;
+  const maxWalletUsable = Math.floor(priceAfterDiscount * 0.10);
+  const walletDeduction = applyWallet ? Math.min(walletBalance, maxWalletUsable) : 0;
+  const effectiveTotal = Math.max(0, priceAfterDiscount - walletDeduction);
+
+  const handlePaymentSelected = (payload: { amountNow: number; mode: string; paymentMethod?: string }) => {
+    setChargeNow(payload.amountNow);
+    setPaymentMode(payload.paymentMethod ?? payload.mode);
+    setPayStep('form');
+  };
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,7 +163,10 @@ function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void
           packageTitle: `${pkg.label} ${pkg.nights} Package`,
           destination: pkg.label,
           sourceUrl: `https://ylootrips.com${pkg.href}`,
-          ourPrice: finalPrice, marketPrice: totalPrice, priceDiff: discountAmt,
+          ourPrice: effectiveTotal,
+          chargeNow: chargeNow ?? effectiveTotal,
+          marketPrice: totalPrice, priceDiff: discountAmt,
+          paymentMode, promoCode, walletDeduction,
         }),
       });
       const data = await res.json();
@@ -212,14 +231,14 @@ function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5">Number of Guests</label>
                 <div className="flex gap-2">
                   {['1','2','3','4','5','6'].map(n => (
-                    <button key={n} onClick={() => setGuests(n)}
+                    <button key={n} onClick={() => { setGuests(n); setChargeNow(null); setPayStep('options'); }}
                       className={`w-10 h-10 rounded-xl text-sm font-bold border transition-all ${guests === n ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}>{n}</button>
                   ))}
                 </div>
               </div>
 
-              {/* Price breakdown */}
-              <div className="bg-gray-50 rounded-2xl p-4 space-y-2.5">
+              {/* Price summary */}
+              <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">{pkg.price} × {guests} guest{Number(guests) > 1 ? 's' : ''}</span>
                   <span className="text-gray-700 font-medium">₹{totalPrice.toLocaleString('en-IN')}</span>
@@ -228,10 +247,22 @@ function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void
                   <span className="flex items-center gap-1"><BadgePercent size={13} /> Early bird 5% off</span>
                   <span className="font-semibold">− ₹{discountAmt.toLocaleString('en-IN')}</span>
                 </div>
-                <div className="border-t border-gray-200 pt-2.5 flex justify-between">
+                {promoCashback > 0 && (
+                  <div className="flex justify-between text-sm text-amber-700">
+                    <span>🎟 Promo cashback credited to wallet</span>
+                    <span className="font-semibold">+₹{promoCashback.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+                {walletDeduction > 0 && (
+                  <div className="flex justify-between text-sm text-amber-700">
+                    <span>💰 WanderLoot wallet</span>
+                    <span className="font-semibold">− ₹{walletDeduction.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-200 pt-2 flex justify-between">
                   <span className="font-bold text-gray-900">Total payable</span>
                   <div className="text-right">
-                    <p className="font-display text-2xl text-gray-900">₹{finalPrice.toLocaleString('en-IN')}</p>
+                    <p className="font-display text-2xl text-gray-900">₹{effectiveTotal.toLocaleString('en-IN')}</p>
                     <p className="text-[10px] text-gray-400">incl. all taxes</p>
                   </div>
                 </div>
@@ -271,67 +302,88 @@ function HomeBookingDrawer({ pkg, onClose }: { pkg: HomePkg; onClose: () => void
                 </div>
               )}
 
-              {/* EMI highlight */}
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-3.5 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-blue-900">0% EMI available</p>
-                  <p className="text-xs text-blue-500 mt-0.5">3 / 6 / 12 month plans · No cost</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-display text-2xl text-blue-800">₹{emi.toLocaleString('en-IN')}</p>
-                  <p className="text-[10px] text-blue-400">/month × 3</p>
-                </div>
-              </div>
+              {/* ── PAYMENT OPTIONS STEP ── */}
+              {payStep === 'options' && (
+                <>
+                  {/* Promo code */}
+                  <PromoCodeInput
+                    orderTotal={priceAfterDiscount}
+                    appliedCode={promoCode}
+                    discountAmount={promoCashback}
+                    onApply={(code, discount) => {
+                      const cb = addCashback(discount, `PROMO-${code}-${Date.now()}`, `Promo code: ${code}`);
+                      setPromoCode(code); setPromoCashback(cb);
+                    }}
+                    onRemove={() => {
+                      if (promoCashback > 0) deductBalance(promoCashback, `PROMO-REMOVE-${promoCode}`);
+                      setPromoCode(null); setPromoCashback(0);
+                    }}
+                  />
 
-              {/* Trust row */}
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { icon: <ShieldCheck size={14} className="text-green-600" />, label: '100% Refund', sub: 'if unavailable' },
-                  { icon: <CreditCard size={14} className="text-blue-600" />, label: 'Easebuzz PG', sub: 'PCI-DSS secure' },
-                  { icon: <BadgePercent size={14} className="text-amber-600" />, label: '5% Discount', sub: 'early bird' },
-                ].map(({ icon, label, sub }) => (
-                  <div key={label} className="bg-gray-50 rounded-xl p-2.5 text-center">
-                    <div className="flex justify-center mb-1">{icon}</div>
-                    <p className="text-[11px] font-bold text-gray-800">{label}</p>
-                    <p className="text-[9px] text-gray-400">{sub}</p>
+                  {/* WanderLoot wallet */}
+                  {walletBalance > 0 && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">💰</span>
+                          <div>
+                            <p className="text-sm font-bold text-amber-900">WanderLoot Wallet</p>
+                            <p className="text-xs text-amber-600">Balance: ₹{walletBalance.toLocaleString('en-IN')}</p>
+                          </div>
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <span className="text-xs text-amber-700 font-medium">Use up to ₹{maxWalletUsable.toLocaleString('en-IN')}</span>
+                          <input type="checkbox" checked={applyWallet} onChange={e => setApplyWallet(e.target.checked)} className="w-4 h-4 accent-amber-500" />
+                        </label>
+                      </div>
+                      {applyWallet && walletDeduction > 0 && (
+                        <div className="mt-2 flex items-center gap-1.5 text-xs text-amber-800 font-semibold bg-amber-100 rounded-lg px-2.5 py-1.5">
+                          <span>💰</span> WanderLoot applied · −₹{walletDeduction.toLocaleString('en-IN')}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* PaymentOptions */}
+                  <PaymentOptions
+                    tripPrice={effectiveTotal}
+                    onProceed={handlePaymentSelected}
+                  />
+                </>
+              )}
+
+              {/* ── DETAILS FORM STEP ── */}
+              {payStep === 'form' && (
+                <>
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-3.5">
+                    <p className="text-xs font-bold text-green-800 mb-1">✅ Plan selected</p>
+                    <p className="text-sm text-green-700">{paymentMode}</p>
+                    <p className="text-sm font-bold text-green-900">Paying now: ₹{(chargeNow ?? effectiveTotal).toLocaleString('en-IN')}</p>
+                    {chargeNow !== null && chargeNow < effectiveTotal && (
+                      <p className="text-xs text-green-600 mt-0.5">Remaining ₹{(effectiveTotal - chargeNow).toLocaleString('en-IN')} due before trip</p>
+                    )}
                   </div>
-                ))}
-              </div>
-
-              {/* Payment methods */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-[10px] text-gray-400 font-medium">Pay via:</p>
-                {['Visa', 'Mastercard', 'UPI', 'Net Banking', 'RuPay'].map(m => (
-                  <span key={m} className="text-[10px] border border-gray-200 text-gray-600 px-2 py-0.5 rounded-md font-medium">{m}</span>
-                ))}
-              </div>
-
-              {!showForm ? (
-                <button onClick={() => setShowForm(true)}
-                  className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-4 rounded-xl hover:bg-gray-800 transition-colors shadow-lg">
-                  <CreditCard size={16} /> Proceed to Pay ₹{finalPrice.toLocaleString('en-IN')}
-                </button>
-              ) : (
-                <form onSubmit={handlePay} className="space-y-2.5">
-                  <p className="text-xs font-semibold text-gray-700">Enter your details</p>
-                  <input required type="text" placeholder="Full name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
-                  <input required type="email" placeholder="Email address" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
-                    className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
-                  <input required type="tel" placeholder="Phone number" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-                    className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
-                  {payError && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{payError}</p>}
-                  <div className="flex gap-2 pt-1">
-                    <button type="submit" disabled={paying}
-                      className="flex-1 flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-3.5 rounded-xl hover:bg-gray-800 disabled:opacity-60 transition-colors">
-                      {paying ? <Loader2 size={15} className="animate-spin" /> : <CreditCard size={15} />}
-                      {paying ? 'Redirecting to payment…' : `Pay ₹${finalPrice.toLocaleString('en-IN')} via Easebuzz`}
-                    </button>
-                    <button type="button" onClick={() => { setShowForm(false); setPayError(''); }}
-                      className="px-4 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50">Back</button>
-                  </div>
-                  <p className="text-[10px] text-gray-400 text-center">🔒 256-bit SSL · Secured by Easebuzz · No card details stored</p>
-                </form>
+                  <form onSubmit={handlePay} className="space-y-2.5">
+                    <p className="text-xs font-semibold text-gray-700">Enter your details</p>
+                    <input required type="text" placeholder="Full name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+                      className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
+                    <input required type="email" placeholder="Email address" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                      className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
+                    <input required type="tel" placeholder="Phone number" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+                      className="w-full px-3 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
+                    {payError && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{payError}</p>}
+                    <div className="flex gap-2 pt-1">
+                      <button type="submit" disabled={paying}
+                        className="flex-1 flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-3.5 rounded-xl hover:bg-gray-800 disabled:opacity-60 transition-colors">
+                        {paying ? <Loader2 size={15} className="animate-spin" /> : <CreditCard size={15} />}
+                        {paying ? 'Redirecting to payment…' : `Pay ₹${(chargeNow ?? effectiveTotal).toLocaleString('en-IN')} via Easebuzz`}
+                      </button>
+                      <button type="button" onClick={() => { setPayStep('options'); setPayError(''); }}
+                        className="px-4 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50">Back</button>
+                    </div>
+                    <p className="text-[10px] text-gray-400 text-center">🔒 256-bit SSL · Secured by Easebuzz · No card details stored</p>
+                  </form>
+                </>
               )}
             </div>
           )}

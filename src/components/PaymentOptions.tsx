@@ -13,6 +13,7 @@ interface EmiPlan {
   monthlyAmount: number;
   totalAmount: number;
   savings: number;
+  interestRate: number;   // 0 for no-cost, 16 for 16% interest
   tag?: string;
 }
 
@@ -37,10 +38,10 @@ interface PaymentPayload {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const BANKS = [
-  { id: 'hdfc',  name: 'HDFC',  color: '#004C8F', bg: '#EBF3FF', offer: '0% EMI up to 12 months' },
-  { id: 'icici', name: 'ICICI', color: '#B02A30', bg: '#FFEBEC', offer: '0% EMI up to 9 months'  },
-  { id: 'axis',  name: 'Axis',  color: '#97144D', bg: '#FFEEF5', offer: '0% EMI up to 6 months'  },
-  { id: 'sbi',   name: 'SBI',   color: '#22409A', bg: '#EEF1FF', offer: '0% EMI up to 6 months'  },
+  { id: 'hdfc',  name: 'HDFC',  color: '#004C8F', bg: '#EBF3FF', offer: '0% on 3 months · 16% p.a. others' },
+  { id: 'icici', name: 'ICICI', color: '#B02A30', bg: '#FFEBEC', offer: '0% on 3 months · 16% p.a. others' },
+  { id: 'axis',  name: 'Axis',  color: '#97144D', bg: '#FFEEF5', offer: '0% on 3 months · 16% p.a. others' },
+  { id: 'sbi',   name: 'SBI',   color: '#22409A', bg: '#EEF1FF', offer: '0% on 3 months · 16% p.a. others' },
 ];
 
 const PARTIAL_SCHEDULE = [
@@ -50,10 +51,12 @@ const PARTIAL_SCHEDULE = [
 ];
 
 function buildEmiPlans(price: number): EmiPlan[] {
+  const total6  = Math.ceil(price * 1.16);
+  const total12 = Math.ceil(price * 1.16);
   return [
-    { months: 3,  monthlyAmount: Math.ceil(price / 3),  totalAmount: price, savings: 0, tag: 'Popular' },
-    { months: 6,  monthlyAmount: Math.ceil(price / 6),  totalAmount: price, savings: 0, tag: 'Best value' },
-    { months: 12, monthlyAmount: Math.ceil(price / 12), totalAmount: price, savings: 0 },
+    { months: 3,  monthlyAmount: Math.ceil(price / 3),    totalAmount: price,   savings: 0, interestRate: 0,  tag: '0% Interest' },
+    { months: 6,  monthlyAmount: Math.ceil(total6 / 6),   totalAmount: total6,  savings: 0, interestRate: 16, tag: '16% p.a.' },
+    { months: 12, monthlyAmount: Math.ceil(total12 / 12), totalAmount: total12, savings: 0, interestRate: 16, tag: '16% p.a.' },
   ];
 }
 
@@ -247,8 +250,8 @@ export default function PaymentOptions({ tripPrice, tripTitle, onProceed }: Paym
                 ? <CheckCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                 : <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />}
               {emiEligible
-                ? <span>No-cost EMI available · 0% interest · No processing fee</span>
-                : <span>No-cost EMI available on orders above ₹5,000</span>}
+                ? <span>3-month EMI is 0% interest · 6 &amp; 12 month plans include 16% p.a. interest</span>
+                : <span>EMI available on orders above ₹5,000</span>}
             </div>
 
             {/* EMI plans */}
@@ -277,17 +280,27 @@ export default function PaymentOptions({ tripPrice, tripTitle, onProceed }: Paym
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-semibold text-primary">{plan.months} months</p>
                         {plan.tag && (
-                          <span className="text-[10px] font-bold bg-accent/20 text-secondary px-2 py-0.5 rounded-full">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            plan.interestRate === 0
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-orange-100 text-orange-700'
+                          }`}>
                             {plan.tag}
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-secondary mt-0.5">0% interest · No processing fee</p>
+                      <p className="text-xs text-secondary mt-0.5">
+                        {plan.interestRate === 0
+                          ? '0% interest · No extra charge'
+                          : `+16% interest · Total ${fmt(plan.totalAmount)}`}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-display text-lg font-semibold text-primary">{fmt(plan.monthlyAmount)}<span className="text-xs font-normal text-secondary">/mo</span></p>
-                    <p className="text-xs text-secondary">Total: {fmt(plan.totalAmount)}</p>
+                    {plan.interestRate > 0 && (
+                      <p className="text-[10px] text-orange-600">Includes 16% interest</p>
+                    )}
                   </div>
                 </button>
               ))}
@@ -296,10 +309,10 @@ export default function PaymentOptions({ tripPrice, tripTitle, onProceed }: Paym
             {/* Bank selection */}
             <div>
               <div className="flex items-center gap-2 mb-2.5">
-                <p className="text-xs font-semibold text-secondary uppercase tracking-wider">Select Bank</p>
+                <p className="text-xs font-semibold text-secondary uppercase tracking-wider">Select Bank / Card</p>
                 <div className="flex items-center gap-1 text-[10px] text-secondary">
                   <Info className="w-3 h-3" />
-                  No-cost EMI on these cards
+                  {selectedEmi?.interestRate === 0 ? '0% interest on 3-month plan' : '16% p.a. interest applies'}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -434,6 +447,7 @@ export default function PaymentOptions({ tripPrice, tripTitle, onProceed }: Paym
       {/* ── Proceed button ───────────────────────────────────────────────── */}
       <div className="px-4 sm:px-5 pb-5">
         <button
+          type="button"
           onClick={handleProceed}
           disabled={!canProceed || processing}
           className="w-full flex items-center justify-center gap-2.5 bg-primary hover:bg-primary-light text-cream font-semibold text-sm py-4 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"

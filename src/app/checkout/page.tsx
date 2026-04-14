@@ -6,7 +6,6 @@ import { Calendar, Users, MapPin, Lock, CheckCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Trip } from '@/types';
 import { formatPriceWithCurrency } from '@/lib/utils';
-import PaymentMethods from '@/components/PaymentMethods';
 import PaymentOptions from '@/components/PaymentOptions';
 import TrustBadges from '@/components/TrustBadges';
 import CheckoutStepper from '@/components/CheckoutStepper';
@@ -107,8 +106,19 @@ function CheckoutContent() {
                 ? (halfPaymentCardType === 'credit' ? 'credit_card' : 'debit_card')
                 : formData.paymentMethod || 'upi';
 
-            // Amount to charge NOW: partial advance or full price
-            const chargeNow = advanceAmountNow !== null ? advanceAmountNow : totalPrice;
+            // Amount to charge NOW — always recompute from current totalPrice
+            // (totalPrice already has wallet/cashback deducted, so chargeNow reflects net amount)
+            let chargeNow: number;
+            if (selectedEmi !== null) {
+                // EMI: first instalment = totalPrice / tenure (recomputed so wallet deduction applies)
+                chargeNow = Math.ceil(totalPrice / (selectedEmi.tenure || 3));
+            } else if (formData.paymentMethod === 'half_payment') {
+                // 20% advance of NET price after wallet/promo
+                chargeNow = Math.ceil(totalPrice * 0.2);
+            } else {
+                // Full payment — net price after all deductions
+                chargeNow = totalPrice;
+            }
 
             const bookingData = {
                 trip: { id: trip.id },
@@ -135,14 +145,23 @@ function CheckoutContent() {
             const booking = bookingResponse.data;
             setBookingReference(booking.bookingReference);
 
-            // Pass pg: '' so backend sends empty pg to Easebuzz → all payment options shown
-            // Pass chargeNow so backend uses partial amount (20%/50%) instead of full price
-            const paymentResponse = await api.initiatePayment(booking.bookingReference, { pg: '', amount: chargeNow });
-            const paymentData = paymentResponse.data;
-
-            if (paymentData.success === false) {
-                throw new Error(paymentData.error || 'Failed to initiate payment');
-            }
+            // Always use our direct Easebuzz route — gives exact amount control + shows all payment methods
+            // (UPI, Cards, EMI, Net Banking, Wallets). Java backend event proxy only shows UPI.
+            const payRes = await fetch('/api/payment/initiate-partial', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bookingReference: booking.bookingReference,
+                    chargeNow,               // exact amount: partial advance OR full price
+                    totalAmount: totalPrice,
+                    customerName: formData.customerName,
+                    customerEmail: formData.customerEmail,
+                    customerPhone: formData.customerPhone,
+                    tripTitle: trip.title,
+                }),
+            });
+            const paymentData = await payRes.json();
+            if (!payRes.ok) throw new Error(paymentData.error || 'Payment initiation failed');
 
             if (paymentData.paymentUrl) {
                 // Store pending wallet/cashback info — credited only after payment confirmed
@@ -387,24 +406,6 @@ function CheckoutContent() {
                                         }}
                                     />
 
-                                    {/* Legacy method picker — shown for international or fallback */}
-                                    {visitor === 'foreigner' && (
-                                        <div className="mt-4">
-                                            <PaymentMethods
-                                                selectedMethod={formData.paymentMethod}
-                                                onMethodChange={(method) => {
-                                                    setFormData({ ...formData, paymentMethod: method });
-                                                    if (method !== 'credit_card') setSelectedEmi(null);
-                                                }}
-                                                amount={totalPrice}
-                                                bookingReference={bookingReference}
-                                                selectedEmi={selectedEmi}
-                                                onEmiChange={(emi) => setSelectedEmi(emi)}
-                                                onHalfPaymentCardTypeChange={(cardType) => setHalfPaymentCardType(cardType)}
-                                                isInternational={true}
-                                            />
-                                        </div>
-                                    )}
                                     <TrustBadges isInternational={visitor === 'foreigner'} />
                                 </section>
 

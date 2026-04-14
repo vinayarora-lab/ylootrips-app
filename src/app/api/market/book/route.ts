@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { generateTicket, logLeadToSheet } from '@/lib/leads';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ylootrips.com';
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://trip-backend-65232427280.asia-south1.run.app/api';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'connectylootrips@gmail.com';
 const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
+const EASEBUZZ_KEY = process.env.EASEBUZZ_KEY || '';
+const EASEBUZZ_SALT = process.env.EASEBUZZ_SALT || '';
+const EASEBUZZ_ENV = process.env.EASEBUZZ_ENV || 'production';
 const MARKET_EVENT_ID = process.env.HOTEL_EVENT_ID
   ? Number(process.env.HOTEL_EVENT_ID)
   : process.env.FLIGHT_EVENT_ID
@@ -14,7 +18,7 @@ const MARKET_EVENT_ID = process.env.HOTEL_EVENT_ID
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, packageTitle, destination, sourceUrl, ourPrice, marketPrice, priceDiff, guests } = body;
+    const { name, email, phone, packageTitle, destination, sourceUrl, ourPrice, chargeNow, paymentMode, paymentMethod, marketPrice, priceDiff, guests } = body;
 
     if (!name || !email || !phone || !ourPrice) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -24,6 +28,9 @@ export async function POST(req: NextRequest) {
     if (totalPayable <= 0) {
       return NextResponse.json({ error: 'Invalid price' }, { status: 400 });
     }
+
+    // chargeNow is the amount to collect now (may be partial advance)
+    const amountToCharge = chargeNow && Number(chargeNow) > 0 ? Math.round(Number(chargeNow)) : totalPayable;
 
     const txnid = `MKT-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     const ticket = generateTicket();
@@ -102,6 +109,91 @@ ACTION: Book from source above after payment confirms.
       }).catch(() => {});
     }
 
+    // ── Direct Easebuzz (supports partial/EMI chargeNow amounts) ─────────────
+    if (EASEBUZZ_KEY && EASEBUZZ_SALT) {
+      try {
+        const amount = String(amountToCharge.toFixed(2));
+        const firstname = name.split(' ')[0] || name;
+        const rawPhone = phone.replace(/\D/g, '');
+        const cleanPhone = rawPhone.length >= 10 ? rawPhone.slice(-10) : rawPhone.padStart(10, '0');
+        const productinfo = paymentMode === 'partial'
+          ? `${(packageTitle || destination || 'Package').substring(0, 80)} (20% Advance)`
+          : paymentMode === 'emi'
+          ? `${(packageTitle || destination || 'Package').substring(0, 80)} (EMI)`
+          : (packageTitle || destination || 'Package').substring(0, 100);
+
+        // Map paymentMethod → Easebuzz show_payment_mode
+        const methodMap: Record<string, string> = {
+          upi: 'UPI',
+          credit_card: 'CC',
+          debit_card: 'DC',
+          netbanking: 'NB',
+        };
+        const showMode = paymentMode === 'emi'
+          ? 'EMI'
+          : (paymentMethod && methodMap[paymentMethod]) || '';
+
+        const udf1 = txnid;
+        const udf2 = String(totalPayable); // store full price for reference
+        const hashStr = [
+          EASEBUZZ_KEY, txnid, amount, productinfo, firstname, email,
+          udf1, udf2, '', '', '',
+          '', '', '', '', '',
+          EASEBUZZ_SALT,
+        ].join('|');
+        const hash = crypto.createHash('sha512').update(hashStr).digest('hex');
+
+        const payUrl = EASEBUZZ_ENV === 'production'
+          ? 'https://pay.easebuzz.in/payment/initiateLink'
+          : 'https://testpay.easebuzz.in/payment/initiateLink';
+
+        const formData = new URLSearchParams({
+          key: EASEBUZZ_KEY,
+          txnid,
+          amount,
+          productinfo,
+          firstname,
+          email,
+          phone: cleanPhone || '9999999999',
+          udf1,
+          udf2,
+          udf3: '', udf4: '', udf5: '',
+          hash,
+          surl: `${SITE_URL}/market/booking-success?ticket=${ticket}&txnid=${txnid}`,
+          furl: `${SITE_URL}/market/booking-failure?ticket=${ticket}`,
+          ...(showMode && { show_payment_mode: showMode }),
+        });
+
+        const ebRes = await fetch(payUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData,
+        });
+        const ebJson = await ebRes.json();
+
+        if (ebJson.status === 1 && ebJson.data) {
+          const redirectBase = EASEBUZZ_ENV === 'production'
+            ? 'https://pay.easebuzz.in'
+            : 'https://testpay.easebuzz.in';
+          return NextResponse.json({
+            paymentUrl: `${redirectBase}/pay/${ebJson.data}`,
+            txnid, ticket,
+            chargeNow: amountToCharge,
+            totalAmount: totalPayable,
+          });
+        }
+
+        console.error('Easebuzz market book error:', ebJson);
+        return NextResponse.json(
+          { error: ebJson.error_desc || ebJson.message || 'Payment gateway error. Please try again.' },
+          { status: 502 }
+        );
+      } catch (err) {
+        console.error('Market book Easebuzz error:', err);
+        return NextResponse.json({ error: 'Payment gateway error. Please try again.' }, { status: 500 });
+      }
+    }
+
     // ── Easebuzz via backend event proxy ─────────────────────────────────────
     if (MARKET_EVENT_ID) {
       try {
@@ -117,7 +209,7 @@ ACTION: Book from source above after payment confirms.
             customerPhone: cleanPhone,
             eventDate: new Date().toISOString().slice(0, 10),
             paymentMethod: 'upi',
-            numberOfTickets: totalPayable,
+            numberOfTickets: amountToCharge,
             specialRequests,
           }),
         });

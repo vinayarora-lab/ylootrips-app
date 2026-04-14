@@ -11,6 +11,9 @@ import {
   CheckCircle, BadgePercent, ShieldCheck,
 } from 'lucide-react';
 import { TourJsonLd, BreadcrumbJsonLd, FaqJsonLd } from '@/components/JsonLd';
+import { useWallet } from '@/context/WalletContext';
+import PaymentOptions from '@/components/PaymentOptions';
+import PromoCodeInput from '@/components/PromoCodeInput';
 
 /* ─────────────────────────────────────────────────────────────────── */
 /*  Types                                                              */
@@ -128,7 +131,10 @@ function PackageBookingDrawer({ pkg, onClose }: { pkg: PackageData; onClose: () 
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  // payment flow: 'options' → show PaymentOptions, 'form' → show customer details
+  const [payStep, setPayStep] = useState<'options' | 'form'>('options');
+  const [chargeNow, setChargeNow] = useState<number | null>(null);
+  const [paymentMode, setPaymentMode] = useState<'full' | 'emi' | 'partial'>('full');
   const [cbName, setCbName] = useState('');
   const [cbPhone, setCbPhone] = useState('');
   const [cbSent, setCbSent] = useState(false);
@@ -137,7 +143,12 @@ function PackageBookingDrawer({ pkg, onClose }: { pkg: PackageData; onClose: () 
   const totalPrice = pkg.priceINR * Number(guests || 2);
   const discountAmt = Math.round(totalPrice * 0.05);
   const finalPrice = totalPrice - discountAmt;
-  const emi = Math.ceil(finalPrice / 3);
+
+  const handlePaymentSelected = (payload: { mode: 'full' | 'emi' | 'partial'; amountNow: number }) => {
+    setChargeNow(payload.amountNow);
+    setPaymentMode(payload.mode);
+    setPayStep('form');
+  };
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,6 +167,8 @@ function PackageBookingDrawer({ pkg, onClose }: { pkg: PackageData; onClose: () 
           destination: pkg.heroTitle,
           sourceUrl: pkg.canonicalUrl,
           ourPrice: finalPrice,
+          chargeNow: chargeNow ?? finalPrice,
+          paymentMode,
           marketPrice: totalPrice,
           priceDiff: discountAmt,
         }),
@@ -223,89 +236,64 @@ function PackageBookingDrawer({ pkg, onClose }: { pkg: PackageData; onClose: () 
         <div className="overflow-y-auto flex-1 overscroll-contain">
           {/* PAY TAB */}
           {tab === 'pay' && (
-            <div className="p-5 space-y-4">
+            <div className="p-4 space-y-4">
+              {/* Guest selector */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5">Number of Guests</label>
                 <div className="flex gap-2">
                   {['1','2','3','4','5','6'].map(n => (
-                    <button key={n} onClick={() => setGuests(n)}
+                    <button key={n} onClick={() => { setGuests(n); setPayStep('options'); setChargeNow(null); }}
                       className={`w-10 h-10 rounded-xl text-sm font-bold border transition-all ${guests === n ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}>{n}</button>
                   ))}
                 </div>
               </div>
 
-              {/* Price breakdown */}
-              <div className="bg-gray-50 rounded-2xl p-4 space-y-2.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">₹{pkg.priceINR.toLocaleString('en-IN')} × {guests} guest{Number(guests) > 1 ? 's' : ''}</span>
-                  <span className="text-gray-700 font-medium">₹{totalPrice.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between text-sm text-green-700">
-                  <span className="flex items-center gap-1"><BadgePercent size={13} /> Early bird 5% off</span>
-                  <span className="font-semibold">− ₹{discountAmt.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="border-t border-gray-200 pt-2 flex justify-between">
-                  <span className="font-bold text-gray-900">Total payable</span>
-                  <span className="font-display text-xl text-gray-900">₹{finalPrice.toLocaleString('en-IN')}</span>
-                </div>
-              </div>
+              {/* Step 1: Payment Options */}
+              {payStep === 'options' && (
+                <PaymentOptions
+                  tripPrice={finalPrice}
+                  tripTitle={pkg.heroTitle}
+                  onProceed={(payload) => handlePaymentSelected(payload)}
+                />
+              )}
 
-              {/* EMI */}
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-blue-800">No-cost EMI available</p>
-                  <p className="text-[11px] text-blue-500 mt-0.5">3 easy monthly installments</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-display text-blue-800">₹{emi.toLocaleString('en-IN')}</p>
-                  <p className="text-[10px] text-blue-400">/month × 3</p>
-                </div>
-              </div>
-
-              {/* Trust badges */}
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { icon: <ShieldCheck size={14} className="text-green-600" />, label: '100% Refund', sub: 'if unavailable' },
-                  { icon: <CreditCard size={14} className="text-blue-600" />, label: 'Secure PG', sub: 'Easebuzz' },
-                  { icon: <BadgePercent size={14} className="text-amber-600" />, label: '5% Off', sub: 'early bird' },
-                ].map(({ icon, label, sub }) => (
-                  <div key={label} className="bg-gray-50 rounded-xl p-2.5 text-center">
-                    <div className="flex justify-center mb-1">{icon}</div>
-                    <p className="text-[11px] font-bold text-gray-800">{label}</p>
-                    <p className="text-[9px] text-gray-400">{sub}</p>
+              {/* Step 2: Customer details form */}
+              {payStep === 'form' && (
+                <div className="space-y-3">
+                  {/* Selected plan summary */}
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-green-800">
+                        {paymentMode === 'partial' ? '20% Advance Selected' : paymentMode === 'emi' ? 'EMI Selected' : 'Full Payment Selected'}
+                      </p>
+                      <p className="text-[11px] text-green-600 mt-0.5">
+                        Paying now: ₹{(chargeNow ?? finalPrice).toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                    <button onClick={() => { setPayStep('options'); setPayError(''); }}
+                      className="text-xs text-green-700 underline">Change</button>
                   </div>
-                ))}
-              </div>
 
-              {!showForm ? (
-                <button onClick={() => setShowForm(true)}
-                  className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-3.5 rounded-xl hover:bg-gray-800 transition-colors">
-                  <CreditCard size={15} /> Proceed to Pay ₹{finalPrice.toLocaleString('en-IN')}
-                </button>
-              ) : (
-                <form onSubmit={handlePay} className="space-y-2.5">
-                  <p className="text-xs font-semibold text-gray-700">Enter your details to continue</p>
-                  <input required type="text" placeholder="Full name"
-                    value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
-                  <input required type="email" placeholder="Email address"
-                    value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
-                  <input required type="tel" placeholder="Phone number"
-                    value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
-                  {payError && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{payError}</p>}
-                  <div className="flex gap-2">
+                  <form onSubmit={handlePay} className="space-y-2.5">
+                    <p className="text-xs font-semibold text-gray-700">Enter your details to continue</p>
+                    <input required type="text" placeholder="Full name"
+                      value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+                      className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
+                    <input required type="email" placeholder="Email address"
+                      value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                      className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
+                    <input required type="tel" placeholder="Phone number"
+                      value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+                      className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-900" />
+                    {payError && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{payError}</p>}
                     <button type="submit" disabled={paying}
-                      className="flex-1 flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-3 rounded-xl hover:bg-gray-800 disabled:opacity-60 transition-colors">
+                      className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-3.5 rounded-xl hover:bg-gray-800 disabled:opacity-60 transition-colors">
                       {paying ? <Loader2 size={14} className="animate-spin" /> : <CreditCard size={14} />}
-                      {paying ? 'Redirecting…' : `Pay ₹${finalPrice.toLocaleString('en-IN')} via Easebuzz`}
+                      {paying ? 'Redirecting…' : `Pay ₹${(chargeNow ?? finalPrice).toLocaleString('en-IN')} via Easebuzz`}
                     </button>
-                    <button type="button" onClick={() => { setShowForm(false); setPayError(''); }}
-                      className="px-4 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50">Back</button>
-                  </div>
-                  <p className="text-[10px] text-gray-400 text-center">🔒 Secured by Easebuzz · No hidden charges · Full refund policy</p>
-                </form>
+                    <p className="text-[10px] text-gray-400 text-center">🔒 Secured by Easebuzz · No hidden charges · Full refund policy</p>
+                  </form>
+                </div>
               )}
             </div>
           )}
@@ -376,14 +364,69 @@ function PackageBookingDrawer({ pkg, onClose }: { pkg: PackageData; onClose: () 
   );
 }
 
-function BookingSidebar({ pkg, onOpenDrawer }: { pkg: PackageData; onOpenDrawer: () => void }) {
+function BookingSidebar({ pkg }: { pkg: PackageData }) {
   const [guests, setGuests] = useState(1);
   const [date, setDate] = useState('');
+  const [step, setStep] = useState<'config' | 'payment' | 'details'>('config');
+  const [chargeNow, setChargeNow] = useState<number | null>(null);
+  const [paymentMode, setPaymentMode] = useState<'full' | 'emi' | 'partial'>('full');
+  const [form, setForm] = useState({ name: '', email: '', phone: '' });
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState('');
+  const [promoCode, setPromoCode] = useState<string | null>(null);
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [applyWallet, setApplyWallet] = useState(false);
+  const { balance: walletBalance } = useWallet();
   const slots = spotsLeft(pkg.slug);
   const live = viewers(pkg.slug);
   const total = pkg.priceINR * guests;
   const emi = Math.ceil(total / 6);
   const deposit = Math.ceil(total * (pkg.depositPercent ?? 30) / 100);
+  const maxWalletUsable = Math.round(Math.max(0, total - promoDiscount) * 0.10);
+  const walletDeduction = applyWallet ? Math.min(walletBalance, maxWalletUsable) : 0;
+  const effectiveTotal = Math.max(0, total - promoDiscount - walletDeduction);
+
+  const handlePaymentSelected = (payload: { mode: 'full' | 'emi' | 'partial'; amountNow: number }) => {
+    setChargeNow(payload.amountNow);
+    setPaymentMode(payload.mode);
+    setStep('details');
+  };
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPaying(true);
+    setPayError('');
+    try {
+      const res = await fetch('/api/market/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          guests: String(guests),
+          packageTitle: pkg.heroTitle,
+          destination: pkg.heroTitle,
+          sourceUrl: pkg.canonicalUrl,
+          ourPrice: effectiveTotal,
+          chargeNow: chargeNow ?? effectiveTotal,
+          paymentMode,
+          marketPrice: total,
+          priceDiff: promoDiscount + walletDeduction,
+        }),
+      });
+      const data = await res.json();
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        setPayError(data.error || 'Payment failed. Please try again.');
+      }
+    } catch {
+      setPayError('Network error. Please try again.');
+    } finally {
+      setPaying(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -407,142 +450,234 @@ function BookingSidebar({ pkg, onOpenDrawer }: { pkg: PackageData; onOpenDrawer:
           <p className="text-white/50 text-xs mt-1">≈ {fmtUSD(pkg.priceUSD)} for international travelers</p>
         </div>
 
-        <div className="p-5 space-y-4">
-          {/* Live signals */}
-          <div className="flex items-center gap-2 text-xs text-primary/55">
-            <Eye className="w-3.5 h-3.5 text-amber-500" />
-            <span><strong className="text-primary">{live} people</strong> viewing this package right now</span>
-          </div>
-          {slots && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
-              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse shrink-0" />
-              <span className="text-red-700 text-xs font-semibold">Only {slots} slots left for this month!</span>
+        {/* Step: Config (default) */}
+        {step === 'config' && (
+          <div className="p-5 space-y-4">
+            {/* Live signals */}
+            <div className="flex items-center gap-2 text-xs text-primary/55">
+              <Eye className="w-3.5 h-3.5 text-amber-500" />
+              <span><strong className="text-primary">{live} people</strong> viewing this package right now</span>
             </div>
-          )}
+            {slots && (
+              <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse shrink-0" />
+                <span className="text-red-700 text-xs font-semibold">Only {slots} slots left for this month!</span>
+              </div>
+            )}
 
-          {/* Guests */}
-          <div>
-            <label className="text-[10px] text-primary/50 uppercase tracking-widest font-semibold mb-1.5 block">
-              <Users className="w-3 h-3 inline mr-1" />Travelers
-            </label>
-            <select
-              value={guests}
-              onChange={e => setGuests(+e.target.value)}
-              className="w-full p-3 border border-primary/15 bg-cream/40 text-primary rounded-xl text-sm focus:outline-none focus:border-secondary"
+            {/* Guests */}
+            <div>
+              <label className="text-[10px] text-primary/50 uppercase tracking-widest font-semibold mb-1.5 block">
+                <Users className="w-3 h-3 inline mr-1" />Travelers
+              </label>
+              <select
+                value={guests}
+                onChange={e => setGuests(+e.target.value)}
+                className="w-full p-3 border border-primary/15 bg-cream/40 text-primary rounded-xl text-sm focus:outline-none focus:border-secondary"
+              >
+                {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                  <option key={n} value={n}>{n} {n === 1 ? 'Traveler' : 'Travelers'}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Date */}
+            <div>
+              <label className="text-[10px] text-primary/50 uppercase tracking-widest font-semibold mb-1.5 block">
+                <Calendar className="w-3 h-3 inline mr-1" />Travel Date
+              </label>
+              <input
+                type="date"
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full p-3 border border-primary/15 bg-cream/40 text-primary rounded-xl text-sm focus:outline-none focus:border-secondary"
+              />
+            </div>
+
+            {/* Price breakdown */}
+            <div className="bg-cream/60 rounded-xl p-4 border border-primary/8 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-primary/55">{fmt(pkg.priceINR)} × {guests}</span>
+                <span className="font-medium">{fmt(total)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-green-700">
+                <span>10% WanderLoot cashback</span>
+                <span>+{fmt(Math.ceil(total * 0.1))}</span>
+              </div>
+              <div className="border-t border-primary/10 pt-2 flex justify-between font-semibold">
+                <span className="text-primary">Total</span>
+                <span className="font-display text-xl text-primary">{fmt(total)}</span>
+              </div>
+              <div className="text-xs text-primary/40 text-right">
+                Advance: {fmt(deposit)} · Balance on arrival
+              </div>
+            </div>
+
+            {/* EMI */}
+            <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-xl px-4 py-3">
+              <TrendingDown className="w-4 h-4 text-violet-600 shrink-0" />
+              <p className="text-xs text-violet-800">
+                <strong>No-cost EMI</strong> from <strong>{fmt(emi)}/mo</strong> for 6 months
+              </p>
+            </div>
+
+            {/* Book button */}
+            <button
+              onClick={() => setStep('payment')}
+              className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-secondary text-cream py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
             >
-              {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                <option key={n} value={n}>{n} {n === 1 ? 'Traveler' : 'Travelers'}</option>
-              ))}
-            </select>
-          </div>
+              <Zap className="w-4 h-4" />
+              Book Now
+            </button>
 
-          {/* Date */}
-          <div>
-            <label className="text-[10px] text-primary/50 uppercase tracking-widest font-semibold mb-1.5 block">
-              <Calendar className="w-3 h-3 inline mr-1" />Travel Date
-            </label>
-            <input
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              min={new Date().toISOString().split('T')[0]}
-              className="w-full p-3 border border-primary/15 bg-cream/40 text-primary rounded-xl text-sm focus:outline-none focus:border-secondary"
+            {/* WhatsApp */}
+            <a
+              href={`https://wa.me/918427831127?text=${encodeURIComponent(pkg.whatsappMsg + (date ? ` Date: ${date}.` : '') + ` Guests: ${guests}.`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Chat on WhatsApp
+            </a>
+
+            {/* Trust row */}
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { icon: Shield, label: 'Secure Pay', color: 'text-blue-600' },
+                { icon: RefreshCw, label: 'Free Cancel', color: 'text-green-600' },
+                { icon: Award, label: '4.9★ Rated', color: 'text-amber-600' },
+              ].map(({ icon: Icon, label, color }) => (
+                <div key={label} className="flex flex-col items-center gap-1 text-center">
+                  <Icon className={`w-4 h-4 ${color}`} />
+                  <span className="text-[10px] text-primary/45 uppercase tracking-wide leading-tight">{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step: Payment Options */}
+        {step === 'payment' && (
+          <div className="p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <button onClick={() => setStep('config')} className="text-xs text-primary/50 hover:text-primary flex items-center gap-1">
+                ← Back
+              </button>
+              <span className="text-xs text-primary/40">·</span>
+              <span className="text-xs text-primary/60">{guests} {guests === 1 ? 'traveler' : 'travelers'} · {fmt(total)}</span>
+            </div>
+
+            {/* Promo code */}
+            <PromoCodeInput
+              orderTotal={total}
+              appliedCode={promoCode}
+              discountAmount={promoDiscount}
+              onApply={(code, discount) => { setPromoCode(code); setPromoDiscount(discount); setChargeNow(null); }}
+              onRemove={() => { setPromoCode(null); setPromoDiscount(0); setChargeNow(null); }}
+            />
+
+            {/* WanderLoot wallet */}
+            {walletBalance > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-amber-900">WanderLoot 💸</p>
+                    <p className="text-xs text-amber-700">Balance: {fmt(walletBalance)} · Use up to {fmt(maxWalletUsable)}</p>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={applyWallet} onChange={e => { setApplyWallet(e.target.checked); setChargeNow(null); }} className="w-4 h-4 accent-amber-500" />
+                    <span className="text-xs font-semibold text-amber-800">Apply</span>
+                  </label>
+                </div>
+                {applyWallet && walletDeduction > 0 && (
+                  <div className="mt-2 pt-2 border-t border-amber-200 flex items-center justify-between text-xs">
+                    <span className="text-amber-800">💰 WanderLoot applied</span>
+                    <span className="font-semibold text-green-700">−{fmt(walletDeduction)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <PaymentOptions
+              tripPrice={effectiveTotal}
+              tripTitle={pkg.heroTitle}
+              onProceed={handlePaymentSelected}
             />
           </div>
+        )}
 
-          {/* Price breakdown */}
-          <div className="bg-cream/60 rounded-xl p-4 border border-primary/8 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-primary/55">{fmt(pkg.priceINR)} × {guests}</span>
-              <span className="font-medium">{fmt(total)}</span>
+        {/* Step: Customer Details */}
+        {step === 'details' && (
+          <div className="p-4 space-y-3">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-green-800">
+                  {paymentMode === 'partial' ? '20% Advance Selected' : paymentMode === 'emi' ? 'EMI Selected' : 'Full Payment Selected'}
+                </p>
+                <p className="text-[11px] text-green-600 mt-0.5">
+                  Paying now: ₹{(chargeNow ?? effectiveTotal).toLocaleString('en-IN')}
+                </p>
+              </div>
+              <button onClick={() => { setStep('payment'); setPayError(''); }} className="text-xs text-green-700 underline">Change</button>
             </div>
-            <div className="flex justify-between text-sm text-green-700">
-              <span>10% WanderLoot cashback</span>
-              <span>+{fmt(Math.ceil(total * 0.1))}</span>
-            </div>
-            <div className="border-t border-primary/10 pt-2 flex justify-between font-semibold">
-              <span className="text-primary">Total</span>
-              <span className="font-display text-xl text-primary">{fmt(total)}</span>
-            </div>
-            <div className="text-xs text-primary/40 text-right">
-              Advance: {fmt(deposit)} · Balance on arrival
-            </div>
+            <form onSubmit={handlePay} className="space-y-2.5">
+              <p className="text-xs font-semibold text-gray-700">Enter your details to continue</p>
+              <input required type="text" placeholder="Full name"
+                value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary" />
+              <input required type="email" placeholder="Email address"
+                value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary" />
+              <input required type="tel" placeholder="Phone number"
+                value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary" />
+              {payError && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{payError}</p>}
+              <button type="submit" disabled={paying}
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-secondary text-cream font-bold text-sm py-3.5 rounded-xl disabled:opacity-60 transition-colors">
+                {paying ? <Loader2 size={14} className="animate-spin" /> : <CreditCard size={14} />}
+                {paying ? 'Redirecting…' : `Pay ₹${(chargeNow ?? effectiveTotal).toLocaleString('en-IN')} via Easebuzz`}
+              </button>
+              <p className="text-[10px] text-gray-400 text-center">🔒 Secured by Easebuzz · No hidden charges</p>
+            </form>
           </div>
+        )}
+      </div>
 
-          {/* EMI */}
-          <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-xl px-4 py-3">
-            <TrendingDown className="w-4 h-4 text-violet-600 shrink-0" />
-            <p className="text-xs text-violet-800">
-              <strong>No-cost EMI</strong> from <strong>{fmt(emi)}/mo</strong> for 6 months
-            </p>
-          </div>
-
-          {/* Book button */}
-          <button
-            onClick={onOpenDrawer}
-            className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-secondary text-cream py-4 rounded-xl text-sm font-bold uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
-          >
-            <Zap className="w-4 h-4" />
-            Book Now
-          </button>
-
-          {/* WhatsApp */}
-          <a
-            href={`https://wa.me/918427831127?text=${encodeURIComponent(pkg.whatsappMsg + (date ? ` Date: ${date}.` : '') + ` Guests: ${guests}.`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Chat on WhatsApp
-          </a>
-
-          {/* Trust row */}
-          <div className="grid grid-cols-3 gap-2">
+      {/* Details card — only on config step */}
+      {step === 'config' && (
+        <>
+          <div className="bg-white rounded-2xl border border-primary/10 p-5 space-y-3">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest">Package Details</p>
             {[
-              { icon: Shield, label: 'Secure Pay', color: 'text-blue-600' },
-              { icon: RefreshCw, label: 'Free Cancel', color: 'text-green-600' },
-              { icon: Award, label: '4.9★ Rated', color: 'text-amber-600' },
-            ].map(({ icon: Icon, label, color }) => (
-              <div key={label} className="flex flex-col items-center gap-1 text-center">
-                <Icon className={`w-4 h-4 ${color}`} />
-                <span className="text-[10px] text-primary/45 uppercase tracking-wide leading-tight">{label}</span>
+              { label: 'Duration', value: pkg.duration },
+              { label: 'Group Size', value: pkg.groupSize },
+              { label: 'Difficulty', value: pkg.difficulty },
+              { label: 'Starts At', value: pkg.startLocation },
+              { label: 'Cancellation', value: 'Free up to 14 days' },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex justify-between text-sm">
+                <span className="text-primary/50">{label}</span>
+                <span className="font-medium text-primary text-right">{value}</span>
               </div>
             ))}
           </div>
-        </div>
-      </div>
 
-      {/* Details card */}
-      <div className="bg-white rounded-2xl border border-primary/10 p-5 space-y-3">
-        <p className="text-xs font-bold text-primary uppercase tracking-widest">Package Details</p>
-        {[
-          { label: 'Duration', value: pkg.duration },
-          { label: 'Group Size', value: pkg.groupSize },
-          { label: 'Difficulty', value: pkg.difficulty },
-          { label: 'Starts At', value: pkg.startLocation },
-          { label: 'Cancellation', value: 'Free up to 14 days' },
-        ].map(({ label, value }) => (
-          <div key={label} className="flex justify-between text-sm">
-            <span className="text-primary/50">{label}</span>
-            <span className="font-medium text-primary text-right">{value}</span>
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+            <p className="text-xs font-bold text-amber-800 mb-1">Need help planning?</p>
+            <p className="text-xs text-amber-700 mb-3">Our experts reply in under 1 hour</p>
+            <a
+              href="https://wa.me/918427831127"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#25D366] hover:bg-[#1ebe5d] px-4 py-2 rounded-full transition-colors"
+            >
+              <Phone className="w-3 h-3" /> +91 84278 31127
+            </a>
           </div>
-        ))}
-      </div>
-
-      {/* Help */}
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
-        <p className="text-xs font-bold text-amber-800 mb-1">Need help planning?</p>
-        <p className="text-xs text-amber-700 mb-3">Our experts reply in under 1 hour</p>
-        <a
-          href="https://wa.me/918427831127"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-[#25D366] hover:bg-[#1ebe5d] px-4 py-2 rounded-full transition-colors"
-        >
-          <Phone className="w-3 h-3" /> +91 84278 31127
-        </a>
-      </div>
+        </>
+      )}
     </div>
   );
 }
@@ -913,7 +1048,7 @@ export default function PackagePageLayout({ pkg }: { pkg: PackageData }) {
           {/* ── Right: Sidebar ── */}
           <div className="hidden lg:block">
             <div className="sticky top-6">
-              <BookingSidebar pkg={pkg} onOpenDrawer={() => setDrawerOpen(true)} />
+              <BookingSidebar pkg={pkg} />
             </div>
           </div>
         </div>

@@ -106,7 +106,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'YhlqkMVnZAan5NIH6n4B3zfBTiZeWMc2H1eiqAAnECE',
+    google: '9C1_Q3HeFI5G6i2JTyjPllbVtlomtZQzOsWDVekljY0',
   },
 };
 

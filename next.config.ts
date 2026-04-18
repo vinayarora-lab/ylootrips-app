@@ -26,6 +26,11 @@ const nextConfig: NextConfig = {
         source: '/images/(.*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
       },
+      // Cache hero videos aggressively
+      {
+        source: '/videos/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=2592000, stale-while-revalidate=86400' }],
+      },
     ];
   },
 

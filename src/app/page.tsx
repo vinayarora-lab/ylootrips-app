@@ -115,13 +115,26 @@ export default function Home() {
 
       {/* ── HERO — pulls up under the sticky topbar with negative margin ── */}
       <section className="relative -mt-14 h-[72vw] min-h-[300px] max-h-[420px] overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=900&q=85"
-          alt="India travel"
-          fill className="object-cover" priority
-        />
-        {/* Gradient: soft at top (nav sits here), heavy at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/80" />
+        {/* Ocean hero video */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=900&q=60"
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/videos/hero-ocean.mp4" type="video/mp4" />
+          {/* Fallback image if video fails */}
+          <Image
+            src="https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=900&q=85"
+            alt="Ocean travel"
+            fill className="object-cover" priority
+          />
+        </video>
+        {/* Gradient: soft at top (nav sits here), ocean teal at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-teal-900/20 to-black/85" />
 
         {/* Hero text — padded top to clear the topbar (56px) */}
         <div className="absolute bottom-0 left-0 right-0 p-5 pb-7">

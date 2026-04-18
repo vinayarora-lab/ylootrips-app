@@ -115,7 +115,7 @@ export default function RootLayout({
       <head>
         {/* Force light mode — prevent system dark mode from inverting the site */}
         <meta name="color-scheme" content="light" />
-        <meta name="theme-color" content="#F5753A" />
+        <meta name="theme-color" content="#1B3A6B" />
         {/* Viewport — critical for mobile rendering */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
         {/* PWA — makes it installable as a home-screen app */}
@@ -142,6 +142,19 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${GA_ID}');
+          `}
+        </Script>
+
+        {/* Service Worker registration */}
+        <Script id="sw-register" strategy="lazyOnload">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                  .then(function(reg) { console.log('SW registered'); })
+                  .catch(function(err) { console.log('SW error:', err); });
+              });
+            }
           `}
         </Script>
 

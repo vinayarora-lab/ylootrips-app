@@ -14,9 +14,15 @@ export default function Header() {
     const hasHero = pathname === '/';
 
     useEffect(() => {
-        const handleScroll = () => setIsScrolled(window.scrollY > 60);
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        // In phone-frame mode, scroll happens on #app-scroll, not window
+        const scrollEl = document.getElementById('app-scroll');
+        const handleScroll = () => {
+            const y = scrollEl ? scrollEl.scrollTop : window.scrollY;
+            setIsScrolled(y > 60);
+        };
+        const target = scrollEl ?? window;
+        target.addEventListener('scroll', handleScroll, { passive: true });
+        return () => target.removeEventListener('scroll', handleScroll);
     }, []);
 
     useEffect(() => {

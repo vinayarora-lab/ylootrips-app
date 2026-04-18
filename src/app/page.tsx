@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -57,26 +57,17 @@ const DESTINATIONS = [
 ];
 
 /* ── Reviews ─────────────────────────────────────────────────────────── */
-const REVIEWS = [
-  {
-    name: 'James Mitchell', country: '🇬🇧 London', rating: 5,
-    text: 'Absolutely flawless from start to finish. Our Kashmir trip was the most extraordinary experience of our lives. The team\'s local knowledge is unmatched.',
-    trip: 'Kashmir 6D · Nov 2025',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80',
-  },
-  {
-    name: 'Priya & Rohan', country: '🇮🇳 Mumbai', rating: 5,
-    text: 'Our Bali honeymoon was perfection. Every detail was taken care of — private villa, sunset dinners, zero stress. Worth every rupee.',
-    trip: 'Bali Honeymoon · Jan 2026',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&q=80',
-  },
-  {
-    name: 'Sarah Chen', country: '🇦🇺 Sydney', rating: 5,
-    text: 'Booked a last-minute Rajasthan tour and they delivered an incredible itinerary in under 2 hours. The 1-hour response promise is real!',
-    trip: 'Rajasthan 8D · Dec 2025',
-    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&q=80',
-  },
-];
+interface LiveReview {
+  id: number;
+  userName: string;
+  userTitle?: string;
+  userImage?: string;
+  comment: string;
+  rating?: number;
+  destination?: string;
+  tripDate?: string;
+  isFeatured?: boolean;
+}
 
 /* ── Trust pillars ───────────────────────────────────────────────────── */
 const TRUST_PILLARS = [
@@ -104,6 +95,18 @@ const STATS = [
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<'all' | 'india' | 'international' | 'honeymoon'>('all');
+  const [reviews, setReviews] = useState<LiveReview[]>([]);
+
+  useEffect(() => {
+    fetch('https://trip-backend-65232427280.asia-south1.run.app/api/testimonials')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: LiveReview[]) => {
+        // Sort latest first (highest id), show up to 4
+        const sorted = [...data].sort((a, b) => b.id - a.id).slice(0, 4);
+        setReviews(sorted);
+      })
+      .catch(() => setReviews([]));
+  }, []);
 
   const filtered = activeCategory === 'all' ? DESTINATIONS
     : activeCategory === 'india' ? DESTINATIONS.filter(d => d.country === 'India')
@@ -381,39 +384,66 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Review cards */}
+        {/* Review cards — live from website */}
         <div className="space-y-3">
-          {REVIEWS.map(({ name, country, rating, text, trip, avatar }) => (
-            <div key={name} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-              {/* Header */}
-              <div className="flex items-start gap-3 mb-3">
-                <Image
-                  src={avatar} alt={name} width={44} height={44}
-                  className="w-11 h-11 rounded-full object-cover border-2 border-gray-100 shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-bold text-gray-900 truncate">{name}</p>
-                    <div className="flex items-center gap-0.5 shrink-0 ml-2">
-                      {Array.from({ length: rating }).map((_, i) => (
-                        <Star key={i} size={10} className="fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
+          {reviews.length === 0 ? (
+            // Skeleton loaders while fetching
+            [1,2,3].map(i => (
+              <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm animate-pulse">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-11 h-11 rounded-full bg-gray-200 shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                    <div className="h-2.5 bg-gray-100 rounded w-1/3" />
                   </div>
-                  <p className="text-[11px] text-gray-400 font-medium">{country}</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-2.5 bg-gray-100 rounded w-full" />
+                  <div className="h-2.5 bg-gray-100 rounded w-4/5" />
                 </div>
               </div>
+            ))
+          ) : (
+            reviews.map((r) => (
+              <div key={r.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                {/* Header */}
+                <div className="flex items-start gap-3 mb-3">
+                  {r.userImage ? (
+                    <Image
+                      src={r.userImage} alt={r.userName} width={44} height={44}
+                      className="w-11 h-11 rounded-full object-cover border-2 border-gray-100 shrink-0"
+                    />
+                  ) : (
+                    <div className="w-11 h-11 rounded-full bg-amber-100 flex items-center justify-center shrink-0 text-amber-700 font-bold text-lg">
+                      {r.userName.charAt(0)}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold text-gray-900 truncate">{r.userName}</p>
+                      <div className="flex items-center gap-0.5 shrink-0 ml-2">
+                        {Array.from({ length: r.rating ?? 5 }).map((_, i) => (
+                          <Star key={i} size={10} className="fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-gray-400 font-medium">{r.userTitle ?? ''}</p>
+                  </div>
+                </div>
 
-              {/* Review text */}
-              <p className="text-[13px] text-gray-700 leading-relaxed">"{text}"</p>
+                {/* Review text */}
+                <p className="text-[13px] text-gray-700 leading-relaxed">"{r.comment}"</p>
 
-              {/* Trip badge */}
-              <div className="mt-3 flex items-center gap-1.5">
-                <CheckCircle size={12} className="text-emerald-500 fill-emerald-100 shrink-0" />
-                <span className="text-[11px] font-semibold text-gray-500">Verified trip · {trip}</span>
+                {/* Trip badge */}
+                <div className="mt-3 flex items-center gap-1.5">
+                  <CheckCircle size={12} className="text-emerald-500 fill-emerald-100 shrink-0" />
+                  <span className="text-[11px] font-semibold text-gray-500">
+                    Verified trip{r.destination ? ` · ${r.destination}` : ''}{r.tripDate ? ` · ${r.tripDate}` : ''}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         <Link

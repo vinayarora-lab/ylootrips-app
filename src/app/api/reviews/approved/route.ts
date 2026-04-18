@@ -24,6 +24,7 @@ export async function GET() {
   try {
     const reviews = readReviews()
       .filter(r => r.status === 'approved')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 20);
     return NextResponse.json({ reviews });
   } catch (err) {

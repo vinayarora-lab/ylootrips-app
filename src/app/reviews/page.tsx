@@ -108,8 +108,10 @@ function RatingBar({ stars, percent }: { stars: number; percent: number }) {
 
 export default async function ReviewsPage() {
   const testimonials = await getTestimonials();
-  const featured = testimonials.filter((t) => t.isFeatured);
-  const all = featured.length > 0 ? featured : testimonials;
+  // Sort latest first — by id descending (higher id = newer submission)
+  const sorted = [...testimonials].sort((a, b) => b.id - a.id);
+  const featured = sorted.filter((t) => t.isFeatured);
+  const all = featured.length > 0 ? featured : sorted;
 
   return (
     <>

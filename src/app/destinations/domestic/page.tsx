@@ -930,7 +930,7 @@ function DomesticDestinationsContent() {
                 All Tours <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {[
                 { slug: 'golden-triangle-10-day', title: '10-Day Golden Triangle', subtitle: 'Delhi · Agra · Jaipur', price: '$1,400', image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&q=80', href: '/tours/golden-triangle-10-day', checkoutHref: '/checkout/tour?tour=golden-triangle-10-day', tags: ['Taj Mahal', 'Amber Fort', 'Red Fort'], rating: 4.9, reviews: 312, badge: 'Most Popular', badgeBg: 'bg-gray-800' },
                 { slug: 'kerala-south-india-14-day', title: '14-Day Kerala & South India', subtitle: 'Kochi · Munnar · Alleppey · Pondicherry', price: '$1,900', image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80', href: '/tours/kerala-south-india-14-day', checkoutHref: '/checkout/tour?tour=kerala-south-india-14-day', tags: ['Houseboat', 'Tea Estates', 'French Quarter'], rating: 4.9, reviews: 287, badge: 'Best Value', badgeBg: 'bg-green-600' },
@@ -1088,7 +1088,7 @@ function DomesticDestinationsContent() {
           <div className="section-container max-w-3xl">
             <div className="text-center mb-10">
               <p className="text-caption uppercase tracking-[0.3em] text-gray-400 mb-3">Before You Go</p>
-              <h2 className="font-display text-display-lg text-primary">Visa, Safety & Practical Info</h2>
+              <h2 className="font-playfair text-2xl text-primary font-semibold">Visa, Safety & Practical Info</h2>
             </div>
             <div className="space-y-3">
               {visaInfo.map((item, i) => (
@@ -1142,14 +1142,14 @@ function DomesticDestinationsContent() {
       </section>
 
       {/* Trip grid */}
-      <section className="py-12 md:py-20 lg:py-28 bg-cream">
+      <section className="py-4 bg-cream">
         <div className="section-container">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-10 md:mb-14">
+          <div className="flex flex-col justify-between gap-2 mb-4">
             <div>
               <p className="text-caption uppercase tracking-[0.3em] text-secondary mb-2">
                 {activeRegion === 'All India' ? (isInternational ? 'Choose Your India Experience' : 'Across India') : activeRegion}
               </p>
-              <h2 className="font-display text-display-lg text-primary">
+              <h2 className="font-playfair text-2xl text-primary font-semibold">
                 {activeRegion === 'All India' ? (isInternational ? 'Where will your India story begin?' : 'Where in India?') : `Explore ${activeRegion}`}
               </h2>
             </div>
@@ -1157,7 +1157,7 @@ function DomesticDestinationsContent() {
           </div>
 
           {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {filtered.map((trip) => <TripCard key={trip.slug} trip={trip} />)}
             </div>
           ) : (
@@ -1186,40 +1186,37 @@ function DomesticDestinationsContent() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-24 bg-primary text-cream">
-        <div className="section-container">
-          <div className="max-w-3xl mx-auto text-center">
-            <p className="text-caption uppercase tracking-[0.3em] text-cream/50 mb-4">
-              {isInternational ? 'Start Planning Your India Trip' : 'India Travel Experts'}
-            </p>
-            <h2 className="font-display text-display-lg mb-4">
-              {isInternational ? 'Tell us your dream. We build the trip.' : 'Not sure where to start?'}
-            </h2>
-            <p className="text-cream/60 text-body-lg max-w-xl mx-auto mb-10">
-              {isInternational
-                ? 'Share your travel dates, group size, and interests. Our India specialists respond within 1 hour with a personalised itinerary and USD pricing — no obligation.'
-                : 'Tell us your interests, budget, and travel dates. Our India specialists respond in under 1 hour — 7 days a week.'}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href={isInternational
-                  ? 'https://wa.me/918427831127?text=Hi!%20I\'m%20from%20abroad%20and%20planning%20an%20India%20trip.%20Can%20you%20help%3F'
-                  : 'https://wa.me/918427831127?text=Hi%2C+I\'m+interested+in+a+domestic+India+trip'}
-                target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#1ebe5d] text-white px-8 py-4 font-semibold text-sm uppercase tracking-widest transition-colors rounded-sm"
-              >
-                <MessageCircle className="w-5 h-5" />
-                {isInternational ? 'WhatsApp Our India Experts' : 'Chat on WhatsApp'}
-              </a>
-              <Link href="/contact" className="inline-flex items-center justify-center gap-2 border border-cream/25 text-cream hover:border-cream hover:bg-white/5 px-8 py-4 text-sm uppercase tracking-widest transition-all rounded-sm">
-                {isInternational ? 'Get Free Custom Itinerary' : 'Plan My India Trip'}
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
-            </div>
-            <p className="text-cream/30 text-xs mt-6 uppercase tracking-widest">
-              {isInternational ? 'Free · No obligation · Response in 1 hour · USD pricing' : 'Free · No obligation · Response in under 1 hour'}
-            </p>
+      <section className="py-8 px-4 bg-gray-900 text-white">
+        <div className="text-center">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[#C4A77D] mb-2">
+            {isInternational ? 'Start Planning Your India Trip' : 'India Travel Experts'}
+          </p>
+          <h2 className="font-playfair text-2xl font-semibold mb-3">
+            {isInternational ? 'Tell us your dream. We build the trip.' : 'Not sure where to start?'}
+          </h2>
+          <p className="text-white/55 text-[13px] leading-relaxed mb-6">
+            {isInternational
+              ? 'Share your travel dates & interests. Our India specialists respond in 1 hour.'
+              : 'Tell us your budget and dates. Our specialists respond in under 1 hour.'}
+          </p>
+          <div className="flex flex-col gap-3">
+            <a
+              href={isInternational
+                ? 'https://wa.me/918427831127?text=Hi!%20I\'m%20from%20abroad%20and%20planning%20an%20India%20trip.%20Can%20you%20help%3F'
+                : 'https://wa.me/918427831127?text=Hi%2C+I\'m+interested+in+a+domestic+India+trip'}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3.5 rounded-2xl font-bold text-sm active:scale-[0.97] transition-transform"
+            >
+              <MessageCircle className="w-4 h-4" />
+              {isInternational ? 'WhatsApp Our India Experts' : 'Chat on WhatsApp'}
+            </a>
+            <Link href="/contact" className="flex items-center justify-center gap-2 border border-white/20 text-white px-6 py-3.5 rounded-2xl font-semibold text-sm active:scale-[0.97] transition-transform">
+              {isInternational ? 'Get Free Custom Itinerary' : 'Plan My India Trip'}
+            </Link>
           </div>
+          <p className="text-white/25 text-[10px] mt-4 uppercase tracking-widest">
+            {isInternational ? 'Free · No obligation · 1 hour response' : 'Free · No obligation · Under 1 hour'}
+          </p>
         </div>
       </section>
     </>

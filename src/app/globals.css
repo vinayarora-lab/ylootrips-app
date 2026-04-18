@@ -192,6 +192,40 @@ body {
   body { background-color: var(--color-cream); }
 }
 
+/* ── Phone-frame responsive grid fix ─────────────────────────────────────────
+   Tailwind breakpoints fire based on VIEWPORT width, not container width.
+   Our phone frame is always ~393px wide even on a 1440px desktop viewport.
+   Force 3/4-column grids to 1-column and 2-column responsive grids to stay
+   at 2-columns max inside the #app-scroll container.
+   This uses CSS class selectors with escaped colons (valid CSS).
+───────────────────────────────────────────────────────────────────────────── */
+#app-scroll .sm\:grid-cols-3,
+#app-scroll .md\:grid-cols-3,
+#app-scroll .lg\:grid-cols-3,
+#app-scroll .xl\:grid-cols-3,
+#app-scroll .sm\:grid-cols-4,
+#app-scroll .md\:grid-cols-4,
+#app-scroll .lg\:grid-cols-4,
+#app-scroll .xl\:grid-cols-4 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+/* Card-grid specific: sm:grid-cols-2 for full cards → keep 1 column in phone frame */
+#app-scroll .sm\:grid-cols-2.card-grid,
+#app-scroll .md\:grid-cols-2.card-grid {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+/* Flex row overrides — prevent sm:flex-row from making side-by-side layouts on phone */
+#app-scroll .sm\:flex-row.stack-mobile {
+  flex-direction: column;
+}
+
+/* Responsive font-size helpers for display text inside the phone frame */
+#app-scroll .text-display-xl { font-size: clamp(1.75rem, 5vw, 2.25rem); }
+#app-scroll .text-display-lg { font-size: clamp(1.5rem, 4vw, 2rem); }
+#app-scroll .text-display-2xl { font-size: clamp(2rem, 6vw, 2.75rem); }
+
 /* Box sizing - only on non-layout elements to avoid breaking hero/sections */
 *, *::before, *::after {
   box-sizing: border-box;

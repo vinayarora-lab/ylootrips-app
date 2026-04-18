@@ -209,7 +209,7 @@ export default function BlogsPage() {
       </section>
 
       {/* Static India Travel Guides — always visible */}
-      <section className="py-14 md:py-20 bg-cream">
+      <section className="py-4 bg-cream">
         <div className="section-container">
           <div className="mb-10">
             <p className="text-caption uppercase tracking-[0.3em] text-secondary mb-3">India Travel Guides</p>
@@ -217,7 +217,7 @@ export default function BlogsPage() {
               Essential reads for <span className="italic">first-time visitors</span>
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             {staticGuides.map((guide) => (
               <Link
                 key={guide.href}
@@ -268,9 +268,9 @@ export default function BlogsPage() {
 
       {/* Featured Post */}
       {!loading && featuredPost && (
-        <section className="py-16 md:py-24 bg-cream">
+        <section className="py-6 bg-cream">
           <div className="section-container">
-            <Link href={`/blogs/${featuredPost.slug}`} className="group grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Link href={`/blogs/${featuredPost.slug}`} className="group grid grid-cols-1 gap-4">
               <div className="relative h-[400px] lg:h-[500px] overflow-hidden">
                 <Image
                   src={featuredPost.imageUrl || 'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=800&q=80'}
@@ -312,20 +312,20 @@ export default function BlogsPage() {
       )}
 
       {/* All Posts Grid */}
-      <section className="py-16 md:py-24 bg-cream-dark">
+      <section className="py-6 bg-cream-dark">
         <div className="section-container">
           <p className="text-caption uppercase tracking-[0.3em] text-secondary mb-3">From Our Writers</p>
           <h2 className="font-display text-display-lg text-primary mb-2">Latest Stories</h2>
           <p className="text-primary/50 text-sm mb-10">Our team shares travel insights, destination guides, and inspiration.</p>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-4">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="h-[400px] bg-cream animate-pulse" />
               ))}
             </div>
           ) : regularPosts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-4">
               {regularPosts.map((post) => (
                 <Link
                   key={post.id}
@@ -375,7 +375,7 @@ export default function BlogsPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-20 bg-primary text-cream">
+      <section className="py-6 bg-primary text-cream">
         <div className="section-container">
           <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-16">
             <div className="flex-1 text-center md:text-left">

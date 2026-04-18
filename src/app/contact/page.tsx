@@ -128,9 +128,9 @@ function ContactForm() {
         </div>
       )}
 
-      <section className="py-10 md:py-16 lg:py-24 bg-cream">
+      <section className="py-4 bg-cream">
         <div className="section-container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16">
+          <div className="grid grid-cols-1 gap-6">
             {/* Form */}
             <div>
               <h2 className="font-display text-display-lg text-primary mb-6 md:mb-8">
@@ -138,7 +138,7 @@ function ContactForm() {
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">Your Name *</label>
                     <input
@@ -157,7 +157,7 @@ function ContactForm() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">Phone Number</label>
                     <input
@@ -177,7 +177,7 @@ function ContactForm() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="block text-caption uppercase tracking-widest text-primary/60 mb-2">Number of Travelers</label>
                     <select

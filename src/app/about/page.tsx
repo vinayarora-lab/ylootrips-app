@@ -75,9 +75,9 @@ export default function AboutPage() {
       </section>
 
       {/* ── MARKET OPPORTUNITY ── */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-6 bg-white">
         <div className="section-container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 gap-6">
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">The Opportunity</p>
               <h2 className="font-display text-3xl md:text-4xl lg:text-5xl text-gray-900 leading-tight mb-6">
@@ -137,10 +137,10 @@ export default function AboutPage() {
       </section>
 
       {/* ── FOUNDER SECTION ── */}
-      <section className="py-16 md:py-24 bg-gray-950">
+      <section className="py-6 bg-gray-950">
         <div className="section-container">
           <div className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="grid grid-cols-1 gap-6">
 
               {/* Photo */}
               <div className="flex justify-center lg:justify-start">
@@ -215,7 +215,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── VISION & MISSION ── */}
-      <section className="py-16 md:py-24 bg-gray-950">
+      <section className="py-6 bg-gray-950">
         <div className="section-container">
           <div className="max-w-4xl mx-auto text-center mb-12">
             <p className="text-white/70 text-xs font-bold uppercase tracking-widest mb-3">Our North Star</p>
@@ -224,7 +224,7 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 gap-4">
             {/* Vision */}
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-8">
               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-5">
@@ -255,7 +255,7 @@ export default function AboutPage() {
           </div>
 
           {/* 3 pillars */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mt-6">
+          <div className="grid grid-cols-1 gap-4 mt-4">
             {[
               { icon: '🤝', title: 'Trust First', desc: 'Every decision we make starts with "would our traveler trust this?"' },
               { icon: '💡', title: 'Tech-Enabled', desc: 'AI planning tools, real-time support, and seamless booking — all in one.' },
@@ -272,7 +272,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── TIMELINE ── */}
-      <section className="py-16 md:py-20 bg-gray-950">
+      <section className="py-6 bg-gray-950">
         <div className="section-container">
           <div className="text-center mb-12">
             <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-3">Our Journey</p>
@@ -312,13 +312,13 @@ export default function AboutPage() {
       </section>
 
       {/* ── VALUES ── */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-6 bg-white">
         <div className="section-container">
           <div className="text-center mb-12">
             <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-3">Our DNA</p>
             <h2 className="font-display text-3xl md:text-4xl text-gray-900">What we stand for</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 gap-4">
             {[
               { icon: Heart, title: 'Traveler First', desc: 'Every feature, every policy, every decision — we ask "is this good for our traveler?"', color: 'text-rose-500 bg-rose-50' },
               { icon: Shield, title: 'Radical Transparency', desc: 'Price shown = price paid. No surprises at checkout. No hidden hotel charges.', color: 'text-blue-500 bg-blue-50' },
@@ -338,7 +338,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── INTERNATIONAL VISITORS ── */}
-      <section className="py-16 md:py-24 bg-gray-950 relative overflow-hidden">
+      <section className="py-6 bg-gray-950 relative overflow-hidden">
         {/* Ambient glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-blue-500/8 rounded-full blur-3xl pointer-events-none" />
 
@@ -359,7 +359,7 @@ export default function AboutPage() {
           </div>
 
           {/* Why India + Why YlooTrips */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-14">
+          <div className="grid grid-cols-1 gap-5 mb-6">
             {/* Why India */}
             <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
               <div className="text-3xl mb-4">🇮🇳</div>
@@ -434,7 +434,7 @@ export default function AboutPage() {
           </div>
 
           {/* Trust signals for foreign visitors */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl mx-auto mb-10">
+          <div className="grid grid-cols-1 gap-4 mb-6">
             {[
               { icon: '🛡️', title: 'Safe & Verified', desc: 'All accommodations and transport operators are personally vetted. We never compromise on traveler safety.', color: 'border-green-500/20 bg-green-500/5' },
               { icon: '📸', title: 'No Surprises', desc: 'Every itinerary detail, hotel name, and inclusion is disclosed upfront. What you see is exactly what you get.', color: 'border-blue-500/20 bg-blue-500/5' },
@@ -493,7 +493,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-16 md:py-24 bg-gray-950">
+      <section className="py-6 bg-gray-950">
         <div className="section-container text-center">
           <div className="inline-flex items-center gap-2 bg-green-500/15 border border-green-500/30 rounded-full px-4 py-1.5 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />

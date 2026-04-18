@@ -204,7 +204,7 @@ export default async function ReviewsPage() {
       {/* ── MAIN CONTENT ── */}
       <div className="bg-gray-50 min-h-screen">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4">
 
             {/* ── LEFT SIDEBAR ── */}
             <div className="lg:col-span-1 space-y-4">

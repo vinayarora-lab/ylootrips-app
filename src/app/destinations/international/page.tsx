@@ -702,14 +702,14 @@ export default function InternationalDestinationsPage() {
       </section>
 
       {/* Destination grid */}
-      <section className="py-12 md:py-20 bg-cream">
+      <section className="py-4 bg-cream">
         <div className="section-container">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-10">
+          <div className="flex flex-col justify-between gap-2 mb-4">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-secondary mb-2">
                 {activeRegion === 'All' ? 'Across the globe' : activeRegion}
               </p>
-              <h2 className="font-display text-4xl md:text-5xl text-primary">
+              <h2 className="font-playfair text-2xl text-primary font-semibold">
                 {activeRegion === 'All' ? 'Where in the world?' : `Explore ${activeRegion}`}
               </h2>
             </div>
@@ -717,7 +717,7 @@ export default function InternationalDestinationsPage() {
           </div>
 
           {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {filtered.map((d) => (
                 <IntlCard key={d.name} d={d} />
               ))}
@@ -746,32 +746,27 @@ export default function InternationalDestinationsPage() {
       </section>
 
       {/* WhatsApp CTA */}
-      <section className="py-16 md:py-24 bg-secondary text-cream">
-        <div className="section-container">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="flex justify-center mb-5">
-              <Globe className="w-10 h-10 text-cream/40" />
-            </div>
-            <p className="text-xs uppercase tracking-[0.3em] text-cream/50 mb-4">International Travel Specialists</p>
-            <h2 className="font-display text-4xl md:text-5xl mb-4">Ready to explore the world?</h2>
-            <p className="text-cream/60 text-lg max-w-xl mx-auto mb-10">
-              We handle visa paperwork, flights, hotels, and on-ground guides. You just pack and go. Our specialists respond in under 1 hour.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="https://wa.me/918427831127?text=Hi%2C+I'm+interested+in+an+international+trip"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#1ebe5d] text-white px-8 py-4 font-semibold text-sm uppercase tracking-widest transition-colors rounded-full"
-              >
-                <MessageCircle className="w-5 h-5" />
-                Chat on WhatsApp
-              </a>
-              <Link href="/contact" className="inline-flex items-center justify-center gap-2 border border-cream/25 text-cream hover:border-cream hover:bg-white/5 px-8 py-4 text-sm uppercase tracking-widest transition-all rounded-full">
-                Plan My World Trip
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
-            </div>
+      <section className="py-8 px-4 bg-gray-900 text-white">
+        <div className="text-center">
+          <Globe className="w-8 h-8 text-white/30 mx-auto mb-3" />
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[#C4A77D] mb-2">International Travel Specialists</p>
+          <h2 className="font-playfair text-2xl font-semibold mb-3">Ready to explore the world?</h2>
+          <p className="text-white/55 text-[13px] leading-relaxed mb-6">
+            We handle visa, flights, hotels & guides. You just pack and go.
+          </p>
+          <div className="flex flex-col gap-3">
+            <a
+              href="https://wa.me/918427831127?text=Hi%2C+I'm+interested+in+an+international+trip"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3.5 rounded-2xl font-bold text-sm active:scale-[0.97] transition-transform"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Chat on WhatsApp
+            </a>
+            <Link href="/contact" className="flex items-center justify-center gap-2 border border-white/20 text-white px-6 py-3.5 rounded-2xl font-semibold text-sm active:scale-[0.97] transition-transform">
+              Plan My World Trip
+            </Link>
           </div>
         </div>
       </section>

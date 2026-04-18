@@ -154,11 +154,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* MSME badge */}
-        <div className="absolute top-[72px] right-4 bg-white/95 backdrop-blur-sm rounded-xl px-3 py-1.5 flex items-center gap-1.5 shadow-lg border border-white/50">
-          <Shield size={12} className="text-blue-600" />
-          <span className="text-[10px] font-bold text-gray-800">MSME Certified</span>
-        </div>
       </section>
 
       {/* ── SEARCH BAR ─────────────────────────────────────────────────── */}

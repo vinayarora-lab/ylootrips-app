@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const getResend = () => new Resend(process.env.RESEND_API_KEY ?? "");
 
 // Simple in-memory cooldown — prevent spam (1 alert per IP per 60s)
 const cooldown = new Map<string, number>();
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const label = typeLabels[type] || `⚠️ Unknown Threat: ${type}`;
     const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
-    await resend.emails.send({
+    await getResend().emails.send({
       from: 'security@ylootrips.com',
       to: 'hello@ylootrips.com',
       subject: `🚨 Security Alert — ${label}`,

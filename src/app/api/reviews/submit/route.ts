@@ -4,7 +4,7 @@ import path from 'path';
 import { Resend } from 'resend';
 
 const DATA_FILE = path.join(process.cwd(), '.data', 'reviews.json');
-const resend = new Resend(process.env.RESEND_API_KEY);
+const getResend = () => new Resend(process.env.RESEND_API_KEY ?? "");
 
 interface Review {
   id: string;
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     // Notify admin
     const adminUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://ylootrips.com'}/admin/reviews`;
     try {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
         to: process.env.ADMIN_EMAIL || 'hello@ylootrips.com',
         subject: `⭐ New Review Pending Approval — ${name} (${rating}/5)`,

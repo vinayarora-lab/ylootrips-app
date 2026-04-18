@@ -11,7 +11,10 @@
   "lang": "en",
   "dir": "ltr",
   "categories": ["travel", "lifestyle", "shopping"],
+  "id": "/",
   "prefer_related_applications": false,
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "icons": [
     {
       "src": "/favicon.png",
@@ -24,6 +27,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://ylootrips-app.vercel.app/og-image.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "YlooTrips Homepage"
+    },
+    {
+      "src": "https://ylootrips-app.vercel.app/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "YlooTrips App"
     }
   ],
   "shortcuts": [

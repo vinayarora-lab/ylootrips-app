@@ -29,22 +29,6 @@
       "purpose": "maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "https://ylootrips-app.vercel.app/og-image.jpg",
-      "sizes": "1200x630",
-      "type": "image/jpeg",
-      "form_factor": "wide",
-      "label": "YlooTrips Homepage"
-    },
-    {
-      "src": "https://ylootrips-app.vercel.app/favicon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "YlooTrips App"
-    }
-  ],
   "shortcuts": [
     {
       "name": "Search Flights",

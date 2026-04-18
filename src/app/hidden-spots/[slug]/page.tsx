@@ -111,7 +111,7 @@ export default async function HiddenSpotPage({ params }: Props) {
       </section>
 
       {/* Sticky booking bar */}
-      <div className="sticky top-16 z-30 bg-primary text-cream py-3 shadow-lg">
+      <div className="sticky top-0 z-30 bg-primary text-cream py-3 shadow-lg">
         <div className="section-container flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-sm">
             <span className="font-semibold">{spot.name}</span>

@@ -221,6 +221,48 @@ body {
   flex-direction: column;
 }
 
+/* section-container inside phone frame: remove large desktop padding */
+#app-scroll .section-container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* pt-below-nav inside phone frame: nav is now sticky sibling, no top clearance needed */
+#app-scroll .pt-below-nav {
+  padding-top: 0;
+}
+
+/* Custom multi-column grid overrides for phone frame */
+#app-scroll .lg\:grid-cols-2,
+#app-scroll .lg\:grid-cols-\[1fr_380px\],
+#app-scroll .lg\:grid-cols-\[380px_1fr\],
+#app-scroll .xl\:grid-cols-\[minmax\(0\,1fr\)_300px\] {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+/* Large section vertical padding reduction inside phone frame */
+#app-scroll .py-20 { padding-top: 2rem; padding-bottom: 2rem; }
+#app-scroll .py-24 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+#app-scroll .py-28 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+#app-scroll .py-32 { padding-top: 3rem; padding-bottom: 3rem; }
+#app-scroll .md\:py-20 { padding-top: 2rem; padding-bottom: 2rem; }
+#app-scroll .md\:py-24 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+#app-scroll .md\:py-28 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+#app-scroll .md\:py-32 { padding-top: 3rem; padding-bottom: 3rem; }
+#app-scroll .lg\:py-24 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+#app-scroll .lg\:gap-16 { gap: 1.5rem; }
+#app-scroll .lg\:gap-12 { gap: 1rem; }
+#app-scroll .space-y-16 > * + * { margin-top: 2rem; }
+#app-scroll .space-y-20 > * + * { margin-top: 2.5rem; }
+#app-scroll .space-y-24 > * + * { margin-top: 2.5rem; }
+#app-scroll .md\:space-y-16 > * + * { margin-top: 2rem; }
+#app-scroll .md\:space-y-20 > * + * { margin-top: 2.5rem; }
+#app-scroll .md\:space-y-24 > * + * { margin-top: 2.5rem; }
+#app-scroll .md\:mb-20 { margin-bottom: 2rem; }
+#app-scroll .mb-14 { margin-bottom: 1.5rem; }
+#app-scroll .mb-16 { margin-bottom: 1.5rem; }
+#app-scroll .mb-20 { margin-bottom: 2rem; }
+
 /* Responsive font-size helpers for display text inside the phone frame */
 #app-scroll .text-display-xl { font-size: clamp(1.75rem, 5vw, 2.25rem); }
 #app-scroll .text-display-lg { font-size: clamp(1.5rem, 4vw, 2rem); }

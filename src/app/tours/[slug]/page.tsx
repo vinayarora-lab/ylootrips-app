@@ -94,7 +94,7 @@ export default async function TourPage({ params }: Props) {
       </section>
 
       {/* ── STICKY BOOKING BAR ───────────────────────────────────────────────── */}
-      <div className="sticky top-16 z-40 bg-primary border-b border-white/10 shadow-xl">
+      <div className="sticky top-0 z-40 bg-primary border-b border-white/10 shadow-xl">
         <div className="section-container py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-4">
             <div>

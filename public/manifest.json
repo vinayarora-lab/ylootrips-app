@@ -29,6 +29,15 @@
       "purpose": "maskable"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "YlooTrips Travel App"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Search Flights",

@@ -179,13 +179,17 @@ input, textarea, select, button {
 }
 
 body {
-  background-color: var(--color-cream);
+  background-color: #111;          /* dark bg visible outside phone frame on desktop */
   color: var(--color-primary);
   font-family: var(--font-body);
   overflow-x: hidden;
-  /* Respect safe area (notch, home indicator) on iOS */
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+}
+
+/* On mobile the phone shell IS the viewport — restore cream bg */
+@media (max-width: 767px) {
+  body { background-color: var(--color-cream); }
 }
 
 /* Box sizing - only on non-layout elements to avoid breaking hero/sections */

@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import Script from "next/script";
 import { Inter, Playfair_Display } from 'next/font/google';
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
-import MobileStickyCTA from "@/components/MobileStickyCTA";
 import Providers from "@/components/Providers";
+import AppShell from "@/components/AppShell";
 import { OrganizationJsonLd } from "@/components/JsonLd";
 import SecurityShield from "@/components/SecurityShield";
-import ExitIntentPopup from "@/components/ExitIntentPopup";
 import ActiveUserPing from "@/components/ActiveUserPing";
 
 const inter = Inter({
@@ -120,9 +115,16 @@ export default function RootLayout({
       <head>
         {/* Force light mode — prevent system dark mode from inverting the site */}
         <meta name="color-scheme" content="light" />
-        <meta name="theme-color" content="#F5F1EB" />
+        <meta name="theme-color" content="#F5753A" />
         {/* Viewport — critical for mobile rendering */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+        {/* PWA — makes it installable as a home-screen app */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="YlooTrips" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
         {/* Preconnect for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://images.unsplash.com" />
@@ -146,16 +148,9 @@ export default function RootLayout({
         <Providers>
           <ActiveUserPing />
           <SecurityShield />
-          <ExitIntentPopup />
-          <Suspense fallback={<div className="h-24 bg-cream" />}>
-            <Header />
-          </Suspense>
-          <main className="min-h-screen pb-16 md:pb-0">
+          <AppShell>
             {children}
-          </main>
-          <Footer />
-          <WhatsAppButton phoneNumber="918427831127" />
-          <MobileStickyCTA />
+          </AppShell>
         </Providers>
       </body>
     </html>

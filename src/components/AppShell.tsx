@@ -492,6 +492,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black md:flex md:items-center md:justify-center md:p-8">
 
       {/* ── Phone frame ── */}
+      {/* transform: translateZ(0) creates a new containing block for position:fixed children,
+          so modals/overlays stay inside the frame instead of covering the whole viewport */}
       <div
         className="
           relative w-full bg-[#F5F1EB] flex flex-col overflow-hidden
@@ -499,7 +501,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           md:rounded-[44px]
           md:shadow-[0_0_0_10px_#1c1c1c,0_0_0_11px_#2a2a2a,0_40px_120px_rgba(0,0,0,0.85)]
         "
-        style={{ height: '100dvh' }}
+        style={{ height: '100dvh', transform: 'translateZ(0)' }}
       >
         {/* Dynamic Island (desktop only) */}
         <div className="hidden md:flex absolute top-3.5 left-1/2 -translate-x-1/2 w-[120px] h-[37px] bg-black rounded-full z-[100] items-center justify-between px-5 pointer-events-none">

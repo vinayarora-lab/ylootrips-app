@@ -990,8 +990,8 @@ export default function TripPlannerChat() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 -mt-4">
-        <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-6 xl:items-start">
+      <div className="px-4 -mt-4">
+        <div>
           <div>
         {/* Input Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-cream-dark p-3 sm:p-5">
@@ -1092,12 +1092,12 @@ export default function TripPlannerChat() {
         )}
         {itinerary && !showMarket && <div className="pb-12" />}
           </div>
-          {/* Real trips sidebar — desktop only */}
-          <div className="hidden xl:block sticky top-20">
+          </div>
+          {/* Real trips — shown below on mobile (replaces sidebar) */}
+          <div className="mt-4 pb-4">
             <RealTripsSidebar />
           </div>
         </div>
       </div>
-    </div>
   );
 }

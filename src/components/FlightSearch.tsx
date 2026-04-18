@@ -308,9 +308,9 @@ export default function FlightSearch() {
             ))}
           </div>
 
-          {/* From / swap / To */}
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_40px_1fr] gap-3 items-end mb-4">
-            <div>
+          {/* From / swap / To — stacked vertically for phone frame */}
+          <div className="relative mb-4">
+            <div className="mb-2">
               <label className="block text-[10px] uppercase tracking-widest text-primary/45 mb-1.5">From</label>
               <div className="relative">
                 <Plane className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary rotate-45 pointer-events-none z-10" />
@@ -318,9 +318,12 @@ export default function FlightSearch() {
               </div>
             </div>
 
-            <button onClick={swap} className="h-[46px] flex items-center justify-center bg-secondary/10 hover:bg-secondary/20 text-secondary transition-colors">
-              <ArrowUpDown className="w-4 h-4" />
-            </button>
+            {/* Swap button — centered between FROM and TO */}
+            <div className="flex justify-center my-1 relative z-10">
+              <button onClick={swap} className="w-9 h-9 flex items-center justify-center bg-primary text-cream rounded-full shadow-md hover:bg-secondary transition-colors">
+                <ArrowUpDown className="w-4 h-4" />
+              </button>
+            </div>
 
             <div>
               <label className="block text-[10px] uppercase tracking-widest text-primary/45 mb-1.5">To</label>
@@ -332,7 +335,7 @@ export default function FlightSearch() {
           </div>
 
           {/* Dates + passengers */}
-          <div className={`grid gap-3 mb-5 ${tripType === 'return' ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
+          <div className="grid grid-cols-1 gap-3 mb-5">
             <div>
               <label className="block text-[10px] uppercase tracking-widest text-primary/45 mb-1.5">
                 {tripType === 'return' ? 'Departure' : 'Travel Date'}

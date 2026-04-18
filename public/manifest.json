@@ -15,48 +15,6 @@
   "icons": [
     {
       "src": "/favicon.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
@@ -68,36 +26,24 @@
       "purpose": "maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/og-image.jpg",
-      "sizes": "1200x630",
-      "type": "image/jpeg",
-      "form_factor": "wide",
-      "label": "YlooTrips Homepage"
-    }
-  ],
   "shortcuts": [
     {
       "name": "Search Flights",
       "short_name": "Flights",
       "description": "Search and book flights",
-      "url": "/flights",
-      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+      "url": "/flights"
     },
     {
       "name": "Search Hotels",
       "short_name": "Hotels",
       "description": "Find and book hotels",
-      "url": "/hotels",
-      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+      "url": "/hotels"
     },
     {
       "name": "AI Trip Planner",
       "short_name": "Planner",
       "description": "Plan your trip with AI",
-      "url": "/trip-planner",
-      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+      "url": "/trip-planner"
     }
   ]
 }

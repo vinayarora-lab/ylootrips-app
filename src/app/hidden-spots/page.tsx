@@ -43,7 +43,7 @@ export default function HiddenSpotsPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f1a12] via-[#0f1a12]/60 to-transparent" />
         </div>
-        <div className="relative z-10 section-container pb-16 pt-40">
+        <div className="relative z-10 section-container pb-8 pt-6">
           <div className="flex items-center gap-2 mb-5">
             <Compass className="w-4 h-4 text-accent" />
             <span className="text-caption uppercase tracking-[0.35em] text-accent">Secret India</span>

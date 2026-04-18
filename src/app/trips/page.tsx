@@ -81,31 +81,30 @@ export default async function TripsPage() {
             </Suspense>
 
             {/* CTA Section */}
-            <section className="py-20 bg-primary text-cream">
-                <div className="section-container text-center">
-                    <p className="text-caption uppercase tracking-[0.3em] text-accent mb-4">Est. 2022 · 25,000+ Travelers</p>
-                    <h2 className="font-display text-display-lg mb-6">
+            <section className="bg-gray-900 px-4 py-8">
+                <div className="text-center">
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#C4A77D] mb-2">Est. 2022 · 25,000+ Travelers</p>
+                    <h2 className="font-playfair text-white text-2xl font-semibold leading-tight mb-3">
                         Can&apos;t find what you&apos;re looking for?
                     </h2>
-                    <p className="text-cream/60 text-body-lg max-w-2xl mx-auto mb-10">
-                        Tell us your budget, interests, and travel dates. Our experts will craft the perfect itinerary — no obligation.
+                    <p className="text-white/55 text-[13px] leading-relaxed mb-6">
+                        Tell us your budget and dates. Our experts craft the perfect itinerary — free, no obligation.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <div className="flex flex-col gap-3">
                         <a
                             href="https://wa.me/918427831127?text=Hi%2C+I'm+looking+for+a+custom+trip+package"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#1ebe5d] text-white px-8 py-4 font-semibold text-sm uppercase tracking-widest transition-colors"
+                            className="flex items-center justify-center gap-2 bg-[#25D366] text-white px-6 py-3.5 rounded-2xl font-bold text-sm active:scale-[0.97] transition-transform"
                         >
-                            <MessageCircle className="w-5 h-5" />
+                            <MessageCircle className="w-4 h-4" />
                             Chat on WhatsApp
                         </a>
-                        <Link href="/contact" className="inline-flex items-center justify-center gap-2 border border-cream/25 text-cream hover:border-cream hover:bg-white/5 px-8 py-4 text-sm uppercase tracking-widest transition-all">
-                            <span>Plan Custom Journey</span>
-                            <ArrowUpRight className="w-4 h-4" />
+                        <Link href="/contact" className="flex items-center justify-center gap-2 border border-white/20 text-white px-6 py-3.5 rounded-2xl font-semibold text-sm active:scale-[0.97] transition-transform">
+                            Plan Custom Journey
                         </Link>
                     </div>
-                    <p className="text-cream/30 text-xs mt-6 uppercase tracking-widest">Free · No obligation · Reply in under 1 hour</p>
+                    <p className="text-white/25 text-[10px] mt-5 uppercase tracking-widest">Free · No obligation · Reply in under 1 hour</p>
                 </div>
             </section>
         </>

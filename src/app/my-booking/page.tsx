@@ -615,7 +615,7 @@ function ProfilePage({ onOpenSearch }: { onOpenSearch: () => void }) {
     <div className="min-h-screen bg-gray-100 pb-24">
 
       {/* Profile Hero Card */}
-      <div className="relative bg-gray-950 pt-28 pb-8 px-4">
+      <div className="relative bg-gray-950 pt-5 pb-8 px-4">
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/10 -translate-y-1/3 translate-x-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-black/10 translate-y-1/2 -translate-x-1/4 pointer-events-none" />

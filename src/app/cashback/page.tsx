@@ -51,7 +51,7 @@ export default function WanderLootPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-28 pb-16">
+    <main className="min-h-screen bg-gray-50 pt-5 pb-16">
       <div className="section-container max-w-3xl">
 
         {/* Page header */}

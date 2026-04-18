@@ -965,11 +965,11 @@ export default function TripPlannerChat() {
   return (
     <div className="min-h-screen bg-cream-light">
       {/* Hero Header */}
-      <div className="bg-primary pt-28 pb-8 px-4 relative overflow-hidden">
+      <div className="bg-primary pt-5 pb-8 px-4 relative overflow-hidden">
         {/* Real Trips pill — top right */}
         <a
           href="/reel-to-trip"
-          className="absolute top-[72px] right-3 sm:right-5 z-10 flex items-center gap-1.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full px-3 py-1.5 shadow-lg shadow-purple-500/30 hover:scale-105 active:scale-95 transition-transform"
+          className="absolute top-3 right-3 sm:right-5 z-10 flex items-center gap-1.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full px-3 py-1.5 shadow-lg shadow-purple-500/30 hover:scale-105 active:scale-95 transition-transform"
         >
           <Instagram className="w-3 h-3 text-white" />
           <span className="text-white text-[10px] font-black">Reel → Trip</span>

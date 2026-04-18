@@ -1128,7 +1128,7 @@ function DomesticDestinationsContent() {
       )}
 
       {/* Region filter */}
-      <section className="py-4 md:py-5 bg-cream-dark border-b border-primary/8 sticky top-16 z-30">
+      <section className="py-4 md:py-5 bg-cream-dark border-b border-primary/8 sticky top-0 z-30">
         <div className="section-container">
           <div className="flex gap-2 overflow-x-auto scrollbar-none pb-0.5">
             {indiaRegions.map((r) => (

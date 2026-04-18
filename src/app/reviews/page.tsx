@@ -119,7 +119,7 @@ export default async function ReviewsPage() {
       ]} />
 
       {/* ── PROFILE HEADER ── */}
-      <div className="bg-white border-b border-gray-100 pt-24 pb-0">
+      <div className="bg-white border-b border-gray-100 pt-5 pb-0">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6 pb-0">
             {/* Avatar */}

@@ -132,7 +132,7 @@ export default function DaycationsPage() {
   return (
     <main className="min-h-screen bg-[#F4F1EA]">
       {/* Hero */}
-      <section className="pt-32 pb-12 px-4 text-center">
+      <section className="pt-6 pb-8 px-4 text-center">
         <div className="max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-6">
             <Flame className="w-3.5 h-3.5" />
@@ -151,7 +151,7 @@ export default function DaycationsPage() {
       </section>
 
       {/* Filters */}
-      <section className="sticky top-16 z-30 bg-[#F4F1EA]/95 backdrop-blur-md border-b border-primary/10 px-4 py-3">
+      <section className="sticky top-0 z-30 bg-[#F4F1EA]/95 backdrop-blur-md border-b border-primary/10 px-4 py-3">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           {/* Category pills */}
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 sm:pb-0">

@@ -189,7 +189,7 @@ export default function BlogsPage() {
       />
 
       {/* Categories */}
-      <section className="sticky top-16 z-30 bg-cream py-4 md:py-6 border-b border-primary/10 overflow-x-auto">
+      <section className="sticky top-0 z-30 bg-cream py-4 md:py-6 border-b border-primary/10 overflow-x-auto">
         <div className="section-container">
           <div className="flex flex-nowrap sm:flex-wrap gap-2 sm:gap-3 min-w-max sm:min-w-0">
             {categories.map((category) => (

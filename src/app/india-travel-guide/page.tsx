@@ -102,7 +102,7 @@ export default function IndiaTravelGuide() {
       ]} />
 
       {/* Hero */}
-      <section className="pt-32 pb-16 md:pt-40 md:pb-20 bg-primary text-cream">
+      <section className="pt-6 pb-8 bg-primary text-cream">
         <div className="section-container">
           <p className="text-caption uppercase tracking-[0.3em] text-accent mb-4">
             Free Travel Guide

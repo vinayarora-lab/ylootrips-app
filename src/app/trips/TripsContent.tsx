@@ -485,7 +485,7 @@ export default function TripsContent() {
             )}
 
             {/* Filters — sticky on all screens */}
-            <section className="py-3 md:py-5 border-b border-primary/10 bg-cream sticky top-16 z-30 shadow-sm">
+            <section className="py-3 md:py-5 border-b border-primary/10 bg-cream sticky top-0 z-30 shadow-sm">
                 <div className="section-container space-y-3">
                     {/* Row 1: Categories */}
                     <div className="flex flex-nowrap gap-2 overflow-x-auto pb-0.5 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none">

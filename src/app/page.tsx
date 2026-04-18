@@ -166,7 +166,7 @@ export default function Home() {
             <Sparkles size={17} className="text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">AI Trip Planner</p>
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">YLOO AI Trip Planner</p>
             <p className="text-sm font-semibold text-gray-700 truncate">Where would you like to go?</p>
           </div>
           <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
@@ -335,7 +335,7 @@ export default function Home() {
             <h3 className="font-playfair text-white text-xl font-semibold leading-tight mb-1">
               Plan your perfect<br />trip in 30 seconds
             </h3>
-            <p className="text-white/70 text-[11px]">Groq AI · Gemini · GPT-4o</p>
+            <p className="text-white/70 text-[11px]">Powered by YLOO AI</p>
             <div className="mt-3 flex items-center gap-1.5">
               <span className="text-white text-xs font-bold">Try free now</span>
               <ArrowRight size={14} className="text-white" />

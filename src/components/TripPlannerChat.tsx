@@ -752,7 +752,7 @@ const REAL_TRIPS = [
     price: '₹1,16,200',
     duration: '10 Days',
     badge: '⭐ Most Popular',
-    href: '/trips/golden-triangle-10-day',
+    href: '/tours/golden-triangle-10-day',
   },
   {
     title: 'Kerala & South India',
@@ -761,7 +761,7 @@ const REAL_TRIPS = [
     price: '₹1,57,700',
     duration: '14 Days',
     badge: '🏆 Top Rated',
-    href: '/trips/kerala-south-india-14-day',
+    href: '/tours/kerala-south-india-14-day',
   },
   {
     title: 'Rajasthan Heritage',
@@ -770,7 +770,7 @@ const REAL_TRIPS = [
     price: '₹78,850',
     duration: '7 Days',
     badge: '🎨 Cultural',
-    href: '/trips/rajasthan-heritage-7-day',
+    href: '/tours/rajasthan-heritage-7-day',
   },
 ];
 

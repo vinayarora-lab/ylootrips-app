@@ -7,7 +7,8 @@ import {
     Plane, Hotel, Calendar, Users, Mail, Phone, Clock, CheckCircle,
     XCircle, AlertCircle, RefreshCw, Search, Download, Eye, Filter,
     ArrowLeft, TrendingUp, DollarSign, BookOpen, Luggage, CreditCard,
-    BarChart3, ChevronDown, ChevronUp, ArrowUpDown, ArrowUp, ArrowDown
+    BarChart3, ChevronDown, ChevronUp, ArrowUpDown, ArrowUp, ArrowDown,
+    Edit2, Save
 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -42,6 +43,11 @@ const STATUS_COLORS: Record<string, string> = {
     TICKET_SENT: 'bg-purple-100 text-purple-700',
     FAILED: 'bg-red-100 text-red-700',
 };
+
+interface BookingDetails { notes: string; flightsPdf?: string; hotelsPdf?: string; itineraryPdf?: string; }
+const EMPTY_DETAILS: BookingDetails = { notes: '' };
+type PdfDocType = 'flights' | 'hotels' | 'itinerary';
+type DetailsTab = 'notes' | 'flights' | 'hotels' | 'itinerary';
 
 type BookingTab = 'flights' | 'trips' | 'events' | 'pg-dashboard';
 
@@ -121,16 +127,25 @@ export default function AdminBookingsPage() {
         setLoading(true);
         const token = localStorage.getItem('adminToken') || '';
         try {
-            const [flightRes, tripRes, eventRes] = await Promise.allSettled([
+            const [flightRes, tripRes, eventRes, notesRes] = await Promise.allSettled([
                 fetch('/api/admin/flight-bookings', { headers: { 'x-admin-token': token } }).then(r => r.json()),
-                // Use server-side proxy — fetches ALL statuses (pending, confirmed, failed, cancelled)
-                fetch('/api/admin/trip-bookings', {
-                    headers: { 'x-admin-token': token },
-                }).then(r => r.json()),
+                api.admin.getBookings(),
                 api.admin.getEventBookings(),
+                fetch('/api/admin/booking-notes', { headers: { 'x-admin-token': token } }).then(r => r.json()),
             ]);
             if (flightRes.status === 'fulfilled') setFlightBookings(flightRes.value.data || []);
-            if (tripRes.status === 'fulfilled') setTripBookings(extractList(tripRes.value));
+
+            // Merge saved booking details into trip bookings
+            const detailsMap: Record<string, BookingDetails> = notesRes.status === 'fulfilled'
+                ? (notesRes.value.details || {})
+                : {};
+            if (tripRes.status === 'fulfilled') {
+                const trips = extractList(tripRes.value);
+                setTripBookings(trips.map(t => ({
+                    ...t,
+                    adminDetails: detailsMap[String(t.bookingReference || '')] ?? null,
+                })));
+            }
             if (eventRes.status === 'fulfilled') setEventBookings(extractList(eventRes.value));
         } finally {
             setLoading(false);
@@ -161,6 +176,135 @@ export default function AdminBookingsPage() {
         await updateFlightStatus(b.txnid, 'TICKET_SENT');
     };
 
+    const [markingPaid, setMarkingPaid] = useState<string | null>(null);
+    const [paymentFilter, setPaymentFilter] = useState<'ALL' | 'PAID' | 'UNPAID'>('ALL');
+    const [editingDetailsId, setEditingDetailsId] = useState<string | null>(null);
+    const [detailsDraft, setDetailsDraft] = useState<BookingDetails>(EMPTY_DETAILS);
+    const [detailsTab, setDetailsTab] = useState<DetailsTab>('notes');
+    const [savingDetails, setSavingDetails] = useState<string | null>(null);
+    const [uploadingPdf, setUploadingPdf] = useState<string | null>(null);
+
+    const markTripAsPaid = async (b: Record<string, unknown>) => {
+        const id = b.id as number;
+        const ref = String(b.bookingReference || '');
+        const email = String(b.customerEmail || '');
+        const phone = String(b.customerPhone || '').replace(/\D/g, '');
+        const tripTitle = String((b.trip as Record<string, unknown>)?.title || b.tripTitle || 'Trip');
+        const bookingTotal = Number(b.finalAmount || b.totalAmount || 0);
+        if (!id || !email) return;
+        const key = String(id);
+        setMarkingPaid(key);
+        try {
+            // 1. Update status to CONFIRMED in backend
+            await api.admin.updateBookingStatus(id, 'CONFIRMED');
+            // 2. Update local state immediately
+            setTripBookings(prev => prev.map(t =>
+                t.id === id ? { ...t, status: 'CONFIRMED', paymentStatus: 'SUCCESS' } : t
+            ));
+            // 3. Credit 10% WanderLoot cashback to client's wallet (non-fatal)
+            let cashbackCredited = 0;
+            if (phone && bookingTotal > 0) {
+                try {
+                    const cbRes = await fetch('/api/wallet/credit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: phone, bookingRef: ref, bookingTotal, tripName: tripTitle }),
+                    });
+                    const cbData = await cbRes.json();
+                    cashbackCredited = cbData.credited || 0;
+                } catch { /* non-fatal */ }
+            }
+            // 4. Send confirmation email to client
+            await fetch('/api/send-confirmation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ to: email, booking: b }),
+            });
+            const cashbackMsg = cashbackCredited > 0 ? ` + ₹${cashbackCredited} WanderLoot cashback credited.` : '';
+            alert(`✅ Booking ${ref} confirmed. Email sent to ${email}.${cashbackMsg}`);
+        } catch {
+            alert('Failed to update status. Please try again.');
+        } finally {
+            setMarkingPaid(null);
+        }
+    };
+
+    const saveBookingDetails = async (key: string, bookingRef: string) => {
+        setSavingDetails(key);
+        const token = localStorage.getItem('adminToken') || '';
+        try {
+            const res = await fetch('/api/admin/booking-notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+                body: JSON.stringify({ ref: bookingRef, details: detailsDraft }),
+            });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || `HTTP ${res.status}`);
+            }
+            setTripBookings(prev => prev.map(t =>
+                String(t.bookingReference) === bookingRef ? { ...t, adminDetails: detailsDraft } : t
+            ));
+            setEditingDetailsId(null);
+        } catch (e) {
+            alert('Failed to save details: ' + (e instanceof Error ? e.message : String(e)));
+        } finally {
+            setSavingDetails(null);
+        }
+    };
+
+    const uploadPdf = async (bookingRef: string, docType: PdfDocType, file: File) => {
+        const key = `${editingDetailsId}-${docType}`;
+        setUploadingPdf(key);
+        const token = localStorage.getItem('adminToken') || '';
+        try {
+            const form = new FormData();
+            form.append('ref', bookingRef);
+            form.append('type', docType);
+            form.append('file', file);
+            const res = await fetch('/api/admin/booking-docs', {
+                method: 'POST',
+                headers: { 'x-admin-token': token },
+                body: form,
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+            const field = `${docType}Pdf` as keyof BookingDetails;
+            setDetailsDraft(prev => ({ ...prev, [field]: data.path }));
+            setTripBookings(prev => prev.map(t =>
+                String(t.bookingReference) === bookingRef
+                    ? { ...t, adminDetails: { ...(t.adminDetails as BookingDetails || EMPTY_DETAILS), [field]: data.path } }
+                    : t
+            ));
+        } catch (e) {
+            alert('Upload failed: ' + (e instanceof Error ? e.message : String(e)));
+        } finally {
+            setUploadingPdf(null);
+        }
+    };
+
+    const deletePdf = async (bookingRef: string, docType: PdfDocType) => {
+        if (!confirm(`Delete ${docType} PDF for this booking?`)) return;
+        const token = localStorage.getItem('adminToken') || '';
+        try {
+            const res = await fetch(`/api/admin/booking-docs?ref=${encodeURIComponent(bookingRef)}&type=${docType}`, {
+                method: 'DELETE',
+                headers: { 'x-admin-token': token },
+            });
+            if (!res.ok) throw new Error('Delete failed');
+            const field = `${docType}Pdf` as keyof BookingDetails;
+            setDetailsDraft(prev => { const n = { ...prev }; delete n[field]; return n; });
+            setTripBookings(prev => prev.map(t => {
+                if (String(t.bookingReference) !== bookingRef) return t;
+                const d = { ...(t.adminDetails as BookingDetails || EMPTY_DETAILS) };
+                delete d[field];
+                return { ...t, adminDetails: d };
+            }));
+        } catch (e) {
+            alert('Delete failed: ' + (e instanceof Error ? e.message : String(e)));
+        }
+    };
+
     // Stats
     const flightRevenue = flightBookings.reduce((s, b) => s + (b.flight?.price || 0), 0);
     const tripRevenue = tripBookings.reduce((s: number, b: Record<string, unknown>) => s + Number(b.finalAmount || b.totalAmount || 0), 0);
@@ -181,11 +325,20 @@ export default function AdminBookingsPage() {
 
     const filteredTrips = sortBookings(tripBookings.filter((b: Record<string, unknown>) => {
         const q = search.toLowerCase();
-        return !q ||
+        const matchSearch = !q ||
             String(b.bookingReference || '').toLowerCase().includes(q) ||
             String(b.customerEmail || '').toLowerCase().includes(q) ||
             String(b.customerName || '').toLowerCase().includes(q) ||
             String(b.customerPhone || '').includes(q);
+        const PAID_STATUSES = ['CONFIRMED', 'COMPLETED', 'PAID', 'SUCCESS', 'CAPTURED'];
+        const pmtStatus = String(b.paymentStatus || b.payment_status || '').toUpperCase();
+        const bkgStatus = String(b.status || '').toUpperCase();
+        const isPaid = PAID_STATUSES.includes(pmtStatus) || PAID_STATUSES.includes(bkgStatus);
+        const matchPayment =
+            paymentFilter === 'ALL' ||
+            (paymentFilter === 'PAID' && isPaid) ||
+            (paymentFilter === 'UNPAID' && !isPaid);
+        return matchSearch && matchPayment;
     }));
 
     const filteredEvents = sortBookings(eventBookings.filter((b: Record<string, unknown>) => {
@@ -362,9 +515,31 @@ export default function AdminBookingsPage() {
                             ))}
                         </select>
                     )}
-                    {/* Sort — shown for trips & events */}
+                    {/* Sort + Payment Filter — shown for trips & events */}
                     {(activeTab === 'trips' || activeTab === 'events') && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
+                            {/* Payment filter — trips only */}
+                            {activeTab === 'trips' && (
+                                <div className="flex rounded-xl border border-gray-300 overflow-hidden text-sm font-semibold">
+                                    {(['ALL', 'PAID', 'UNPAID'] as const).map(f => (
+                                        <button
+                                            key={f}
+                                            onClick={() => setPaymentFilter(f)}
+                                            className={`px-3 py-2.5 transition-colors ${
+                                                paymentFilter === f
+                                                    ? f === 'PAID'
+                                                        ? 'bg-green-600 text-white'
+                                                        : f === 'UNPAID'
+                                                            ? 'bg-red-500 text-white'
+                                                            : 'bg-gray-800 text-white'
+                                                    : 'bg-white text-gray-500 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            {f === 'ALL' ? 'All' : f === 'PAID' ? '✓ Paid' : '⏳ Unpaid'}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                             <select
                                 value={sortField}
                                 onChange={e => setSortField(e.target.value as SortField)}
@@ -595,6 +770,16 @@ export default function AdminBookingsPage() {
                                                         )}
                                                         <p className="text-[10px] text-gray-400">{b.createdAt ? fmtDate(String(b.createdAt)) : ''}</p>
                                                     </div>
+                                                    {isPending && (
+                                                        <button
+                                                            onClick={() => markTripAsPaid(b)}
+                                                            disabled={markingPaid === String(b.id)}
+                                                            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-colors whitespace-nowrap"
+                                                            title="Mark as Paid & send confirmation email"
+                                                        >
+                                                            {markingPaid === String(b.id) ? '...' : '✓ Mark Paid'}
+                                                        </button>
+                                                    )}
                                                     <a href={`mailto:${String(b.customerEmail || '')}?subject=Your Trip Booking - ${String(b.bookingReference || '')}`}
                                                         className="p-2 rounded-lg hover:bg-blue-50 text-blue-500 transition-colors" title="Email customer">
                                                         <Mail size={16} />
@@ -611,6 +796,120 @@ export default function AdminBookingsPage() {
                                                     📝 {String(b.specialRequests)}
                                                 </p>
                                             ) : null}
+
+                                            {/* ── Booking Details for Client ── */}
+                                            {editingDetailsId === String(b.id) ? (
+                                                <div className="mt-3 border border-blue-200 rounded-xl bg-blue-50 p-3 space-y-3">
+                                                    {/* Tab bar */}
+                                                    <div className="flex gap-1 bg-white rounded-lg p-1 border border-blue-100">
+                                                        {(['notes', 'flights', 'hotels', 'itinerary'] as const).map(tab => (
+                                                            <button key={tab} onClick={() => setDetailsTab(tab)}
+                                                                className={`flex-1 py-1.5 text-[11px] font-bold rounded transition-colors
+                                                                    ${detailsTab === tab ? 'bg-blue-600 text-white' : 'text-blue-600 hover:bg-blue-100'}`}>
+                                                                {tab === 'notes' ? '📝 Notes' : tab === 'flights' ? '✈️ Flights' : tab === 'hotels' ? '🏨 Hotels' : '🗺️ Itinerary'}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Notes tab */}
+                                                    {detailsTab === 'notes' && (
+                                                        <textarea
+                                                            value={detailsDraft.notes}
+                                                            onChange={e => setDetailsDraft(prev => ({ ...prev, notes: e.target.value }))}
+                                                            rows={4} autoFocus
+                                                            placeholder="Notes visible to client: guide contact, meeting point, special instructions..."
+                                                            className="w-full text-xs border border-blue-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none bg-white"
+                                                        />
+                                                    )}
+
+                                                    {/* PDF upload tabs — Flights / Hotels / Itinerary */}
+                                                    {(['flights', 'hotels', 'itinerary'] as const).map(docType => {
+                                                        if (detailsTab !== docType) return null;
+                                                        const pdfField = `${docType}Pdf` as keyof BookingDetails;
+                                                        const existingPath = detailsDraft[pdfField] as string | undefined;
+                                                        const uploadKey = `${editingDetailsId}-${docType}`;
+                                                        const isUploading = uploadingPdf === uploadKey;
+                                                        const bookingRef = String(b.bookingReference || b.id);
+                                                        const labels: Record<string, string> = { flights: 'Flight Tickets', hotels: 'Hotel Voucher', itinerary: 'Itinerary' };
+                                                        return (
+                                                            <div key={docType} className="space-y-3">
+                                                                <p className="text-[11px] text-gray-500">Upload a PDF for <strong>{labels[docType]}</strong>. Client can download it from their booking page.</p>
+                                                                {existingPath ? (
+                                                                    <div className="flex items-center justify-between bg-white border border-green-200 rounded-lg px-3 py-3">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-lg">📄</span>
+                                                                            <div>
+                                                                                <p className="text-xs font-semibold text-gray-800">{docType}.pdf</p>
+                                                                                <p className="text-[10px] text-green-600 font-bold">✓ Uploaded</p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex gap-2">
+                                                                            <a href={`/api/booking-docs?ref=${encodeURIComponent(bookingRef)}&type=${docType}`}
+                                                                                target="_blank" rel="noopener noreferrer"
+                                                                                className="text-[11px] text-blue-600 hover:underline font-semibold px-2 py-1 border border-blue-200 rounded">
+                                                                                Preview
+                                                                            </a>
+                                                                            <button onClick={() => deletePdf(bookingRef, docType)}
+                                                                                className="text-[11px] text-red-500 hover:text-red-700 px-2 py-1 border border-red-200 rounded">
+                                                                                Delete
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <label className="block cursor-pointer">
+                                                                        <input type="file" accept="application/pdf" className="hidden"
+                                                                            onChange={e => { const f = e.target.files?.[0]; if (f) uploadPdf(bookingRef, docType, f); e.target.value = ''; }} />
+                                                                        <div className={`w-full py-8 border-2 border-dashed rounded-xl text-center transition-colors
+                                                                            ${isUploading ? 'border-blue-300 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'}`}>
+                                                                            {isUploading
+                                                                                ? <><RefreshCw size={18} className="animate-spin text-blue-500 mx-auto mb-1" /><p className="text-xs text-blue-600 font-semibold">Uploading...</p></>
+                                                                                : <><p className="text-2xl mb-1">📎</p><p className="text-xs font-bold text-gray-600">Click to upload {labels[docType]} PDF</p><p className="text-[10px] text-gray-400 mt-1">PDF files only</p></>
+                                                                            }
+                                                                        </div>
+                                                                    </label>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+
+                                                    <div className="flex gap-2 pt-1">
+                                                        <button
+                                                            onClick={() => saveBookingDetails(String(b.id), String(b.bookingReference || b.id))}
+                                                            disabled={savingDetails === String(b.id)}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-colors"
+                                                        >
+                                                            {savingDetails === String(b.id) ? <RefreshCw size={12} className="animate-spin" /> : <Save size={12} />}
+                                                            Save All
+                                                        </button>
+                                                        <button onClick={() => setEditingDetailsId(null)}
+                                                            className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg">
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="mt-2 flex items-start gap-2">
+                                                    {b.adminDetails ? (
+                                                        <div className="flex-1 text-xs bg-blue-50 text-blue-800 rounded-lg px-3 py-2 border border-blue-100 space-y-0.5">
+                                                            {(b.adminDetails as BookingDetails).notes && <p>📝 {String((b.adminDetails as BookingDetails).notes).slice(0, 80)}{String((b.adminDetails as BookingDetails).notes).length > 80 ? '…' : ''}</p>}
+                                                            {(b.adminDetails as BookingDetails).flightsPdf && <p className="text-green-700">✈️ Flight Tickets PDF</p>}
+                                                            {(b.adminDetails as BookingDetails).hotelsPdf && <p className="text-purple-700">🏨 Hotel Voucher PDF</p>}
+                                                            {(b.adminDetails as BookingDetails).itineraryPdf && <p className="text-orange-700">🗺️ Itinerary PDF</p>}
+                                                        </div>
+                                                    ) : null}
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingDetailsId(String(b.id));
+                                                            setDetailsDraft((b.adminDetails as BookingDetails) || { ...EMPTY_DETAILS });
+                                                            setDetailsTab('notes');
+                                                        }}
+                                                        className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 text-[11px] text-blue-600 hover:bg-blue-50 border border-blue-200 rounded-lg font-semibold transition-colors"
+                                                    >
+                                                        <Edit2 size={11} />
+                                                        {b.adminDetails ? 'Edit Details' : '+ Add Details'}
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}

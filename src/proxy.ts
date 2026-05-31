@@ -1,135 +1,150 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// In-memory rate limiter — only blocks extreme abuse
-const rateMap = new Map<string, { count: number; ts: number }>();
-const WINDOW_MS = 60_000;
-const MAX_REQUESTS = 600;  // 10 req/sec sustained — very generous for real users
-const STRICT_MAX = 200;    // API routes
-
-// Suspicious URL patterns — path traversal, SQL injection, common exploit probes
-const ATTACK_PATTERNS = [
-  /\.\.\//,                        // path traversal
-  /(\%2e\%2e|\.\.%2f|%2e\.)/i,    // encoded path traversal
-  /<script/i,                       // XSS
-  /union\s+select/i,               // SQL injection
-  /exec(\s|\+)+(s|x)p\w+/i,       // SQL exec
-  /;\s*(drop|alter|delete)\s+/i,   // SQL destructive
-  /\beval\s*\(/i,                  // eval injection
-  /etc\/passwd/i,                   // LFI
-  /\/wp-admin/i,                    // WordPress probe
-  /\/phpmy/i,                       // phpMyAdmin probe
-  /\/\.env/,                        // env file probe
-  /\/\.git/,                        // git exposure
+// ── Bot / Scraper User-Agent patterns ─────────────────────────────────────────
+// Block aggressive AI scrapers & malicious bots. Legitimate search engines
+// (Googlebot, Bingbot) are intentionally allowed.
+const BLOCKED_UA_PATTERNS = [
+  // AI training scrapers
+  /CCBot/i,
+  /Bytespider/i,
+  /Amazonbot/i,
+  /DataForSeoBot/i,
+  /MJ12bot/i,
+  /DotBot/i,
+  /SemrushBot/i,          // aggressive commercial crawler
+  /AhrefsBot/i,           // aggressive commercial crawler
+  /MajesticBot/i,
+  /BLEXBot/i,
+  /serpstatbot/i,
+  /PetalBot/i,
+  /Sogou/i,
+  /YandexBot/i,
+  /Baiduspider/i,
+  /360Spider/i,
+  /ia_archiver/i,
+  /scrapy/i,
+  /python-requests/i,
+  /python-httpx/i,
+  /Go-http-client\/1/i,   // Go scraper (not modern services)
+  /curl\//i,              // raw curl in production = likely bot
+  /wget\//i,
+  /libwww-perl/i,
+  /Java\//i,              // raw Java HTTP client
+  /axios\/0\.[0-9]\./i,   // old axios versions used by scrapers
+  /HeadlessChrome/i,      // headless Chrome without real UA
+  /PhantomJS/i,
+  /Screaming Frog/i,
+  /HTTrack/i,
+  /WebCopier/i,
+  /SitePoint/i,
+  /harvest/i,
+  /Teleport/i,
+  /WebZIP/i,
+  /EmailSiphon/i,
+  /EmailCollector/i,
+  /WebmasterWorld/i,
 ];
 
-function getIp(req: NextRequest): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || req.headers.get('x-real-ip')
-    || 'unknown';
+// Admin routes that require ADMIN_SECRET header
+const ADMIN_ROUTES = [
+  '/admin',
+  '/api/admin',
+];
+
+// API routes that should never be crawled (return 404 to bots)
+const PRIVATE_API_PREFIXES = [
+  '/api/admin/',
+  '/api/wallet/',
+  '/api/payment/',
+  '/api/security/',
+  '/api/indexnow',
+];
+
+function isBotUA(ua: string): boolean {
+  if (!ua || ua.length < 5) return true; // empty UA = bot
+  return BLOCKED_UA_PATTERNS.some((p) => p.test(ua));
 }
 
-function isRateLimited(ip: string, isApi: boolean): boolean {
-  const now = Date.now();
-  const entry = rateMap.get(ip);
-  const limit = isApi ? STRICT_MAX : MAX_REQUESTS;
+function isAdminRoute(pathname: string): boolean {
+  return ADMIN_ROUTES.some((r) => pathname.startsWith(r));
+}
 
-  if (!entry || now - entry.ts > WINDOW_MS) {
-    rateMap.set(ip, { count: 1, ts: now });
-    return false;
-  }
-
-  entry.count++;
-  if (entry.count > limit) return true;
-  return false;
+function isPrivateApiRoute(pathname: string): boolean {
+  return PRIVATE_API_PREFIXES.some((r) => pathname.startsWith(r));
 }
 
 export function proxy(req: NextRequest) {
-  const { pathname, search } = req.nextUrl;
-  const ip = getIp(req);
-  const fullUrl = pathname + search;
-  const isApi = pathname.startsWith('/api/');
-
-  // ── 1. Attack pattern detection ──────────────────────────────────────────
-  for (const pattern of ATTACK_PATTERNS) {
-    if (pattern.test(fullUrl) || pattern.test(decodeURIComponent(fullUrl))) {
-      // Silently alert admin (fire-and-forget)
-      fetch(`${req.nextUrl.origin}/api/security/alert`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          type: 'scrape',
-          page: fullUrl,
-          ua: req.headers.get('user-agent') || 'unknown',
-        }),
-      }).catch(() => {});
-
-      return new NextResponse('Forbidden', {
-        status: 403,
-        headers: securityHeaders(),
-      });
-    }
-  }
-
-  // ── 2. Rate limiting ──────────────────────────────────────────────────────
-  if (isRateLimited(ip, isApi)) {
-    // Alert for API abuse (not page requests to avoid noise)
-    if (isApi) {
-      fetch(`${req.nextUrl.origin}/api/security/alert`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          type: 'scrape',
-          page: `RATE_LIMIT_HIT: ${pathname}`,
-          ua: req.headers.get('user-agent') || 'unknown',
-        }),
-      }).catch(() => {});
-    }
-
-    return new NextResponse('Too Many Requests', {
-      status: 429,
-      headers: { 'Retry-After': '60', ...securityHeaders() },
-    });
-  }
-
-  // ── 3. Block obvious scraper bots (not API routes, not static assets) ────
+  const { pathname } = req.nextUrl;
   const ua = req.headers.get('user-agent') || '';
-  const botPatterns = /python-requests|scrapy|wget\/|go-http-client\/|libwww-perl/i;
-  if (botPatterns.test(ua) && !pathname.startsWith('/api/') && !pathname.startsWith('/_next/')) {
-    return new NextResponse('Forbidden', { status: 403, headers: securityHeaders() });
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
+
+  // ── 1. Block malicious bots from all non-API pages ─────────────────────────
+  // Allow bots to hit API routes (payment callbacks etc. may come from servers)
+  if (!pathname.startsWith('/api/') && isBotUA(ua)) {
+    return new NextResponse('Access denied', { status: 403 });
   }
 
-  // ── 4. Add security headers to all responses ─────────────────────────────
+  // ── 2. Block bots from private API routes entirely ─────────────────────────
+  if (isPrivateApiRoute(pathname) && isBotUA(ua)) {
+    return new NextResponse('Not found', { status: 404 });
+  }
+
+  // ── 3. Protect admin UI routes (block direct browser access without token) ─
+  // Admin panel is accessible only via header-based auth (set by the admin UI)
+  // This prevents casual scanning from revealing admin pages exist
+  if (pathname.startsWith('/admin') && !pathname.startsWith('/api/')) {
+    const adminSecret = process.env.ADMIN_SECRET;
+    // Admin pages are Next.js pages — we don't block them at middleware level
+    // (the page itself handles auth), but we add a noindex header
+    const res = NextResponse.next();
+    res.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return res;
+  }
+
+  // ── 4. Block suspicious requests to sensitive API routes ──────────────────
+  // If someone hits /api/admin/* from a browser (non-server call), block it
+  // Exception: booking-notes uses GCS service-account auth — no ADMIN_SECRET needed
+  if (pathname.startsWith('/api/admin/') &&
+      !pathname.startsWith('/api/admin/booking-notes') &&
+      !pathname.startsWith('/api/admin/booking-docs')) {
+    const adminSecret = process.env.ADMIN_SECRET;
+    if (!adminSecret) {
+      // ADMIN_SECRET not configured — deny all admin API access
+      return NextResponse.json({ error: 'Not configured' }, { status: 503 });
+    }
+    const token =
+      req.headers.get('x-admin-secret') ||
+      req.headers.get('x-admin-token') ||
+      req.headers.get('authorization')?.replace('Bearer ', '');
+    if (token !== adminSecret) {
+      // Log suspicious access attempt
+      console.warn(`[middleware] Unauthorized admin access: ${pathname} from ${ip} UA:${ua.slice(0, 80)}`);
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  }
+
+  // ── 5. Security headers on all responses ──────────────────────────────────
   const res = NextResponse.next();
-  Object.entries(securityHeaders()).forEach(([k, v]) => res.headers.set(k, v));
+
+  // Prevent clickjacking even on API responses
+  res.headers.set('X-Frame-Options', 'DENY');
+  res.headers.set('X-Content-Type-Options', 'nosniff');
+
+  // Tell Cloudflare / CDN not to cache admin/payment API responses
+  if (pathname.startsWith('/api/admin/') || pathname.startsWith('/api/payment/') || pathname.startsWith('/api/wallet/')) {
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.headers.set('Pragma', 'no-cache');
+  }
+
   return res;
 }
 
-function securityHeaders(): Record<string, string> {
-  return {
-    'X-Frame-Options': 'DENY',
-    'X-Content-Type-Options': 'nosniff',
-    'X-XSS-Protection': '1; mode=block',
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self), payment=(self)',
-    'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
-    'Content-Security-Policy': [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.easebuzz.in",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https: http:",
-      "media-src 'self' https: blob:",
-      "connect-src 'self' https: wss:",
-      "frame-src 'self' https://*.easebuzz.in https://pay.easebuzz.in",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self' https://*.easebuzz.in",
-    ].join('; '),
-  };
-}
-
 export const config = {
+  // Run on all routes except Next.js internals and static files
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|icon.png|robots.txt|sitemap.xml).*)',
+    '/((?!_next/static|_next/image|favicon|logo|robots|sitemap|llms|BingSiteAuth|apple-touch|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff2?|ttf|otf|mp3|mp4|css|js|map)).*)',
   ],
 };

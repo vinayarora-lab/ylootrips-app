@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Search, CheckCircle, Clock, Plane, Calendar, Users,
   MapPin, Ticket, Copy, MessageCircle, ArrowLeft, AlertCircle,
   RefreshCw, Receipt, Shield, Download, Star, Zap,
   Wallet, ChevronRight, Bell, Compass, Globe,
-  Mountain, Sparkles, BookOpen, Heart, X
+  Mountain, Sparkles, BookOpen, Heart, X, Hotel
 } from 'lucide-react';
 import Link from 'next/link';
 import { useWallet } from '@/context/WalletContext';
@@ -177,15 +177,31 @@ function Timeline({ steps }: { steps: { label: string; done: boolean }[] }) {
   );
 }
 
+interface BookingDetails { notes: string; flightsPdf?: string; hotelsPdf?: string; itineraryPdf?: string; }
+
 /* ─── Trip Booking Card ─── */
 function TripBookingCard({ data }: { data: Record<string, unknown> }) {
   const ref = (data.bookingReference as string) || '';
   const total = Number(data.finalAmount || data.totalAmount || 0);
+  const [adminDetails, setAdminDetails] = useState<BookingDetails | null>(null);
+
+  useEffect(() => {
+    if (!ref) return;
+    fetch(`/api/booking-notes?ref=${encodeURIComponent(ref)}`)
+      .then(r => r.json())
+      .then(j => { if (j.details) setAdminDetails(j.details); })
+      .catch(() => {});
+  }, [ref]);
+
+  const isPaid = (data.paymentStatus as string)?.toUpperCase() === 'PAID';
+  const hasDetails = !!(adminDetails && (adminDetails.notes || adminDetails.flightsPdf || adminDetails.hotelsPdf || adminDetails.itineraryPdf));
+  const travelDateStr = (data.travelDate || (data.trip as Record<string, unknown>)?.date) as string | undefined;
+  const journeyStarted = travelDateStr ? new Date(travelDateStr) <= new Date() : false;
   const steps = [
     { label: 'Booking Confirmed ✅', done: true },
-    { label: 'Payment Received', done: (data.paymentStatus as string)?.toUpperCase() === 'PAID' },
-    { label: 'Trip Preparation 🗺️', done: false },
-    { label: 'Your Journey ✈️', done: false },
+    { label: 'Payment Received', done: isPaid },
+    { label: 'Trip Preparation 🗺️', done: isPaid && hasDetails },
+    { label: 'Your Journey ✈️', done: journeyStarted },
   ];
   return (
     <div className="space-y-5">
@@ -247,6 +263,78 @@ function TripBookingCard({ data }: { data: Record<string, unknown> }) {
         </div>
       </GlassCard>
       <Timeline steps={steps} />
+      {!!adminDetails && (adminDetails.notes || adminDetails.flightsPdf || adminDetails.hotelsPdf || adminDetails.itineraryPdf) && (
+        <div className="space-y-4">
+          {/* Notes from admin */}
+          {!!adminDetails.notes && (
+            <GlassCard className="!border-amber-500/20 !bg-amber-500/5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 bg-amber-500/20 rounded-xl flex items-center justify-center shrink-0">
+                  <Bell size={13} className="text-amber-400" />
+                </div>
+                <p className="text-amber-400 font-bold text-sm">Updates from YlooTrips</p>
+              </div>
+              <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{adminDetails.notes}</p>
+            </GlassCard>
+          )}
+          {/* Travel document downloads */}
+          {(adminDetails.flightsPdf || adminDetails.hotelsPdf || adminDetails.itineraryPdf) && (
+            <GlassCard>
+              <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-4">Your Travel Documents</p>
+              <div className="space-y-2">
+                {adminDetails.flightsPdf && (
+                  <a href={`/api/booking-docs?ref=${encodeURIComponent(ref)}&type=flights`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-between bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3.5 hover:bg-blue-500/20 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-blue-500/20 rounded-xl flex items-center justify-center shrink-0">
+                        <Plane size={15} className="text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold text-sm">Flight Tickets</p>
+                        <p className="text-white/40 text-xs">PDF · Tap to download</p>
+                      </div>
+                    </div>
+                    <Download size={15} className="text-blue-400 group-hover:scale-110 transition-transform" />
+                  </a>
+                )}
+                {adminDetails.hotelsPdf && (
+                  <a href={`/api/booking-docs?ref=${encodeURIComponent(ref)}&type=hotels`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-between bg-purple-500/10 border border-purple-500/20 rounded-xl px-4 py-3.5 hover:bg-purple-500/20 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-purple-500/20 rounded-xl flex items-center justify-center shrink-0">
+                        <Hotel size={15} className="text-purple-400" />
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold text-sm">Hotel Voucher</p>
+                        <p className="text-white/40 text-xs">PDF · Tap to download</p>
+                      </div>
+                    </div>
+                    <Download size={15} className="text-purple-400 group-hover:scale-110 transition-transform" />
+                  </a>
+                )}
+                {adminDetails.itineraryPdf && (
+                  <a href={`/api/booking-docs?ref=${encodeURIComponent(ref)}&type=itinerary`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-between bg-orange-500/10 border border-orange-500/20 rounded-xl px-4 py-3.5 hover:bg-orange-500/20 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-orange-500/20 rounded-xl flex items-center justify-center shrink-0">
+                        <BookOpen size={15} className="text-orange-400" />
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold text-sm">Your Itinerary</p>
+                        <p className="text-white/40 text-xs">PDF · Tap to download</p>
+                      </div>
+                    </div>
+                    <Download size={15} className="text-orange-400 group-hover:scale-110 transition-transform" />
+                  </a>
+                )}
+              </div>
+            </GlassCard>
+          )}
+        </div>
+      )}
       <PaymentReceipt
         receiptId={ref}
         lines={[{ label: 'Trip Package', amount: total }]}
@@ -342,7 +430,7 @@ function FlightBookingCard({ data }: { data: Record<string, unknown> }) {
     { label: 'Booking Received 📥', done: true },
     { label: 'Payment Confirmed 💳', done: (data.status as string)?.toUpperCase() !== 'PENDING' },
     { label: 'Ticket Issued 🎟️', done: ['TICKET_ISSUED', 'CONFIRMED'].includes((data.status as string)?.toUpperCase()) },
-    { label: 'Bon Voyage! ✈️', done: false },
+    { label: 'Bon Voyage! ✈️', done: flight?.dep ? new Date(flight.dep as string) <= new Date() : false },
   ];
   return (
     <div className="space-y-5">
@@ -436,6 +524,232 @@ function FlightBookingCard({ data }: { data: Record<string, unknown> }) {
   );
 }
 
+/* ─── Client Login Sheet — lookup all bookings by phone/email ─── */
+function ClientLoginSheet({ onClose, onResults }: {
+  onClose: () => void;
+  onResults: (bookings: Record<string, unknown>[]) => void;
+}) {
+  const [contact, setContact] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLookup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = contact.trim();
+    if (!val) { setError('Enter your phone number or email.'); return; }
+    setLoading(true); setError(null);
+
+    const isEmail = val.includes('@');
+    const params = new URLSearchParams(isEmail ? { email: val } : { phone: val });
+    try {
+      const res = await fetch(`/api/client/bookings?${params}`);
+      const json = await res.json();
+      if (!res.ok) { setError(json.error || 'Something went wrong.'); return; }
+      if (!json.data || json.data.length === 0) {
+        setError('No bookings found for this contact. Try your email or check the number.');
+        return;
+      }
+      onResults(json.data);
+    } catch {
+      setError('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex flex-col justify-end bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="rounded-t-3xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300"
+        style={{ background: 'rgba(10,10,10,0.98)', border: '1px solid rgba(201,169,110,0.2)', maxHeight: '85vh' }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-white/20" />
+        </div>
+        <div className="px-5 pb-8 pt-3 overflow-y-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#C9A96E' }}>Client Portal</p>
+              <h2 className="text-lg font-black text-white mt-0.5">View All My Bookings</h2>
+              <p className="text-xs text-white/40 mt-0.5">Enter your registered phone or email</p>
+            </div>
+            <button onClick={onClose} className="w-9 h-9 rounded-full flex items-center justify-center active:scale-90 transition-transform" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <X size={16} className="text-white/60" />
+            </button>
+          </div>
+
+          <form onSubmit={handleLookup} className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(201,169,110,0.7)' }}>Phone or Email</label>
+              <input
+                type="text"
+                value={contact}
+                onChange={e => setContact(e.target.value)}
+                placeholder="+91 98765 43210 or you@email.com"
+                className="w-full px-4 py-4 rounded-2xl text-white placeholder-white/20 focus:outline-none transition-all"
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(201,169,110,0.25)', fontSize: 15 }}
+                autoFocus
+              />
+            </div>
+
+            {error && (
+              <div className="flex items-start gap-3 p-4 rounded-2xl" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <AlertCircle size={16} className="text-red-400 shrink-0 mt-0.5" />
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 py-4 font-black rounded-2xl transition-all active:scale-[0.98] disabled:opacity-50"
+              style={{ background: 'linear-gradient(135deg, #C9A96E, #E2C68F)', color: '#000' }}
+            >
+              {loading ? <><RefreshCw size={18} className="animate-spin" />Looking up...</> : <><Search size={18} />Find My Bookings</>}
+            </button>
+          </form>
+
+          <p className="text-center text-xs text-white/20 mt-5">Your data is secure and only shown to you</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── All Bookings List ─── */
+function AllBookingsList({ bookings, onBack }: { bookings: Record<string, unknown>[]; onBack: () => void }) {
+  const [selectedBooking, setSelectedBooking] = useState<Record<string, unknown> | null>(null);
+
+  // Only show confirmed / paid bookings
+  const confirmedStatuses = ['PAID', 'CONFIRMED', 'SUCCESS', 'TICKET_ISSUED'];
+  const confirmedBookings = bookings.filter(b => {
+    const status = String(b.status || b.paymentStatus || '').toUpperCase();
+    return confirmedStatuses.includes(status);
+  });
+
+  const getTypeLabel = (b: Record<string, unknown>) => {
+    const t = b._bookingType as string;
+    if (t === 'flight') return { label: 'Flight', emoji: '✈️', color: 'rgba(14,165,233,0.2)', border: 'rgba(14,165,233,0.3)', text: '#38bdf8' };
+    if (t === 'hotel') return { label: 'Hotel', emoji: '🏨', color: 'rgba(168,85,247,0.2)', border: 'rgba(168,85,247,0.3)', text: '#c084fc' };
+    if (t === 'market') return { label: 'Event', emoji: '🎉', color: 'rgba(236,72,153,0.2)', border: 'rgba(236,72,153,0.3)', text: '#f472b6' };
+    return { label: 'Trip', emoji: '🗺️', color: 'rgba(201,169,110,0.2)', border: 'rgba(201,169,110,0.3)', text: '#C9A96E' };
+  };
+
+  // Show full detail view for selected booking
+  if (selectedBooking) {
+    const type = selectedBooking._bookingType as string;
+    return (
+      <div className="min-h-screen pb-24" style={{ background: '#0a0a0f', backgroundImage: 'radial-gradient(ellipse 80% 60% at 50% -20%, rgba(245,158,11,0.15), transparent)' }}>
+        <div className="max-w-lg mx-auto px-4 py-8">
+          <button
+            onClick={() => setSelectedBooking(null)}
+            className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 font-medium transition-colors mb-6"
+          >
+            <ArrowLeft size={16} />Back to All Bookings
+          </button>
+
+          {type === 'trip' && <TripBookingCard data={selectedBooking} />}
+          {type === 'market' && <EventBookingCard data={selectedBooking} />}
+          {type === 'flight' && <FlightBookingCard data={selectedBooking} />}
+          {type === 'hotel' && <TripBookingCard data={selectedBooking} />}
+
+          <a
+            href="https://wa.me/918427831127?text=Hi!%20I%20need%20help%20with%20my%20booking."
+            target="_blank" rel="noopener noreferrer"
+            className="mt-5 flex items-center justify-center gap-3 w-full py-4 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold rounded-2xl transition-all"
+          >
+            <MessageCircle size={18} />Need help? Chat on WhatsApp
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen pb-24" style={{ background: '#0a0a0f' }}>
+      <div className="max-w-lg mx-auto px-4 py-8">
+        <button onClick={onBack} className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 font-medium transition-colors mb-6">
+          <ArrowLeft size={16} />Back
+        </button>
+
+        <div className="mb-6">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#C9A96E' }}>Your History</p>
+          <h1 className="text-2xl font-black text-white mt-1">Confirmed Bookings</h1>
+          <p className="text-white/40 text-sm mt-0.5">{confirmedBookings.length} confirmed booking{confirmedBookings.length !== 1 ? 's' : ''}</p>
+        </div>
+
+        {confirmedBookings.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-5xl mb-4">📭</p>
+            <p className="text-white font-bold text-lg">No confirmed bookings</p>
+            <p className="text-white/40 text-sm mt-1">Your confirmed trips will appear here</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {confirmedBookings.map((b, i) => {
+              const { label, emoji, color, border, text } = getTypeLabel(b);
+              const ref = String(b.bookingReference || b.txnid || b.evtRef || b.id || '—');
+              const destination = String(b.packageName || b.tripTitle || b.destination || b.hotelName || b.eventName || b.productName || '');
+              const date = String(b.travelDate || b.checkIn || b.journeyDate || b.createdAt || b.savedAt || '');
+              const amount = Number(b.totalAmount || b.totalFare || b.amount || b.grandTotal || 0);
+              const status = String(b.status || b.paymentStatus || 'CONFIRMED');
+              return (
+                <button
+                  key={ref + i}
+                  onClick={() => setSelectedBooking(b)}
+                  className="w-full text-left rounded-2xl p-4 transition-all active:scale-[0.98] hover:border-white/20"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ background: color, border: `1px solid ${border}` }}>
+                      {emoji}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-bold text-white text-sm leading-tight truncate">{destination || label + ' Booking'}</p>
+                          <p className="text-[11px] font-mono mt-0.5" style={{ color: text }}>{ref}</p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <StatusBadge status={status} />
+                          <ChevronRight size={14} className="text-white/30" />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 mt-2 flex-wrap">
+                        {date && (
+                          <span className="text-[11px] text-white/40 flex items-center gap-1">
+                            <Calendar size={11} />
+                            {new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
+                        {amount > 0 && (
+                          <span className="text-[11px] font-bold" style={{ color: '#C9A96E' }}>
+                            ₹{new Intl.NumberFormat('en-IN').format(Math.round(amount))}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <a
+          href="https://wa.me/918427831127?text=Hi!%20I%20need%20help%20with%20my%20booking."
+          target="_blank" rel="noopener noreferrer"
+          className="mt-6 flex items-center justify-center gap-3 w-full py-4 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold rounded-2xl transition-all"
+        >
+          <MessageCircle size={18} />Need help? Chat on WhatsApp
+        </a>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Booking Search Sheet ─── */
 function BookingSearchSheet({ onClose, onResult }: {
   onClose: () => void;
@@ -450,7 +764,7 @@ function BookingSearchSheet({ onClose, onResult }: {
 
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reference.trim() || !email.trim()) { setError('Enter your booking reference and email.'); return; }
+    if (!reference.trim()) { setError('Enter your booking reference.'); return; }
     setLoading(true); setError(null);
     const ref = reference.trim().toUpperCase();
     try {
@@ -458,28 +772,23 @@ function BookingSearchSheet({ onClose, onResult }: {
         const res = await fetch(`/api/admin/flight-bookings?txnid=${encodeURIComponent(ref)}`);
         const json = await res.json();
         if (!json.data) { setError('Booking not found. Check your reference and try again.'); return; }
-        if ((json.data.contact?.email as string || '').toLowerCase() !== email.trim().toLowerCase()) { setError("Email doesn't match our records."); return; }
         onResult({ type: 'flight', data: json.data });
       } else if (ref.startsWith('EVT-')) {
         const flightRes = await fetch(`/api/admin/flight-bookings?evtRef=${encodeURIComponent(ref)}`);
         const flightJson = await flightRes.json();
         if (flightJson.data) {
-          const b = flightJson.data as Record<string, unknown>;
-          if (((b.contact as Record<string, unknown>)?.email as string || '').toLowerCase() !== email.trim().toLowerCase()) { setError("Email doesn't match our records."); return; }
-          onResult({ type: 'flight', data: b }); return;
+          onResult({ type: 'flight', data: flightJson.data as Record<string, unknown> }); return;
         }
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${apiUrl}/event-bookings/${encodeURIComponent(ref)}`);
         if (!res.ok) { setError('Booking not found. Check your reference.'); return; }
         const booking = await res.json();
-        if ((booking.customerEmail as string || '').toLowerCase() !== email.trim().toLowerCase()) { setError("Email doesn't match our records."); return; }
         onResult({ type: 'event', data: booking });
       } else {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${apiUrl}/bookings/${encodeURIComponent(ref)}`);
         if (!res.ok) { setError('Booking not found. Check your reference.'); return; }
         const booking = await res.json();
-        if ((booking.customerEmail as string || '').toLowerCase() !== email.trim().toLowerCase()) { setError("Email doesn't match our records."); return; }
         onResult({ type: 'trip', data: booking });
       }
     } catch {
@@ -506,7 +815,7 @@ function BookingSearchSheet({ onClose, onResult }: {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="text-lg font-black text-gray-900">Track Your Booking</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Enter your reference & email to find your booking</p>
+              <p className="text-xs text-gray-400 mt-0.5">Enter your booking reference to find your booking</p>
             </div>
             <button onClick={onClose} className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center active:scale-90 transition-transform">
               <X size={16} className="text-gray-500" />
@@ -525,18 +834,6 @@ function BookingSearchSheet({ onClose, onResult }: {
                 required
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Email used when booking"
-                className="w-full px-4 py-4 rounded-2xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/20 focus:border-gray-900 text-sm transition-all"
-                required
-              />
-            </div>
-
             {error && (
               <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl">
                 <AlertCircle size={17} className="text-red-400 shrink-0 mt-0.5" />
@@ -574,7 +871,7 @@ function BookingSearchSheet({ onClose, onResult }: {
 }
 
 /* ─── Profile Page (MMT-style) ─── */
-function ProfilePage({ onOpenSearch }: { onOpenSearch: () => void }) {
+function ProfilePage({ onOpenSearch, onOpenClientLogin }: { onOpenSearch: () => void; onOpenClientLogin: () => void }) {
   const { balance } = useWallet();
 
   const menuSections = [
@@ -582,6 +879,7 @@ function ProfilePage({ onOpenSearch }: { onOpenSearch: () => void }) {
       title: 'My Trips',
       items: [
         { icon: <Ticket size={20} className="text-gray-600" />, label: 'Track / Find Booking', sub: 'BK · EVT · FLT reference', action: onOpenSearch, bg: 'bg-gray-100' },
+        { icon: <Search size={20} style={{ color: '#A07840' }} />, label: 'View All My Bookings', sub: 'Enter phone or email', action: onOpenClientLogin, bg: 'bg-amber-50' },
         { icon: <Heart size={20} className="text-rose-500" />, label: 'Wishlist', sub: 'Saved destinations', href: '/destinations/domestic', bg: 'bg-rose-50' },
       ],
     },
@@ -615,7 +913,7 @@ function ProfilePage({ onOpenSearch }: { onOpenSearch: () => void }) {
     <div className="min-h-screen bg-gray-100 pb-24">
 
       {/* Profile Hero Card */}
-      <div className="relative bg-gray-950 pt-5 pb-8 px-4">
+      <div className="relative bg-gray-950 pt-28 pb-8 px-4">
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/10 -translate-y-1/3 translate-x-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-black/10 translate-y-1/2 -translate-x-1/4 pointer-events-none" />
@@ -648,9 +946,10 @@ function ProfilePage({ onOpenSearch }: { onOpenSearch: () => void }) {
       {/* Quick Actions */}
       <div className="mx-4 -mt-5 relative z-10">
         <div className="bg-white rounded-2xl shadow-lg px-4 py-5">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {[
               { icon: <Search size={22} className="text-gray-600" />, label: 'Find Booking', action: onOpenSearch },
+              { icon: <Ticket size={22} style={{ color: '#A07840' }} />, label: 'All Bookings', action: onOpenClientLogin },
               { icon: <MessageCircle size={22} className="text-green-500" />, label: 'Support', href: 'https://wa.me/918427831127?text=Hi!%20I%20need%20help.' },
               { icon: <Bell size={22} className="text-blue-500" />, label: 'Notifications', badge: true },
             ].map(({ icon, label, action, href, badge }) => {
@@ -726,12 +1025,18 @@ function MyBookingContent() {
   const prefillRef = searchParams.get('ref') || '';
 
   const [showSearch, setShowSearch] = useState(!!prefillRef);
+  const [showClientLogin, setShowClientLogin] = useState(false);
   const [result, setResult] = useState<{ type: 'trip' | 'event' | 'flight'; data: Record<string, unknown> } | null>(null);
+  const [allBookings, setAllBookings] = useState<Record<string, unknown>[] | null>(null);
 
   const handleResult = (r: { type: 'trip' | 'event' | 'flight'; data: Record<string, unknown> }) => {
     setShowSearch(false);
     setResult(r);
   };
+
+  if (allBookings) {
+    return <AllBookingsList bookings={allBookings} onBack={() => setAllBookings(null)} />;
+  }
 
   if (result) {
     return (
@@ -765,10 +1070,15 @@ function MyBookingContent() {
 
   return (
     <>
-      <ProfilePage onOpenSearch={() => setShowSearch(true)} />
+      <ProfilePage onOpenSearch={() => setShowSearch(true)} onOpenClientLogin={() => setShowClientLogin(true)} />
       {showSearch && (
         <Suspense fallback={null}>
           <BookingSearchSheet onClose={() => setShowSearch(false)} onResult={handleResult} />
+        </Suspense>
+      )}
+      {showClientLogin && (
+        <Suspense fallback={null}>
+          <ClientLoginSheet onClose={() => setShowClientLogin(false)} onResults={(b) => { setShowClientLogin(false); setAllBookings(b); }} />
         </Suspense>
       )}
     </>

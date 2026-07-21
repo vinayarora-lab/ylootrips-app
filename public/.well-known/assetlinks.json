@@ -1,0 +1,12 @@
+[                                                           
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.ylootrips.app",
+        "sha256_cert_fingerprints": [
+          "67:7F:8F:4F:CB:06:5F:56:52:DF:9B:E2:57:4B:C1:D6:83:58:C8:23:F3:48:B9:0B:BA:12:41:A1:AD:D7:B2:AD"
+        ]
+      }
+    }
+  ]

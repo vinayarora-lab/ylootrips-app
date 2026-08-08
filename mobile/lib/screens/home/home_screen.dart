@@ -316,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
 
           // ── Why YlooTrips vs competitors ─────────────────────────────────────
-          SliverToBoxAdapter(child: _sectionHeader('Why Choose YlooTrips?', 'We beat MakeMyTrip & Booking.com on every factor')),
+          SliverToBoxAdapter(child: _sectionHeader('Why Choose YlooTrips?', 'Compare with top travel brands')),
           SliverToBoxAdapter(child: _whyUsSection()),
           SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
 
@@ -877,11 +877,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             return GestureDetector(
               onTap: () async {
                 if (q.$3 == '__sim__') {
-                  final url = Uri.parse('https://www.matrix-cellular.com');
-                  if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
+                  context.push('/esim');
                 } else if (q.$3 == '__forex__') {
-                  final url = Uri.parse('https://www.niyo.com/global');
-                  if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
+                  context.push('/forex-card');
                 } else {
                   context.go(q.$3);
                 }
@@ -1473,10 +1471,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // ── Free Forex Card (BookMyForex) ────────────────────────────────────────
   Widget _forexCardSection() {
     return GestureDetector(
-      onTap: () async {
-        final url = Uri.parse('https://www.niyo.com/global');
-        if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
-      },
+      onTap: () => context.push('/forex-card'),
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
         decoration: BoxDecoration(
@@ -1570,10 +1565,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // ── International SIM card (Matrix Cellular) ─────────────────────────────
   Widget _simCardSection() {
     return GestureDetector(
-      onTap: () async {
-        final url = Uri.parse('https://www.matrix-cellular.com');
-        if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
-      },
+      onTap: () => context.push('/esim'),
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
         decoration: BoxDecoration(
@@ -1695,8 +1687,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   decoration: BoxDecoration(color: AppTheme.secondary, borderRadius: BorderRadius.circular(6)),
                   child: Text('YlooTrips', style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white), textAlign: TextAlign.center),
                 ))),
-                Expanded(flex: 3, child: Text('MakeMyTrip', style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFF6B7280)), textAlign: TextAlign.center)),
-                Expanded(flex: 3, child: Text('Booking.com', style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFF6B7280)), textAlign: TextAlign.center)),
+                Expanded(flex: 3, child: Center(child: Image.network(
+                  'https://logo.clearbit.com/makemytrip.com',
+                  height: 18,
+                  errorBuilder: (_, __, ___) => Text('MakeMyTrip', style: GoogleFonts.inter(fontSize: 8, color: const Color(0xFF6B7280))),
+                ))),
+                Expanded(flex: 3, child: Center(child: Image.network(
+                  'https://logo.clearbit.com/booking.com',
+                  height: 18,
+                  errorBuilder: (_, __, ___) => Text('Booking.com', style: GoogleFonts.inter(fontSize: 8, color: const Color(0xFF6B7280))),
+                ))),
               ]),
             ),
             const Divider(height: 1, color: Color(0xFFE5E7EB)),

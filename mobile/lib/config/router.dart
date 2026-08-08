@@ -27,6 +27,8 @@ import '../screens/wishlist/wishlist_screen.dart';
 import '../screens/visa/visa_guide_screen.dart';
 import '../screens/remote_web_screen.dart';
 import '../screens/force_update_screen.dart';
+import '../screens/forex/forex_card_screen.dart';
+import '../screens/esim/esim_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/splash',
@@ -152,6 +154,8 @@ final router = GoRouter(
         );
       },
     ),
+    GoRoute(path: '/forex-card', builder: (c, s) => const ForexCardScreen()),
+    GoRoute(path: '/esim', builder: (c, s) => const ESimScreen()),
     GoRoute(
       path: '/payment',
       builder: (c, s) {

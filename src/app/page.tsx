@@ -345,6 +345,92 @@ export default function Home() {
           </div>
         </section>
 
+
+        {/* ── APP LAUNCH ────────────────────────────────────────────────── */}
+        <section className="px-4 mb-8">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0F172A] via-[#1E3A5F] to-[#006CE4]">
+            {/* Background glow */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-amber-400/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl" />
+
+            <div className="relative p-5">
+              {/* Launch badge */}
+              <div className="flex items-center gap-2 mb-4">
+                <span className="inline-flex items-center gap-1.5 bg-amber-400 text-amber-900 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full">
+                  <span className="w-1.5 h-1.5 bg-amber-900 rounded-full animate-pulse" />
+                  Launching August 2026
+                </span>
+              </div>
+
+              {/* Heading */}
+              <h2 className="font-playfair text-white text-2xl font-bold leading-tight mb-2">
+                YlooTrips App —<br />
+                <span className="text-amber-400">Your All-in-One</span> Travel Companion
+              </h2>
+              <p className="text-white/70 text-sm leading-relaxed mb-5">
+                We are putting everything a traveller needs into one app — flights, hotels, AI trip planner, hidden gems, forex card, eSIM, bookings and more. No agent, no hassle.
+              </p>
+
+              {/* Feature pills */}
+              <div className="flex flex-wrap gap-2 mb-5">
+                {['✈️ Flights', '🏨 Hotels', '🤖 AI Planner', '🗺️ Hidden Gems', '📅 Best Time Guide', '💳 Forex Card', '📶 eSIM', '🎒 Bookings'].map((f) => (
+                  <span key={f} className="bg-white/10 border border-white/20 text-white/90 text-[11px] font-medium px-3 py-1 rounded-full">{f}</span>
+                ))}
+              </div>
+
+              {/* Stats row */}
+              <div className="grid grid-cols-3 gap-3 mb-5">
+                {[
+                  { v: '10,000+', l: 'Happy Travellers' },
+                  { v: '4.9 ★', l: 'Average Rating' },
+                  { v: '₹10Cr+', l: 'Customer Savings' },
+                ].map(({ v, l }) => (
+                  <div key={l} className="bg-white/10 rounded-2xl p-3 text-center">
+                    <p className="text-white font-black text-base leading-none">{v}</p>
+                    <p className="text-white/60 text-[10px] mt-1 leading-tight">{l}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Early access CTA */}
+              <div className="bg-white/10 border border-white/20 rounded-2xl p-4 mb-4">
+                <p className="text-amber-400 text-xs font-bold uppercase tracking-wide mb-1">🎁 Early Access Offer</p>
+                <p className="text-white text-sm font-semibold mb-1">Be among the first 1,000 users</p>
+                <p className="text-white/60 text-xs leading-relaxed">Get ₹500 WanderLoot cashback + priority customer support + lifetime 10% off on all bookings — exclusively for early adopters.</p>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.ylootrips.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 bg-white rounded-2xl py-3.5 active:scale-[0.97] transition-transform"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M3.18 23.76c.36.2.77.24 1.15.12l12.1-7-2.83-2.83-10.42 9.71zM20.47 10.16L17.9 8.67l-3.15 3.15 3.17 3.17 2.56-1.47a1.74 1.74 0 000-3.36zM1.33 1.05A1.74 1.74 0 001 2v20a1.74 1.74 0 00.33.95l.11.11 11.22-11.22v-.26L1.44.94l-.11.11zM4.33.12l12.1 7-2.83 2.83L3.18.24A1.74 1.74 0 014.33.12z" fill="#34A853"/>
+                  </svg>
+                  <div className="text-left">
+                    <p className="text-gray-400 text-[9px] leading-none">Get it on</p>
+                    <p className="text-gray-900 text-sm font-black leading-tight">Google Play</p>
+                  </div>
+                </a>
+                <Link
+                  href="/contact"
+                  className="flex-1 flex items-center justify-center gap-2 bg-amber-400 rounded-2xl py-3.5 active:scale-[0.97] transition-transform"
+                >
+                  <span className="text-amber-900 text-sm font-black">Get Early Access</span>
+                </Link>
+              </div>
+
+              {/* Trust note */}
+              <p className="text-white/40 text-[10px] text-center mt-3">
+                🔒 New app · Reviews growing · Fully verified & IATA registered
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* ── SERVICES ───────────────────────────────────────────────────── */}
         <section className="px-4 mb-8">
           <div className="mb-4">

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-const SECTIONS = ['banners', 'quick_actions', 'features', 'trending', 'deals', 'promos', 'categories', 'stats', 'nav', 'popup', 'settings'] as const;
+const SECTIONS = ['banners', 'quick_actions', 'features', 'trending', 'deals', 'promos', 'categories', 'stats', 'nav', 'popup', 'offers', 'visa', 'besttime', 'settings'] as const;
 type Section = typeof SECTIONS[number];
 
 export default function AppConfigAdmin() {

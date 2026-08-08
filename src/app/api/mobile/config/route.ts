@@ -88,6 +88,149 @@ const DEFAULT_CONFIG = {
   contactEmail: 'hello@ylootrips.com',
   phone: '+91-8427831127',
 
+
+  // ── Package Offers (shown in Info tab of every trip) ─────────────────────────
+  packageOffers: [
+    {
+      icon: 'local_offer',
+      color: '#059669',
+      bg: '#D1FAE5',
+      title: 'Early Bird Discount',
+      desc: 'Book 60+ days in advance and save up to 15% on total package cost.',
+      badge: 'SAVE 15%',
+    },
+    {
+      icon: 'people',
+      color: '#1A73E8',
+      bg: '#DBEAFE',
+      title: 'Group Booking Offer',
+      desc: 'Travelling with 6+ people? Get ₹5,000 cashback per person in your WanderLoot wallet.',
+      badge: 'GROUP DEAL',
+    },
+    {
+      icon: 'favorite',
+      color: '#DB2777',
+      bg: '#FCE7F3',
+      title: 'Honeymoon Bonus',
+      desc: 'Couples get complimentary room upgrade + flower decoration + welcome cake.',
+      badge: 'FREE UPGRADE',
+    },
+    {
+      icon: 'account_balance_wallet',
+      color: '#7C3AED',
+      bg: '#EDE9FE',
+      title: 'WanderLoot Cashback',
+      desc: 'Earn ₹2,500 – ₹10,000 cashback on every booking credited to your wallet.',
+      badge: '₹2,500 BACK',
+    },
+  ],
+
+  // ── Visa Data per package slug ────────────────────────────────────────────────
+  visaData: {
+    'bali-honeymoon-package': {
+      type: 'Visa on Arrival',
+      fee: '$35 USD (~₹2,900)',
+      validity: '30 days (extendable)',
+      processing: 'Instant at Bali airport',
+      required: 'Passport valid 6+ months, return ticket, hotel booking proof',
+      note: '✅ Easy — obtained at the airport on arrival. No prior paperwork needed.',
+    },
+    'dubai-tour-package-from-delhi': {
+      type: 'Tourist Visa (Required)',
+      fee: '₹5,500 – ₹7,000 (30-day) | ₹9,500 (60-day)',
+      validity: '30 or 60 days',
+      processing: '3-5 working days',
+      required: 'Passport valid 6+ months, passport photo, bank statement (3 months), confirmed hotel',
+      note: '✅ YlooTrips handles your UAE visa application — we submit on your behalf!',
+    },
+    'maldives-luxury-package': {
+      type: 'Free Visa on Arrival',
+      fee: 'FREE',
+      validity: '30 days',
+      processing: 'Instant at Malé airport',
+      required: 'Valid passport, return ticket, confirmed hotel / resort booking',
+      note: '✅ No cost, no paperwork — smoothest visa in the world!',
+    },
+  },
+
+  // ── Best Time to Visit per package slug ──────────────────────────────────────
+  bestTimeData: {
+    'kashmir-tour-package': {
+      best: 'Apr – Jun & Sep – Nov',
+      avoid: 'Dec – Feb (heavy snowfall, roads close)',
+      months: ['❄️Jan','❄️Feb','🌸Mar','✅Apr','✅May','✅Jun','🌧️Jul','🌧️Aug','✅Sep','✅Oct','✅Nov','❄️Dec'],
+      weather: 'Spring (Apr-Jun) brings blooming flowers and pleasant 15-25°C. Autumn (Sep-Nov) has clear skies and golden chinar trees.',
+      tip: '⭐ Best avoided during peak summer (Jul-Aug) due to heavy rains and peak monsoon.',
+    },
+    'bali-honeymoon-package': {
+      best: 'May – Sep (Dry Season)',
+      avoid: 'Dec – Mar (heavy monsoon rains)',
+      months: ['🌧️Jan','🌧️Feb','🌧️Mar','🌤️Apr','✅May','✅Jun','✅Jul','✅Aug','✅Sep','🌤️Oct','🌧️Nov','🌧️Dec'],
+      weather: 'Dry season (May-Sep) offers sunny days at 27-32°C with cool evenings. Perfect beach and temple weather.',
+      tip: '⭐ July-August is peak season — book 3 months in advance for honeymoon villas.',
+    },
+    'kerala-tour-package': {
+      best: 'Oct – Mar (Post-Monsoon & Winter)',
+      avoid: 'Jun – Aug (intense monsoon, floods possible)',
+      months: ['✅Jan','✅Feb','✅Mar','🌤️Apr','🌤️May','🌧️Jun','🌧️Jul','🌧️Aug','🌤️Sep','✅Oct','✅Nov','✅Dec'],
+      weather: 'October to March is ideal with 22-32°C, calm backwaters, and clear beaches. Monsoon (Jun-Aug) offers lush greenery but rough seas.',
+      tip: '⭐ Houseboat bookings at 50% higher in December — plan ahead or visit in November for best value.',
+    },
+    'dubai-tour-package-from-delhi': {
+      best: 'Nov – Mar (Cool & Pleasant)',
+      avoid: 'Jun – Sep (extreme heat 40-50°C)',
+      months: ['✅Jan','✅Feb','✅Mar','🌤️Apr','🌤️May','🌡️Jun','🌡️Jul','🌡️Aug','🌡️Sep','🌤️Oct','✅Nov','✅Dec'],
+      weather: 'November to March is the golden window — 20-28°C, no humidity, perfect for desert safari and sightseeing.',
+      tip: '⭐ Visit in December for Dubai Shopping Festival or January for DSF sales on luxury brands.',
+    },
+    'maldives-luxury-package': {
+      best: 'Nov – Apr (Dry Season)',
+      avoid: 'May – Oct (South-West Monsoon, rough seas)',
+      months: ['✅Jan','✅Feb','✅Mar','✅Apr','🌧️May','🌧️Jun','🌧️Jul','🌧️Aug','🌧️Sep','🌤️Oct','✅Nov','✅Dec'],
+      weather: 'Dry season brings crystal-clear waters (30m+ visibility), 25-30°C, and perfect snorkelling/diving conditions.',
+      tip: '⭐ Manta ray season runs February-April — best time to spot them at Baa Atoll.',
+    },
+    'goa-tour-package': {
+      best: 'Nov – Feb (Peak Season)',
+      avoid: 'Jun – Sep (monsoon, rough sea, most shacks closed)',
+      months: ['✅Jan','✅Feb','🌤️Mar','🌤️Apr','🌤️May','🌧️Jun','🌧️Jul','🌧️Aug','🌧️Sep','🌤️Oct','✅Nov','✅Dec'],
+      weather: 'November to February is perfect at 20-30°C with calm seas, lively beach shacks, and water sports.',
+      tip: '⭐ December-January is most expensive — visit in November or February for better hotel rates.',
+    },
+    'manali-tour-package': {
+      best: 'Apr – Jun & Sep – Nov',
+      avoid: 'Jan – Feb (extreme cold, Rohtang closed)',
+      months: ['❄️Jan','❄️Feb','🌸Mar','✅Apr','✅May','✅Jun','🌧️Jul','🌧️Aug','✅Sep','✅Oct','✅Nov','❄️Dec'],
+      weather: 'Summer (Apr-Jun) is perfect for Rohtang Pass and adventure activities at 15-25°C. Autumn clear skies offer Himalayan views.',
+      tip: '⭐ For snow activities, go in January-February but expect road closures. For everything else, May-June is ideal.',
+    },
+    'golden-triangle-10-day': {
+      best: 'Oct – Mar (Cool & Clear)',
+      avoid: 'Apr – Jun (extreme heat, 40-48°C in Rajasthan)',
+      months: ['✅Jan','✅Feb','✅Mar','🌡️Apr','🌡️May','🌡️Jun','🌧️Jul','🌧️Aug','🌤️Sep','✅Oct','✅Nov','✅Dec'],
+      weather: 'October to March is ideal — 15-25°C for Agra and Jaipur. The Taj Mahal looks its most magical on misty winter mornings.',
+      tip: '⭐ Full moon nights at Taj Mahal (booking required) — check the lunar calendar when planning your trip.',
+    },
+    'rajasthan-heritage-7-day': {
+      best: 'Oct – Mar (Winter, festivals)',
+      avoid: 'May – Jul (desert heat up to 50°C)',
+      months: ['✅Jan','✅Feb','✅Mar','🌡️Apr','🌡️May','🌡️Jun','🌧️Jul','🌧️Aug','🌤️Sep','✅Oct','✅Nov','✅Dec'],
+      weather: 'October to March: 10-25°C, clear desert skies, Pushkar Fair (November), and Jaipur Literature Festival (January).',
+      tip: '⭐ Rajasthan is magical during winter festivals — Diwali illuminates every fort and palace.',
+    },
+  },
+
+  // ── Domestic slugs (no visa needed) ──────────────────────────────────────────
+  domesticSlugs: [
+    'kashmir-tour-package',
+    'kerala-tour-package',
+    'kerala-south-india-14-day',
+    'goa-tour-package',
+    'manali-tour-package',
+    'golden-triangle-10-day',
+    'rajasthan-heritage-7-day',
+  ],
+
   // ── Hero text (remote-editable) ──────────────────────────────────────────
   heroTitle: 'Find Your Perfect\nHoliday',
   heroPill1: '25,000+ Trips',

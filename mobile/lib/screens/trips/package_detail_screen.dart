@@ -9,6 +9,7 @@ import '../../config/theme.dart';
 import '../../providers/currency_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/booking_payment_sheet.dart';
+import '../../providers/remote_config_provider.dart';
 
 // ── Per-package itinerary data keyed by slug ─────────────────────────────────
 const _itineraries = <String, List<Map<String, String>>>{
@@ -857,52 +858,34 @@ class _InfoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visa = _visaData[slug];
-    final bt = _bestTimeData[slug];
-    final domestic = _isDomestic(slug);
+    final rc = context.watch<RemoteConfigProvider>();
+    final visa = rc.visaForSlug(slug);
+    final bt = rc.bestTimeForSlug(slug);
+    final domestic = rc.isDomestic(slug);
+    final offers = rc.packageOffers;
 
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-        // ── Current Offers ──────────────────────────────────────────────────
+        // ── Current Offers (from Remote Config — editable in admin panel) ────────
         Text('🎁 Current Offers', style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        _offerCard(
-          icon: Icons.local_offer_rounded,
-          color: const Color(0xFF059669),
-          bg: const Color(0xFFD1FAE5),
-          title: 'Early Bird Discount',
-          desc: 'Book 60+ days in advance and save up to 15% on total package cost.',
-          badge: 'SAVE 15%',
-        ),
-        const SizedBox(height: 10),
-        _offerCard(
-          icon: Icons.people_rounded,
-          color: const Color(0xFF1A73E8),
-          bg: const Color(0xFFDBEAFE),
-          title: 'Group Booking Offer',
-          desc: 'Travelling with 6+ people? Get ₹5,000 cashback per person in your WanderLoot wallet.',
-          badge: 'GROUP DEAL',
-        ),
-        const SizedBox(height: 10),
-        _offerCard(
-          icon: Icons.favorite_rounded,
-          color: const Color(0xFFDB2777),
-          bg: const Color(0xFFFCE7F3),
-          title: 'Honeymoon Bonus',
-          desc: 'Couples get complimentary room upgrade + flower decoration + welcome cake.',
-          badge: 'FREE UPGRADE',
-        ),
-        const SizedBox(height: 10),
-        _offerCard(
-          icon: Icons.account_balance_wallet_rounded,
-          color: const Color(0xFF7C3AED),
-          bg: const Color(0xFFEDE9FE),
-          title: 'WanderLoot Cashback',
-          desc: 'Earn ₹2,500 – ₹10,000 cashback on every booking credited to your wallet.',
-          badge: '₹2,500 BACK',
-        ),
+        ...offers.asMap().entries.map((e) {
+          final o = e.value;
+          final color = _hexColor(o['color'] as String? ?? '#059669');
+          final bg = _hexColor(o['bg'] as String? ?? '#D1FAE5');
+          return Padding(
+            padding: EdgeInsets.only(bottom: e.key < offers.length - 1 ? 10 : 0),
+            child: _offerCard(
+              icon: _iconFromName(o['icon'] as String? ?? 'local_offer'),
+              color: color, bg: bg,
+              title: o['title'] as String? ?? '',
+              desc: o['desc'] as String? ?? '',
+              badge: o['badge'] as String? ?? '',
+            ),
+          );
+        }),
 
         const SizedBox(height: 24),
 
@@ -1118,6 +1101,25 @@ class _InfoTab extends StatelessWidget {
         const SizedBox(height: 32),
       ]),
     );
+  }
+
+  // ── Helpers for remote-config-driven icons/colors ─────────────────────────
+  static Color _hexColor(String hex) {
+    final h = hex.replaceFirst('#', '');
+    return Color(int.parse('FF$h', radix: 16));
+  }
+
+  static IconData _iconFromName(String name) {
+    switch (name) {
+      case 'local_offer': return Icons.local_offer_rounded;
+      case 'people': return Icons.people_rounded;
+      case 'favorite': return Icons.favorite_rounded;
+      case 'account_balance_wallet': return Icons.account_balance_wallet_rounded;
+      case 'flight': return Icons.flight_rounded;
+      case 'hotel': return Icons.hotel_rounded;
+      case 'star': return Icons.star_rounded;
+      default: return Icons.local_offer_rounded;
+    }
   }
 
   Widget _offerCard({required IconData icon, required Color color, required Color bg, required String title, required String desc, required String badge}) =>

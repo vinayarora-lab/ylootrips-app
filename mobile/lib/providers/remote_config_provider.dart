@@ -88,6 +88,47 @@ class RemoteConfigProvider extends ChangeNotifier {
     return null;
   }
 
+  // ── Package detail dynamic content ──────────────────────────────────────────
+
+  /// Offers shown in the Info tab of every trip detail screen
+  List<Map<String, dynamic>> get packageOffers =>
+      _mapList('packageOffers', _defaultPackageOffers);
+
+  /// Visa data keyed by package slug
+  Map<String, dynamic> get visaData {
+    final v = _config['visaData'];
+    if (v is Map) return Map<String, dynamic>.from(v);
+    return {};
+  }
+
+  /// Best time data keyed by package slug
+  Map<String, dynamic> get bestTimeData {
+    final v = _config['bestTimeData'];
+    if (v is Map) return Map<String, dynamic>.from(v);
+    return {};
+  }
+
+  /// Slugs that are domestic (no visa required)
+  List<String> get domesticSlugs {
+    final v = _config['domesticSlugs'];
+    if (v is List) return v.map((e) => e.toString()).toList();
+    return _defaultDomesticSlugs;
+  }
+
+  bool isDomestic(String slug) => domesticSlugs.contains(slug);
+
+  Map<String, dynamic>? visaForSlug(String slug) {
+    final v = visaData[slug];
+    if (v is Map) return Map<String, dynamic>.from(v);
+    return null;
+  }
+
+  Map<String, dynamic>? bestTimeForSlug(String slug) {
+    final v = bestTimeData[slug];
+    if (v is Map) return Map<String, dynamic>.from(v);
+    return null;
+  }
+
   // ── Force update ─────────────────────────────────────────────────────────────
   // Set minAppVersion to a version > current to prompt users to update.
   String get minAppVersion => _config['minAppVersion'] as String? ?? '0.0.0';
@@ -257,5 +298,42 @@ class RemoteConfigProvider extends ChangeNotifier {
     {'emoji': '💳', 'code': 'HDFC20', 'title': '₹3,000 off on HDFC cards', 'sub': 'Min. booking ₹30,000'},
     {'emoji': '💰', 'code': 'EMI0', 'title': '0% EMI on all bookings', 'sub': 'No cost EMI up to 12 months'},
     {'emoji': '🏆', 'code': 'WANDERLOOT', 'title': 'Double cashback this week', 'sub': 'Earn 20% WanderLoot'},
+  ];
+
+  static const _defaultPackageOffers = [
+    {
+      'icon': 'local_offer', 'color': '#059669', 'bg': '#D1FAE5',
+      'title': 'Early Bird Discount',
+      'desc': 'Book 60+ days in advance and save up to 15% on total package cost.',
+      'badge': 'SAVE 15%',
+    },
+    {
+      'icon': 'people', 'color': '#1A73E8', 'bg': '#DBEAFE',
+      'title': 'Group Booking Offer',
+      'desc': 'Travelling with 6+ people? Get ₹5,000 cashback per person in your WanderLoot wallet.',
+      'badge': 'GROUP DEAL',
+    },
+    {
+      'icon': 'favorite', 'color': '#DB2777', 'bg': '#FCE7F3',
+      'title': 'Honeymoon Bonus',
+      'desc': 'Couples get complimentary room upgrade + flower decoration + welcome cake.',
+      'badge': 'FREE UPGRADE',
+    },
+    {
+      'icon': 'account_balance_wallet', 'color': '#7C3AED', 'bg': '#EDE9FE',
+      'title': 'WanderLoot Cashback',
+      'desc': 'Earn ₹2,500 – ₹10,000 cashback on every booking credited to your wallet.',
+      'badge': '₹2,500 BACK',
+    },
+  ];
+
+  static const _defaultDomesticSlugs = [
+    'kashmir-tour-package',
+    'kerala-tour-package',
+    'kerala-south-india-14-day',
+    'goa-tour-package',
+    'manali-tour-package',
+    'golden-triangle-10-day',
+    'rajasthan-heritage-7-day',
   ];
 }

@@ -204,6 +204,111 @@ List<Map<String, String>> _itineraryFor(String slug, int nights) {
   });
 }
 
+
+// ── Best Time to Visit data ───────────────────────────────────────────────────
+const _bestTimeData = <String, Map<String, dynamic>>{
+  'kashmir-tour-package': {
+    'best': 'Apr – Jun & Sep – Nov',
+    'avoid': 'Dec – Feb (heavy snowfall, roads close)',
+    'months': ['❄️Jan', '❄️Feb', '🌸Mar', '✅Apr', '✅May', '✅Jun', '🌧️Jul', '🌧️Aug', '✅Sep', '✅Oct', '✅Nov', '❄️Dec'],
+    'weather': 'Spring (Apr-Jun) brings blooming flowers and pleasant 15-25°C. Autumn (Sep-Nov) has clear skies and golden chinar trees.',
+    'tip': '⭐ Best avoided during peak summer (Jul-Aug) due to heavy rains and peak monsoon.',
+  },
+  'bali-honeymoon-package': {
+    'best': 'May – Sep (Dry Season)',
+    'avoid': 'Dec – Mar (heavy monsoon rains)',
+    'months': ['🌧️Jan', '🌧️Feb', '🌧️Mar', '🌤️Apr', '✅May', '✅Jun', '✅Jul', '✅Aug', '✅Sep', '🌤️Oct', '🌧️Nov', '🌧️Dec'],
+    'weather': 'Dry season (May-Sep) offers sunny days at 27-32°C with cool evenings. Perfect beach and temple weather.',
+    'tip': '⭐ July-August is peak season — book 3 months in advance for honeymoon villas.',
+  },
+  'kerala-tour-package': {
+    'best': 'Oct – Mar (Post-Monsoon & Winter)',
+    'avoid': 'Jun – Aug (intense monsoon, floods possible)',
+    'months': ['✅Jan', '✅Feb', '✅Mar', '🌤️Apr', '🌤️May', '🌧️Jun', '🌧️Jul', '🌧️Aug', '🌤️Sep', '✅Oct', '✅Nov', '✅Dec'],
+    'weather': 'October to March is ideal with 22-32°C, calm backwaters, and clear beaches. Monsoon (Jun-Aug) offers lush greenery but rough seas.',
+    'tip': '⭐ Houseboat bookings at 50% higher in December — plan ahead or visit in November for best value.',
+  },
+  'dubai-tour-package-from-delhi': {
+    'best': 'Nov – Mar (Cool & Pleasant)',
+    'avoid': 'Jun – Sep (extreme heat 40-50°C)',
+    'months': ['✅Jan', '✅Feb', '✅Mar', '🌤️Apr', '🌤️May', '🌡️Jun', '🌡️Jul', '🌡️Aug', '🌡️Sep', '🌤️Oct', '✅Nov', '✅Dec'],
+    'weather': 'November to March is the golden window — 20-28°C, no humidity, perfect for desert safari and sightseeing.',
+    'tip': '⭐ Visit in December for Dubai Shopping Festival or January for DSF sales on luxury brands.',
+  },
+  'maldives-luxury-package': {
+    'best': 'Nov – Apr (Dry Season)',
+    'avoid': 'May – Oct (South-West Monsoon, rough seas)',
+    'months': ['✅Jan', '✅Feb', '✅Mar', '✅Apr', '🌧️May', '🌧️Jun', '🌧️Jul', '🌧️Aug', '🌧️Sep', '🌤️Oct', '✅Nov', '✅Dec'],
+    'weather': 'Dry season brings crystal-clear waters (30m+ visibility), 25-30°C, and perfect snorkelling/diving conditions.',
+    'tip': '⭐ Manta ray season runs February-April — best time to spot them at Baa Atoll.',
+  },
+  'goa-tour-package': {
+    'best': 'Nov – Feb (Peak Season)',
+    'avoid': 'Jun – Sep (monsoon, rough sea, most shacks closed)',
+    'months': ['✅Jan', '✅Feb', '🌤️Mar', '🌤️Apr', '🌤️May', '🌧️Jun', '🌧️Jul', '🌧️Aug', '🌧️Sep', '🌤️Oct', '✅Nov', '✅Dec'],
+    'weather': 'November to February is perfect at 20-30°C with calm seas, lively beach shacks, and water sports.',
+    'tip': '⭐ December-January is most expensive — visit in November or February for better hotel rates.',
+  },
+  'manali-tour-package': {
+    'best': 'Apr – Jun & Sep – Nov',
+    'avoid': 'Jan – Feb (extreme cold, Rohtang closed)',
+    'months': ['❄️Jan', '❄️Feb', '🌸Mar', '✅Apr', '✅May', '✅Jun', '🌧️Jul', '🌧️Aug', '✅Sep', '✅Oct', '✅Nov', '❄️Dec'],
+    'weather': 'Summer (Apr-Jun) is perfect for Rohtang Pass and adventure activities at 15-25°C. Autumn clear skies offer Himalayan views.',
+    'tip': '⭐ For snow activities, go in January-February but expect road closures. For everything else, May-June is ideal.',
+  },
+  'golden-triangle-10-day': {
+    'best': 'Oct – Mar (Cool & Clear)',
+    'avoid': 'Apr – Jun (extreme heat, 40-48°C in Rajasthan)',
+    'months': ['✅Jan', '✅Feb', '✅Mar', '🌡️Apr', '🌡️May', '🌡️Jun', '🌧️Jul', '🌧️Aug', '🌤️Sep', '✅Oct', '✅Nov', '✅Dec'],
+    'weather': 'October to March is ideal — 15-25°C for Agra and Jaipur. The Taj Mahal looks its most magical on misty winter mornings.',
+    'tip': '⭐ Full moon nights at Taj Mahal (booking required) — check the lunar calendar when planning your trip.',
+  },
+  'rajasthan-heritage-7-day': {
+    'best': 'Oct – Mar (Winter, festivals)',
+    'avoid': 'May – Jul (desert heat up to 50°C)',
+    'months': ['✅Jan', '✅Feb', '✅Mar', '🌡️Apr', '🌡️May', '🌡️Jun', '🌧️Jul', '🌧️Aug', '🌤️Sep', '✅Oct', '✅Nov', '✅Dec'],
+    'weather': 'October to March: 10-25°C, clear desert skies, Pushkar Fair (November), and Jaipur Literature Festival (January).',
+    'tip': '⭐ Rajasthan is magical during winter festivals — Diwali illuminates every fort and palace.',
+  },
+};
+
+// ── Visa Information data ─────────────────────────────────────────────────────
+const _visaData = <String, Map<String, String>>{
+  'bali-honeymoon-package': {
+    'type': 'Visa on Arrival',
+    'fee': '\$35 USD (~₹2,900)',
+    'validity': '30 days (extendable)',
+    'processing': 'Instant at Bali airport',
+    'required': 'Passport valid 6+ months, return ticket, hotel booking proof',
+    'note': '✅ Easy — obtained at the airport on arrival. No prior paperwork needed.',
+  },
+  'dubai-tour-package-from-delhi': {
+    'type': 'Tourist Visa (Required)',
+    'fee': '₹5,500 – ₹7,000 (30-day) | ₹9,500 (60-day)',
+    'validity': '30 or 60 days',
+    'processing': '3-5 working days',
+    'required': 'Passport valid 6+ months, passport photo, bank statement (3 months), confirmed hotel',
+    'note': '✅ YlooTrips handles your UAE visa application — we submit on your behalf!',
+  },
+  'maldives-luxury-package': {
+    'type': 'Free Visa on Arrival',
+    'fee': 'FREE',
+    'validity': '30 days',
+    'processing': 'Instant at Malé airport',
+    'required': 'Valid passport, return ticket, confirmed hotel / resort booking',
+    'note': '✅ No cost, no paperwork — smoothest visa in the world!',
+  },
+};
+
+// Domestic packages needing no visa
+const _domesticSlugs = {
+  'kashmir-tour-package', 'kerala-tour-package', 'goa-tour-package',
+  'manali-tour-package', 'golden-triangle-10-day', 'rajasthan-heritage-7-day',
+  'kerala-south-india-14-day',
+};
+
+bool _isDomestic(String slug) => _domesticSlugs.contains(slug);
+
 // ── Main Screen ───────────────────────────────────────────────────────────────
 class PackageDetailScreen extends StatefulWidget {
   final Map<String, dynamic> packageData;
@@ -245,7 +350,7 @@ class _PackageDetailScreenState extends State<PackageDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 3, vsync: this);
+    _tabCtrl = TabController(length: 4, vsync: this);
     _loadWishlist();
   }
 
@@ -309,6 +414,9 @@ class _PackageDetailScreenState extends State<PackageDetailScreen>
                 ]),
                 ListView(padding: const EdgeInsets.only(bottom: 32), children: [
                   const _InclusionsTab(),
+                ]),
+                ListView(padding: const EdgeInsets.only(bottom: 32), children: [
+                  _InfoTab(slug: slug),
                 ]),
               ],
             ),
@@ -405,6 +513,8 @@ class _PackageDetailScreenState extends State<PackageDetailScreen>
     color: AppTheme.white,
     child: TabBar(
       controller: _tabCtrl,
+      isScrollable: true,
+      tabAlignment: TabAlignment.start,
       labelStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700),
       unselectedLabelStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w400),
       labelColor: AppTheme.secondary,
@@ -434,7 +544,7 @@ class _PackageDetailScreenState extends State<PackageDetailScreen>
         Text('Starting from', style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textGray)),
         Text(currency.format(price.toDouble()),
           style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.primary)),
-        Text('per person · all inclusive',
+        Text('per person · excl. flights',
           style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textGray)),
       ]),
       const Spacer(),
@@ -738,4 +848,338 @@ class _PillBadge extends StatelessWidget {
     decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
     child: Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: text)),
   );
+
+}
+// ── Info Tab (Visa + Best Time + Offers + Payment) ───────────────────────────
+class _InfoTab extends StatelessWidget {
+  final String slug;
+  const _InfoTab({required this.slug});
+
+  @override
+  Widget build(BuildContext context) {
+    final visa = _visaData[slug];
+    final bt = _bestTimeData[slug];
+    final domestic = _isDomestic(slug);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+        // ── Current Offers ──────────────────────────────────────────────────
+        Text('🎁 Current Offers', style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        _offerCard(
+          icon: Icons.local_offer_rounded,
+          color: const Color(0xFF059669),
+          bg: const Color(0xFFD1FAE5),
+          title: 'Early Bird Discount',
+          desc: 'Book 60+ days in advance and save up to 15% on total package cost.',
+          badge: 'SAVE 15%',
+        ),
+        const SizedBox(height: 10),
+        _offerCard(
+          icon: Icons.people_rounded,
+          color: const Color(0xFF1A73E8),
+          bg: const Color(0xFFDBEAFE),
+          title: 'Group Booking Offer',
+          desc: 'Travelling with 6+ people? Get ₹5,000 cashback per person in your WanderLoot wallet.',
+          badge: 'GROUP DEAL',
+        ),
+        const SizedBox(height: 10),
+        _offerCard(
+          icon: Icons.favorite_rounded,
+          color: const Color(0xFFDB2777),
+          bg: const Color(0xFFFCE7F3),
+          title: 'Honeymoon Bonus',
+          desc: 'Couples get complimentary room upgrade + flower decoration + welcome cake.',
+          badge: 'FREE UPGRADE',
+        ),
+        const SizedBox(height: 10),
+        _offerCard(
+          icon: Icons.account_balance_wallet_rounded,
+          color: const Color(0xFF7C3AED),
+          bg: const Color(0xFFEDE9FE),
+          title: 'WanderLoot Cashback',
+          desc: 'Earn ₹2,500 – ₹10,000 cashback on every booking credited to your wallet.',
+          badge: '₹2,500 BACK',
+        ),
+
+        const SizedBox(height: 24),
+
+        // ── Payment Options ─────────────────────────────────────────────────
+        Text('💳 Payment Options', style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Text('Flexible payment — book now, pay later', style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF6B7280))),
+        const SizedBox(height: 12),
+        _paymentRow(
+          icon: Icons.arrow_downward_rounded,
+          color: const Color(0xFF059669),
+          title: 'Book with 25% Advance',
+          desc: 'Pay only ₹XX,XXX now. Balance due 30 days before departure.',
+          tag: 'MOST POPULAR',
+          tagColor: const Color(0xFF059669),
+        ),
+        const SizedBox(height: 10),
+        _paymentRow(
+          icon: Icons.calendar_month_rounded,
+          color: const Color(0xFF1A73E8),
+          title: 'No Cost EMI',
+          desc: '3, 6, or 9 month EMI via credit card. Zero processing fee.',
+          tag: '0% EMI',
+          tagColor: const Color(0xFF1A73E8),
+        ),
+        const SizedBox(height: 10),
+        _paymentRow(
+          icon: Icons.flash_on_rounded,
+          color: const Color(0xFFD97706),
+          title: 'Full Payment',
+          desc: 'Pay 100% now and get additional 3% discount on total package.',
+          tag: 'SAVE 3%',
+          tagColor: const Color(0xFFD97706),
+        ),
+        Container(
+          margin: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFEF3C7),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(children: [
+            const Icon(Icons.verified_user_rounded, color: Color(0xFF92400E), size: 20),
+            const SizedBox(width: 10),
+            Expanded(child: Text(
+              'All payments secured by Easebuzz payment gateway. UPI · Cards · Net Banking · EMI supported.',
+              style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF92400E), height: 1.5),
+            )),
+          ]),
+        ),
+
+        const SizedBox(height: 24),
+
+        // ── Best Time to Visit ──────────────────────────────────────────────
+        Text('📅 Best Time to Visit', style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        if (bt != null) ...[
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [Color(0xFF0F4C81), Color(0xFF1A73E8)]),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                const Icon(Icons.check_circle_outline, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text('Best Time:', style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
+                const SizedBox(width: 6),
+                Expanded(child: Text(bt['best'] as String, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white))),
+              ]),
+              const SizedBox(height: 8),
+              Row(children: [
+                const Icon(Icons.do_not_disturb_on_outlined, color: Colors.white70, size: 18),
+                const SizedBox(width: 8),
+                Text('Avoid:', style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
+                const SizedBox(width: 6),
+                Expanded(child: Text(bt['avoid'] as String, style: GoogleFonts.inter(fontSize: 12, color: Colors.white70))),
+              ]),
+            ]),
+          ),
+          const SizedBox(height: 12),
+          // Month grid
+          Wrap(
+            spacing: 6, runSpacing: 6,
+            children: (bt['months'] as List<dynamic>).map<Widget>((m) {
+              final ms = m as String;
+              final isGood = ms.startsWith('✅');
+              final isBad = ms.startsWith('🌡️') || ms.startsWith('❄️') || ms.startsWith('🌧️');
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isGood ? const Color(0xFFD1FAE5) : (isBad ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7)),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isGood ? const Color(0xFF059669) : (isBad ? const Color(0xFFEF4444) : const Color(0xFFD97706)),
+                    width: 1,
+                  ),
+                ),
+                child: Text(ms, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600,
+                  color: isGood ? const Color(0xFF065F46) : (isBad ? const Color(0xFF991B1B) : const Color(0xFF92400E)))),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(12)),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('🌤 Weather Overview', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF1E40AF))),
+              const SizedBox(height: 6),
+              Text(bt['weather'] as String, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF374151), height: 1.6)),
+              const SizedBox(height: 8),
+              Text(bt['tip'] as String, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF1E40AF))),
+            ]),
+          ),
+        ] else
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(12)),
+            child: Text('Best time varies — contact our travel experts for personalised advice.',
+              style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF374151))),
+          ),
+
+        const SizedBox(height: 24),
+
+        // ── Visa Information ────────────────────────────────────────────────
+        Text('🛂 Visa Information', style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        if (domestic)
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [Color(0xFF059669), Color(0xFF10B981)]),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(children: [
+              const Icon(Icons.check_circle_rounded, color: Colors.white, size: 28),
+              const SizedBox(width: 14),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('No Visa Required', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                Text('This is a domestic India trip — Indian passport holders travel freely.', style: GoogleFonts.inter(fontSize: 12, color: Colors.white.withValues(alpha: 0.9), height: 1.4)),
+              ])),
+            ]),
+          )
+        else if (visa != null) ...[
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+            ),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              _visaRow(Icons.approval_rounded, 'Visa Type', visa['type']!),
+              const Divider(height: 20),
+              _visaRow(Icons.currency_rupee_rounded, 'Visa Fee', visa['fee']!),
+              const Divider(height: 20),
+              _visaRow(Icons.timer_rounded, 'Processing Time', visa['processing']!),
+              const Divider(height: 20),
+              _visaRow(Icons.date_range_rounded, 'Validity', visa['validity']!),
+              const Divider(height: 20),
+              _visaRow(Icons.description_rounded, 'Documents Required', visa['required']!),
+            ]),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: const Color(0xFFD1FAE5), borderRadius: BorderRadius.circular(12)),
+            child: Row(children: [
+              const Icon(Icons.handshake_rounded, color: Color(0xFF059669), size: 20),
+              const SizedBox(width: 10),
+              Expanded(child: Text(visa['note']!, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF065F46), height: 1.4))),
+            ]),
+          ),
+        ] else
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(12)),
+            child: Row(children: [
+              const Icon(Icons.info_outline, color: Color(0xFF92400E), size: 20),
+              const SizedBox(width: 10),
+              Expanded(child: Text(
+                'Visa requirements vary by nationality. Contact us for specific visa guidance.',
+                style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF92400E), height: 1.4),
+              )),
+            ]),
+          ),
+
+        const SizedBox(height: 24),
+
+        // ── Price Note ──────────────────────────────────────────────────────
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('💡 Price Note', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF111827))),
+            const SizedBox(height: 8),
+            _priceNoteRow('✈️ Flights', domestic ? 'Not included — domestic flights add ₹4,000-₹12,000' : 'Not included in base price — add international flights'),
+            _priceNoteRow('🏨 Hotels', 'Included — 4★ & 5★ properties as listed'),
+            _priceNoteRow('🍽️ Meals', 'Daily breakfast + listed meals included'),
+            _priceNoteRow('🚗 Transfers', 'All local transport included'),
+            _priceNoteRow('🎫 Activities', 'All listed sightseeing included'),
+          ]),
+        ),
+
+        const SizedBox(height: 32),
+      ]),
+    );
+  }
+
+  Widget _offerCard({required IconData icon, required Color color, required Color bg, required String title, required String desc, required String badge}) =>
+    Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6, offset: const Offset(0, 2))]),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(width: 40, height: 40, decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+          child: Icon(icon, size: 20, color: color)),
+        const SizedBox(width: 12),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(child: Text(title, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF111827)))),
+            Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+              child: Text(badge, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w800, color: color))),
+          ]),
+          const SizedBox(height: 4),
+          Text(desc, style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF6B7280), height: 1.5)),
+        ])),
+      ]),
+    );
+
+  Widget _paymentRow({required IconData icon, required Color color, required String title, required String desc, required String tag, required Color tagColor}) =>
+    Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE5E7EB))),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(width: 38, height: 38, decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+          child: Icon(icon, size: 20, color: color)),
+        const SizedBox(width: 12),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(child: Text(title, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700))),
+            Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: tagColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+              child: Text(tag, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w800, color: tagColor))),
+          ]),
+          const SizedBox(height: 4),
+          Text(desc, style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF6B7280), height: 1.5)),
+        ])),
+      ]),
+    );
+
+  Widget _visaRow(IconData icon, String label, String value) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    Icon(icon, size: 18, color: const Color(0xFF1A73E8)),
+    const SizedBox(width: 10),
+    SizedBox(width: 110, child: Text(label, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF374151)))),
+    Expanded(child: Text(value, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF6B7280), height: 1.4))),
+  ]);
+
+  Widget _priceNoteRow(String label, String value) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF374151))),
+      const SizedBox(width: 8),
+      Expanded(child: Text(value, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF6B7280)))),
+    ]),
+  );
+}
+
 }

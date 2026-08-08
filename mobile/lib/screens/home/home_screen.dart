@@ -1021,14 +1021,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // ── Category grid ─────────────────────────────────────────────────────────
   Widget _categoryGrid() {
-    // Fixed category tiles with correct navigation — each opens its own filtered list
     final cats = [
-      {'emoji': '🏖️', 'label': 'Beach', 'sub': 'Goa · Andamans · Kerala', 'id': 'beach', 'bg': const Color(0xFFE0F2FE), 'ic': const Color(0xFF0369A1)},
-      {'emoji': '💑', 'label': 'Honeymoon', 'sub': 'Bali · Maldives · Kashmir', 'id': 'honeymoon', 'bg': const Color(0xFFFCE7F3), 'ic': const Color(0xFFBE185D)},
-      {'emoji': '🏔️', 'label': 'Adventure', 'sub': 'Ladakh · Spiti · Manali', 'id': 'adventure', 'bg': const Color(0xFFDCFCE7), 'ic': const Color(0xFF15803D)},
-      {'emoji': '🏛️', 'label': 'Heritage', 'sub': 'Rajasthan · Varanasi', 'id': 'heritage', 'bg': const Color(0xFFFEF3C7), 'ic': const Color(0xFFB45309)},
-      {'emoji': '🌿', 'label': 'Offbeat', 'sub': 'Hidden gems · Secret spots', 'id': 'offbeat', 'bg': const Color(0xFFEDE9FE), 'ic': const Color(0xFF6D28D9)},
-      {'emoji': '🌍', 'label': 'International', 'sub': 'Dubai · Bali · Thailand', 'id': 'international', 'bg': const Color(0xFFFFEDD5), 'ic': const Color(0xFFEA580C)},
+      {'emoji': '🏖️', 'label': 'Beach', 'sub': 'Goa · Andamans', 'id': 'beach',
+       'img': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80'},
+      {'emoji': '💑', 'label': 'Honeymoon', 'sub': 'Bali · Maldives', 'id': 'honeymoon',
+       'img': 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&q=80'},
+      {'emoji': '🏔️', 'label': 'Adventure', 'sub': 'Ladakh · Spiti', 'id': 'adventure',
+       'img': 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&q=80'},
+      {'emoji': '🏛️', 'label': 'Heritage', 'sub': 'Rajasthan · Agra', 'id': 'heritage',
+       'img': 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=80'},
+      {'emoji': '🌿', 'label': 'Offbeat', 'sub': 'Hidden Gems', 'id': 'offbeat',
+       'img': 'https://images.unsplash.com/photo-1591135742467-db8bfd09fd4e?w=400&q=80'},
+      {'emoji': '🌍', 'label': 'Global', 'sub': 'Dubai · Bangkok', 'id': 'international',
+       'img': 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80'},
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1036,33 +1041,50 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         crossAxisCount: 3,
-        childAspectRatio: 0.95,
+        childAspectRatio: 0.78,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
         children: cats.map((c) {
-          final bg = c['bg'] as Color;
-          final ic = c['ic'] as Color;
-          final id  = c['id'] as String;
+          final id = c['id'] as String;
           return GestureDetector(
             onTap: () => context.go('/trips', extra: {'category': id}),
-            child: Container(
-              decoration: BoxDecoration(
-                color: bg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: ic.withValues(alpha: 0.15)),
-              ),
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text(c['emoji'] as String, style: const TextStyle(fontSize: 30)),
-                const SizedBox(height: 6),
-                Text(c['label'] as String,
-                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w800, color: ic),
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 2),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(c['sub'] as String,
-                      style: GoogleFonts.inter(fontSize: 8.5, color: ic.withValues(alpha: 0.7)),
-                      textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Stack(children: [
+                // Background image
+                Image.network(
+                  c['img'] as String,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(color: const Color(0xFF1E3A5F)),
+                ),
+                // Dark gradient overlay
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x33000000), Color(0xCC000000)],
+                      stops: [0.3, 1.0],
+                    ),
+                  ),
+                ),
+                // Labels
+                Positioned(
+                  bottom: 10, left: 8, right: 8,
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(c['label'] as String,
+                      style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: -0.2)),
+                    Text(c['sub'] as String,
+                      style: GoogleFonts.inter(fontSize: 9, color: Colors.white70),
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ]),
+                ),
+                // Emoji badge top-left
+                Positioned(
+                  top: 8, left: 8,
+                  child: Text(c['emoji'] as String, style: const TextStyle(fontSize: 20)),
                 ),
               ]),
             ),

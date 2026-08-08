@@ -55,6 +55,28 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/bookings/history?phone= — fetch booking history by phone (mobile app)
+router.get('/history', async (req: Request, res: Response) => {
+  try {
+    await connectDB();
+    const rawPhone = (req.query.phone as string | undefined) ?? '';
+    const phone = rawPhone.replace(/\D/g, '').slice(-10);
+    if (phone.length < 10) {
+      return res.status(400).json({ error: 'Valid 10-digit phone number required' });
+    }
+    const bookings = await Booking.find({
+      customerPhone: { $regex: phone + '$' },
+    })
+      .sort({ createdAt: -1 })
+      .select('bookingReference tripTitle destination travelDate guests totalAmount paidAmount status paymentStatus createdAt')
+      .lean();
+    return res.json({ bookings });
+  } catch (err) {
+    console.error('[bookings] history error:', err);
+    return res.status(500).json({ error: 'Failed to fetch booking history' });
+  }
+});
+
 // GET /api/bookings/:ref — get booking by reference
 router.get('/:ref', async (req: Request, res: Response) => {
   try {

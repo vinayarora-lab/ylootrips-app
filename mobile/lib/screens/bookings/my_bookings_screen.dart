@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -71,16 +72,21 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> with SingleTickerPr
     }
     setState(() { _historyLoading = true; _historyError = null; _history = null; });
     try {
-      final uri = Uri.parse('${AppConfig.apiUrl}/bookings/history?phone=$phone');
+      final uri = Uri.parse('${AppConfig.backendUrl}/bookings/history?phone=$phone');
       final res = await http.get(uri, headers: {'Accept': 'application/json'})
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 20));
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body) as Map<String, dynamic>;
         setState(() { _history = data['bookings'] as List? ?? []; _historyLoading = false; });
         return;
       }
-    } catch (_) {}
-    setState(() { _historyLoading = false; _historyError = 'Could not fetch bookings. Please try again.'; });
+      final body = jsonDecode(res.body) as Map<String, dynamic>? ?? {};
+      setState(() { _historyLoading = false; _historyError = body['error']?.toString() ?? 'Server error. Please try again.'; });
+    } on TimeoutException {
+      setState(() { _historyLoading = false; _historyError = 'Request timed out. Check your connection and try again.'; });
+    } catch (_) {
+      setState(() { _historyLoading = false; _historyError = 'Network error. Please check your internet connection.'; });
+    }
   }
 
   @override

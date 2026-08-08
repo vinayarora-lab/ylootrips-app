@@ -1,0 +1,6 @@
+mobile/
+play_store_assets/
+backend/
+scripts/
+.env*.local
+*.log

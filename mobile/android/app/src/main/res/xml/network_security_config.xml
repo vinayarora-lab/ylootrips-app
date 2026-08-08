@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- Allow secure connections to Easebuzz payment gateway -->
+        <domain includeSubdomains="true">pay.easebuzz.in</domain>
+        <domain includeSubdomains="true">testpay.easebuzz.in</domain>
+        <domain includeSubdomains="true">www.ylootrips.com</domain>
+        <domain includeSubdomains="true">ylootrips.com</domain>
+        <domain includeSubdomains="true">trip-backend-65232427280.asia-south1.run.app</domain>
+    </domain-config>
+</network-security-config>

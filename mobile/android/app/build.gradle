@@ -1,0 +1,183 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withReader('UTF-8') { reader ->
+        keystoreProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+android {
+    namespace "com.ylootrips.app"
+    compileSdk 36
+    ndkVersion "27.0.12077973"
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    defaultConfig {
+        applicationId "com.ylootrips.app"
+        // Minimum Android 5.0 (API 21)
+        minSdkVersion 21
+        targetSdkVersion 36
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+
+        // Required for Google Sign-In
+        multiDexEnabled true
+
+        // 64-bit only — required for 16KB page size compliance on modern devices
+        ndk {
+            abiFilters 'arm64-v8a', 'x86_64', 'armeabi-v7a'
+        }
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+// Patch BundleConfig.pb after bundleRelease to set PAGE_ALIGNMENT_16K.
+// Fixes Google Play "does not support 16 KB memory page sizes" error.
+afterEvaluate {
+    tasks.findByName('bundleRelease')?.doLast {
+        def aabFile = new File("${buildDir}/outputs/bundle/release/app-release.aab")
+        if (!aabFile.exists()) return
+
+        def oldSeq = [0x12,0x0a,0x0a,0x00,0x12,0x02,0x08,0x01,0x32,0x02,0x08,0x01] as byte[]
+        def newSeq = [0x12,0x0c,0x0a,0x00,0x12,0x04,0x08,0x01,0x10,0x02,0x32,0x02,0x08,0x01] as byte[]
+
+        def tmpFile = new File("${buildDir}/outputs/bundle/release/_patch16k.aab")
+
+        // Use ZipFile (random-access) to avoid stream-closed issues
+        def srcZip = new java.util.zip.ZipFile(aabFile)
+        def outZip = new java.util.zip.ZipOutputStream(
+                new java.io.BufferedOutputStream(new java.io.FileOutputStream(tmpFile)))
+
+        boolean patched = false
+        def entries = srcZip.entries()
+        while (entries.hasMoreElements()) {
+            def entry = entries.nextElement()
+            // Drop old JAR signature so jarsigner can re-sign cleanly
+            if (entry.name == 'META-INF/MANIFEST.MF' ||
+                (entry.name.startsWith('META-INF/') &&
+                 (entry.name.endsWith('.SF') || entry.name.endsWith('.RSA') || entry.name.endsWith('.DSA')))) {
+                continue
+            }
+            def data = srcZip.getInputStream(entry).bytes
+            if (entry.name == 'BundleConfig.pb') {
+                data = patch16kBytes(data, oldSeq, newSeq)
+                patched = true
+                println "16KB patch: BundleConfig.pb updated (PAGE_ALIGNMENT_16K)"
+            }
+            outZip.putNextEntry(new java.util.zip.ZipEntry(entry.name))
+            outZip.write(data)
+            outZip.closeEntry()
+        }
+        srcZip.close()
+        outZip.finish()
+        outZip.close()
+
+        if (!patched) {
+            tmpFile.delete()
+            println "16KB patch: skipped (BundleConfig already patched or not found)"
+            return
+        }
+
+        aabFile.delete()
+        tmpFile.renameTo(aabFile)
+
+        // Re-sign the patched AAB with jarsigner
+        def javaHome = System.getenv('JAVA_HOME') ?: System.getProperty('java.home')?.replaceAll('/jre$','')
+        def jarsignerBin = new File(javaHome, 'bin/jarsigner').absolutePath
+        project.exec {
+            commandLine jarsignerBin,
+                '-sigalg', 'SHA256withRSA',
+                '-digestalg', 'SHA-256',
+                '-keystore', keystoreProperties['storeFile'],
+                '-storepass', keystoreProperties['storePassword'],
+                '-keypass', keystoreProperties['keyPassword'],
+                aabFile.absolutePath,
+                keystoreProperties['keyAlias']
+        }
+        println "16KB patch: AAB re-signed successfully"
+    }
+}
+
+static byte[] patch16kBytes(byte[] src, byte[] find, byte[] replace) {
+    for (int i = 0; i <= src.length - find.length; i++) {
+        boolean match = true
+        for (int j = 0; j < find.length; j++) {
+            if (src[i + j] != find[j]) { match = false; break }
+        }
+        if (match) {
+            def out = new byte[src.length - find.length + replace.length]
+            System.arraycopy(src, 0, out, 0, i)
+            System.arraycopy(replace, 0, out, i, replace.length)
+            System.arraycopy(src, i + find.length, out, i + replace.length, src.length - i - find.length)
+            return out
+        }
+    }
+    return src
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // MultiDex support
+    implementation 'androidx.multidex:multidex:2.0.1'
+}

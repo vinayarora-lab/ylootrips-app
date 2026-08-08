@@ -153,6 +153,27 @@ function PaymentSuccessContent() {
                         localStorage.setItem(dedupKey, '1');
                     }
 
+                    // GA4 purchase event
+                    try {
+                        const amount = bookingData.finalAmount || bookingData.totalAmount || 0;
+                        const ref = bookingData.bookingReference || urlTxnid;
+                        const tripName = bookingData.trip?.title || bookingData.event?.title || bookingData.productInfo || 'YlooTrips Booking';
+                        if (typeof window !== 'undefined' && (window as any).gtag) {
+                            (window as any).gtag('event', 'purchase', {
+                                transaction_id: ref,
+                                value: amount,
+                                currency: 'INR',
+                                items: [{
+                                    item_id: ref,
+                                    item_name: tripName,
+                                    item_category: bookingData.event ? 'Event' : 'Tour Package',
+                                    price: amount,
+                                    quantity: bookingData.numberOfGuests || bookingData.numberOfTickets || 1,
+                                }],
+                            });
+                        }
+                    } catch { /* analytics failure should not break UX */ }
+
                     // Payment successful - send confirmation email
                     const customerEmail = bookingData.customerEmail || bookingData.email;
                     if (customerEmail) {

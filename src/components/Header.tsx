@@ -88,14 +88,14 @@ export default function Header() {
                         {/* CTA + Mobile toggle */}
                         <div className="flex items-center gap-2">
                             {/* Track Booking */}
-                            <Link href="/my-booking"
+                            <Link href="/my-trips"
                                 className={`hidden md:flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider border transition-all duration-300 ${
                                     hasHero && !isScrolled
                                         ? 'border-white/50 text-white hover:bg-white/10'
                                         : 'border-gray-900 text-gray-900 hover:bg-gray-100'
                                 }`}>
                                 <Ticket size={12} />
-                                My Booking
+                                My Trips
                             </Link>
                             {/* Plan Journey */}
                             <Link href="/trip-planner"
@@ -180,13 +180,13 @@ export default function Header() {
                         {/* Bottom CTAs */}
                         <div className="flex flex-col gap-3"
                             style={{ transitionDelay: isMobileMenuOpen ? '380ms' : '0ms' }}>
-                            <Link href="/my-booking" onClick={() => setIsMobileMenuOpen(false)}
+                            <Link href="/my-trips" onClick={() => setIsMobileMenuOpen(false)}
                                 className={`flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold border border-white/15 text-white/70 bg-white/5 transition-all duration-500 ${
                                     isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                                 }`}
                                 style={{ transitionDelay: isMobileMenuOpen ? '360ms' : '0ms' }}>
                                 <Ticket size={15} />
-                                Track My Booking
+                                My Trips
                             </Link>
                             <Link href="/trip-planner" onClick={() => setIsMobileMenuOpen(false)}
                                 className={`flex items-center justify-center gap-2.5 py-4 rounded-2xl text-sm font-bold bg-white text-gray-900 shadow-lg shadow-black/20 transition-all duration-500 ${

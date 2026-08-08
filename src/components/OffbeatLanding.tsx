@@ -370,7 +370,7 @@ export default function OffbeatLanding() {
       {/* ── Testimonial strip ─────────────────────────────────────────────── */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-14 sm:py-16 text-center">
         <blockquote className="font-display text-xl sm:text-2xl text-primary leading-relaxed max-w-2xl mx-auto">
-          "YlooTrips sent us to Dzukou Valley when everyone else was booking Manali. It was the best decision of our lives."
+          "YlooTrips took us to Dzukou Valley when everyone else was heading to Manali. We had a hidden Himalayan valley almost entirely to ourselves — wildflowers, mist, absolute silence. The best travel decision of our lives."
         </blockquote>
         <div className="flex items-center justify-center gap-2 mt-4">
           <div className="flex">

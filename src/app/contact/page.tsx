@@ -94,6 +94,10 @@ function ContactForm() {
       const data = await res.json();
 
       if (res.ok && data.success) {
+        // GA4 lead event
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('event', 'generate_lead', { event_category: 'Contact', destination: formData.destination || 'unspecified' });
+        }
         setSubmitStatus('success');
         setTicket(data.ticket || '');
         setStatusMessage(data.message || "Thank you! We'll get back to you within 24 hours.");

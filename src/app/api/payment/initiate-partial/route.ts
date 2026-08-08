@@ -7,13 +7,30 @@ const EASEBUZZ_ENV = process.env.EASEBUZZ_ENV || 'production';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ylootrips.com';
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://trip-backend-65232427280.asia-south1.run.app/api';
 
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Accept',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { bookingReference, chargeNow, totalAmount, customerName, customerEmail, customerPhone, tripTitle } = body;
+    // Accept both web (bookingReference/chargeNow) and mobile (ref/partialAmount) field names
+    const bookingReference = body.bookingReference || body.ref || `YLO-${Date.now()}`;
+    const chargeNow = body.chargeNow ?? body.partialAmount ?? body.advance;
+    const totalAmount = body.totalAmount;
+    const customerName = body.customerName || body.name;
+    const customerEmail = body.customerEmail || body.email;
+    const customerPhone = body.customerPhone || body.phone;
+    const tripTitle = body.tripTitle || body.productInfo || body.title;
 
-    if (!bookingReference || !chargeNow || chargeNow <= 0) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!chargeNow || chargeNow <= 0) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 }, );
     }
 
     const amount = String(Number(chargeNow).toFixed(2));
@@ -56,8 +73,8 @@ export async function POST(req: NextRequest) {
         udf4: '',
         udf5: '',
         hash,
-        surl: `${SITE_URL}/payment/success?ref=${bookingReference}`,
-        furl: `${SITE_URL}/payment/failure?ref=${bookingReference}`,
+        surl: `${SITE_URL}/api/payment/success`,
+        furl: `${SITE_URL}/api/payment/failure`,
       });
 
       const ebRes = await fetch(payUrl, {

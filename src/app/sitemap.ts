@@ -31,6 +31,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/reviews`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${BASE_URL}/privacy-policy`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
 
+    // Core feature pages
+    { url: `${BASE_URL}/faq`,          lastModified: now, changeFrequency: 'monthly', priority: 0.82 },
+    { url: `${BASE_URL}/tripadvisor`,  lastModified: now, changeFrequency: 'monthly', priority: 0.65 },
+    { url: `${BASE_URL}/flights`,      lastModified: now, changeFrequency: 'daily',   priority: 0.9  },
+    { url: `${BASE_URL}/hotels`,       lastModified: now, changeFrequency: 'daily',   priority: 0.88 },
+    { url: `${BASE_URL}/trip-planner`, lastModified: now, changeFrequency: 'monthly', priority: 0.88 },
+    { url: `${BASE_URL}/cashback`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7  },
+    { url: `${BASE_URL}/offbeat`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.72 },
+    { url: `${BASE_URL}/hidden-spots`, lastModified: now, changeFrequency: 'weekly',  priority: 0.72 },
+    { url: `${BASE_URL}/careers`,      lastModified: now, changeFrequency: 'monthly', priority: 0.4  },
+
     // International SEO pages
     { url: `${BASE_URL}/india-travel-guide`, lastModified: now, changeFrequency: 'monthly', priority: 0.92 },
 

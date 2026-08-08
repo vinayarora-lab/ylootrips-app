@@ -128,6 +128,13 @@ export default function RootLayout({
         {/* Preconnect for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://images.unsplash.com" />
+        {/* Smart App Banner — Android (Google Play) */}
+        <meta name="google-play-app" content="app-id=com.ylootrips.app" />
+        {/* App Indexing — Open Graph app links for Google and social */}
+        <meta property="al:android:url" content="ylootrips://home" />
+        <meta property="al:android:app_name" content="YlooTrips" />
+        <meta property="al:android:package" content="com.ylootrips.app" />
+        <meta property="al:web:url" content="https://www.ylootrips.com" />
         <OrganizationJsonLd />
       </head>
       <body className="antialiased" suppressHydrationWarning>

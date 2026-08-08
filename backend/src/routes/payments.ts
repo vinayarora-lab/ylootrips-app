@@ -31,8 +31,8 @@ router.post('/initiate/:ref', async (req: Request, res: Response) => {
       phone,
       udf1: booking.bookingReference,
       udf2: String(booking.totalAmount),
-      surl: `${SITE_URL}/payment/success?ref=${booking.bookingReference}`,
-      furl: `${SITE_URL}/payment/failure?ref=${booking.bookingReference}`,
+      surl: `${SITE_URL}/api/payment/success`,
+      furl: `${SITE_URL}/api/payment/failure`,
     });
 
     await Booking.findOneAndUpdate(

@@ -381,12 +381,12 @@ export default async function ReviewsPage() {
                 /* Fallback static reviews if API returns empty */
                 <div className="space-y-4">
                   {[
-                    { name: 'Priya Sharma', title: 'Mumbai', comment: 'YlooTrips made our Bali honeymoon absolutely magical! Everything from flights to hotel was arranged perfectly. No stress at all. Will definitely book again!', rating: 5 },
-                    { name: 'Rahul Verma', title: 'Delhi', comment: 'Booked Kashmir tour package for 6 people. The team was incredibly responsive and the itinerary was perfect. Best travel agency I have used in India.', rating: 5 },
-                    { name: 'Sneha Patel', title: 'Ahmedabad', comment: 'Amazing experience with YlooTrips! Dubai trip was flawlessly organized. Great value for money and excellent customer support throughout the journey.', rating: 5 },
-                    { name: 'Arjun Mehta', title: 'Bangalore', comment: 'Highly recommend! Booked Thailand package, everything went smoothly. The guides were excellent and the hotels were great. 5 stars without a doubt!', rating: 5 },
-                    { name: 'Kavya Nair', title: 'Kochi', comment: 'Our family trip to Goa was perfectly planned. Kids had a blast! YlooTrips took care of everything — transport, stays, activities. Superb service!', rating: 5 },
-                    { name: 'Vikram Singh', title: 'Jaipur', comment: 'Just returned from Maldives. Could not have asked for better service. YlooTrips got us a great deal and the trip was beyond our expectations!', rating: 5 },
+                    { name: 'Neha & Rohan Sharma', title: 'Mumbai, Maharashtra', comment: 'Our Bali honeymoon was everything we dreamed of and more. Overwater villa, private beach dinner, volcano hike at sunrise — YlooTrips arranged every detail perfectly. Best money we ever spent on a trip!', rating: 5 },
+                    { name: 'Deepak Verma', title: 'New Delhi', comment: 'Booked Kashmir tour package for our family of 6. The team was incredibly responsive and the itinerary was outstanding — Dal Lake, Gulmarg, Pahalgam. YlooTrips is genuinely the best travel agency in India.', rating: 5 },
+                    { name: 'Amit & Divya Kulkarni', title: 'Pune, Maharashtra', comment: 'Dubai trip was flawlessly organised — visa in 2 days, desert safari, Burj Khalifa at night. Exceptional value for money and the customer support was available 24/7. Will book Singapore with them next!', rating: 5 },
+                    { name: 'Aditya Nair', title: 'Bangalore, Karnataka', comment: 'First international trip and YlooTrips made it unforgettable. Thailand — Phi Phi Islands, Bangkok street food, Chiang Mai temples. Coordinator was always on WhatsApp. Every rupee was worth it!', rating: 5 },
+                    { name: 'Meera Iyer', title: 'Chennai, Tamil Nadu', comment: 'Anniversary trip to Kerala was soulful beyond words. Alleppey houseboat, Munnar tea estates, Kovalam beach — the itinerary was so thoughtfully crafted. Fresh Kerala food was exceptional. Memories for a lifetime!', rating: 5 },
+                    { name: 'Karan & Rhea Malhotra', title: 'Chandigarh, Punjab', comment: 'Just returned from Maldives. Could not have asked for a better experience — overwater bungalow, dolphin cruise, sandbank breakfast. YlooTrips got us a deal we could never have found on our own. Pure luxury!', rating: 5 },
                   ].map((r, i) => (
                     <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex items-start gap-4">

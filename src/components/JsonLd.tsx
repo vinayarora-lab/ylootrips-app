@@ -43,6 +43,15 @@ export function OrganizationJsonLd() {
           'https://www.instagram.com/ylootrips',
           'https://www.facebook.com/ylootrips',
           'https://twitter.com/ylootrips',
+          'https://www.linkedin.com/company/ylootrips',
+          'https://www.youtube.com/@ylootrips',
+          'https://play.google.com/store/apps/details?id=com.ylootrips.app',
+        ],
+        knowsAbout: [
+          'India tour packages', 'luxury India travel', 'honeymoon packages India',
+          'Kashmir tour', 'Bali tour packages', 'Dubai holiday packages',
+          'Maldives luxury packages', 'Kerala backwaters', 'Rajasthan heritage tours',
+          'AI trip planning', 'flight booking India', 'hotel booking India',
         ],
         aggregateRating: {
           '@type': 'AggregateRating',
@@ -246,6 +255,73 @@ export function ArticleJsonLd({
     keywords: keywords.join(', '),
     inLanguage: 'en',
     about: { '@type': 'Thing', name: 'India Travel' },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+// ── HowTo Schema — tells Google HOW to book / use a feature ──────────────────
+interface HowToStep {
+  name: string;
+  text: string;
+  image?: string;
+}
+
+interface HowToJsonLdProps {
+  name: string;
+  description: string;
+  totalTime: string; // ISO 8601 duration e.g. "PT10M"
+  steps: HowToStep[];
+}
+
+export function HowToJsonLd({ name, description, totalTime, steps }: HowToJsonLdProps) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name,
+    description,
+    totalTime,
+    supply: [
+      { '@type': 'HowToSupply', name: 'Internet connection' },
+      { '@type': 'HowToSupply', name: 'Travel dates and destination in mind' },
+    ],
+    step: steps.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+      ...(s.image ? { image: { '@type': 'ImageObject', url: s.image } } : {}),
+    })),
+    provider: {
+      '@type': 'TravelAgency',
+      name: 'YlooTrips',
+      url: 'https://www.ylootrips.com',
+    },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+// ── Speakable Schema — helps Google Assistant / voice search ─────────────────
+export function SpeakableJsonLd({ cssSelectors, url }: { cssSelectors: string[]; url: string }) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: cssSelectors,
+    },
+    url,
   };
 
   return (

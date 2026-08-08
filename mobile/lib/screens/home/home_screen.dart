@@ -880,7 +880,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   final url = Uri.parse('https://www.matrix-cellular.com');
                   if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
                 } else if (q.$3 == '__forex__') {
-                  final url = Uri.parse('https://www.bookmyforex.com/order-forex-card/');
+                  final url = Uri.parse('https://www.niyo.com/global');
                   if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
                 } else {
                   context.go(q.$3);
@@ -1474,7 +1474,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _forexCardSection() {
     return GestureDetector(
       onTap: () async {
-        final url = Uri.parse('https://www.bookmyforex.com/order-forex-card/');
+        final url = Uri.parse('https://www.niyo.com/global');
         if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
       },
       child: Container(

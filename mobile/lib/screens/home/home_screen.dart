@@ -210,28 +210,59 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             backgroundColor: AppTheme.primary,
             surfaceTintColor: Colors.transparent,
             toolbarHeight: 60,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            title: Row(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset(
                   'assets/images/logo.png',
-                  height: 24,
+                  height: 32,
                   fit: BoxFit.contain,
+                  color: Colors.white,
                   errorBuilder: (_, __, ___) => Text(
                     'YlooTrips',
-                    style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white),
+                    style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text('Luxury India Travel', style: GoogleFonts.inter(fontSize: 10, color: Colors.white60, fontWeight: FontWeight.w400)),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('YlooTrips', style: GoogleFonts.playfairDisplay(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: -0.3)),
+                    Text('Luxury India Travel', style: GoogleFonts.inter(fontSize: 9, color: Colors.white60)),
+                  ],
+                ),
               ],
             ),
             actions: [
+              // Wallet balance — green pill
+              GestureDetector(
+                onTap: () => context.go('/cashback'),
+                child: Container(
+                  margin: const EdgeInsets.only(right: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF059669),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [BoxShadow(color: const Color(0xFF059669).withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2))],
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(Icons.account_balance_wallet_rounded, size: 13, color: Colors.white),
+                    const SizedBox(width: 4),
+                    Consumer<WalletProvider>(
+                      builder: (_, w, __) => Text(
+                        '₹${w.balance.toStringAsFixed(0)}',
+                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
               GestureDetector(
                 onTap: () => context.push('/my-bookings'),
                 child: Container(
-                  margin: const EdgeInsets.only(right: 6),
+                  margin: const EdgeInsets.only(right: 4),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.15),
@@ -239,13 +270,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     border: Border.all(color: Colors.white24),
                   ),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.confirmation_number_outlined, size: 14, color: Colors.white),
+                    const Icon(Icons.confirmation_number_outlined, size: 13, color: Colors.white),
                     const SizedBox(width: 4),
-                    Text('My Trips', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
+                    Text('Trips', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
                   ]),
                 ),
               ),
-              _NavBtn(Icons.diamond_outlined, 'Rewards', () => context.go('/cashback'), dark: false),
               const SizedBox(width: 4),
             ],
           ),

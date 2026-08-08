@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -98,6 +99,10 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> with SingleTickerPr
           pinned: true,
           backgroundColor: AppTheme.primary,
           foregroundColor: Colors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 20),
+            onPressed: () => GoRouter.of(context).pop(),
+          ),
           title: Text('My Bookings',
               style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: Colors.white)),
           bottom: TabBar(

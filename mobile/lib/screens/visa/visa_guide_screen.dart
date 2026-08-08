@@ -170,6 +170,13 @@ class _VisaGuideScreenState extends State<VisaGuideScreen> {
       body: CustomScrollView(slivers: [
         // ── Header ────────────────────────────────────────────────────────────
         SliverAppBar(
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
+        automaticallyImplyLeading: false,
           pinned: true,
           expandedHeight: 130,
           backgroundColor: const Color(0xFF1a3c34),

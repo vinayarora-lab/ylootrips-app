@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -322,6 +323,14 @@ class _PackageDetailScreenState extends State<PackageDetailScreen>
     pinned: true,
     backgroundColor: AppTheme.primary,
     foregroundColor: Colors.white,
+    leading: Builder(builder: (ctx) => IconButton(
+      icon: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(color: Colors.black38, shape: BoxShape.circle),
+        child: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 16),
+      ),
+      onPressed: () => GoRouter.of(ctx).pop(),
+    )),
     actions: [
       IconButton(
         icon: Icon(_wishlisted ? Icons.favorite_rounded : Icons.favorite_border_rounded,

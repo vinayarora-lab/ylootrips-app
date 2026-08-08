@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -89,6 +90,13 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
         elevation: 0,
         scrolledUnderElevation: 0.5,
         shadowColor: AppTheme.borderGray,
+        leading: GoRouter.of(context).canPop()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded, size: 20, color: Color(0xFF1C1C1C)),
+                onPressed: () => GoRouter.of(context).pop(),
+              )
+            : null,
+        automaticallyImplyLeading: false,
         title: Row(
           children: [
             Container(
@@ -103,10 +111,10 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('AI Trip Planner',
+                Text('Yloo AI',
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary)),
-                Text('Powered by Groq & Gemini',
+                Text('Your personal AI travel expert',
                   style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textGray)),
               ],
             ),

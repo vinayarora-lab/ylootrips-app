@@ -54,6 +54,13 @@ class _WishlistScreenState extends State<WishlistScreen> {
       backgroundColor: AppTheme.cream,
       body: CustomScrollView(slivers: [
         SliverAppBar(
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
+        automaticallyImplyLeading: false,
           pinned: true,
           backgroundColor: AppTheme.white,
           foregroundColor: AppTheme.primary,

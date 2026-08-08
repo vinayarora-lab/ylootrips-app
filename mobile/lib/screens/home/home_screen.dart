@@ -311,6 +311,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           SliverToBoxAdapter(child: _simCardSection()),
           SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
 
+          // ── Free Forex Card ───────────────────────────────────────────────
+          SliverToBoxAdapter(child: _forexCardSection()),
+          SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
+
           // ── Why YlooTrips vs competitors ─────────────────────────────────────
           SliverToBoxAdapter(child: _sectionHeader('Why Choose YlooTrips?', 'We beat MakeMyTrip & Booking.com on every factor')),
           SliverToBoxAdapter(child: _whyUsSection()),
@@ -831,8 +835,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       (Icons.hotel_rounded,       'Hotels',      '/hotels',     const Color(0xFF0F766E)),
       (Icons.local_offer_rounded, 'Hot Deals',   '/offers',     const Color(0xFFDC2626)),
       (Icons.map_outlined,        'Visa Guide',  '/visa-guide', const Color(0xFF7C3AED)),
-        (Icons.sim_card_rounded,     'Intl SIM',    '__sim__',     const Color(0xFF059669)),
-      (Icons.favorite_border,     'Saved Trips', '/wishlist',   const Color(0xFFBE123C)),
+      (Icons.sim_card_rounded,       'Intl SIM',    '__sim__',     const Color(0xFF059669)),
+      (Icons.credit_card_rounded,    'Forex Card',  '__forex__',   const Color(0xFFF59E0B)),
+      (Icons.favorite_border,        'Saved Trips', '/wishlist',   const Color(0xFFBE123C)),
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       // Hot Deals banner
@@ -873,6 +878,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onTap: () async {
                 if (q.$3 == '__sim__') {
                   final url = Uri.parse('https://www.matrix-cellular.com');
+                  if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
+                } else if (q.$3 == '__forex__') {
+                  final url = Uri.parse('https://www.bookmyforex.com/order-forex-card/');
                   if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
                 } else {
                   context.go(q.$3);
@@ -1462,6 +1470,103 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   // ── Why YlooTrips comparison table ────────────────────────────────────────
+  // ── Free Forex Card (BookMyForex) ────────────────────────────────────────
+  Widget _forexCardSection() {
+    return GestureDetector(
+      onTap: () async {
+        final url = Uri.parse('https://www.bookmyforex.com/order-forex-card/');
+        if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
+      },
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF92400E), Color(0xFFD97706)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(color: const Color(0xFFD97706).withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6)),
+          ],
+        ),
+        child: Stack(children: [
+          Positioned(right: -15, top: -15,
+            child: Container(width: 110, height: 110,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.06)))),
+          Positioned(left: -10, bottom: -20,
+            child: Container(width: 70, height: 70,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.04)))),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(children: [
+              Container(
+                width: 64, height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1.5),
+                ),
+                child: Stack(alignment: Alignment.center, children: [
+                  const Icon(Icons.credit_card_rounded, color: Colors.white, size: 32),
+                  Positioned(top: 8, right: 8,
+                    child: Container(width: 10, height: 10,
+                      decoration: const BoxDecoration(color: Color(0xFFFBBF24), shape: BoxShape.circle))),
+                ]),
+              ),
+              const SizedBox(width: 16),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(color: const Color(0xFFFBBF24), borderRadius: BorderRadius.circular(20)),
+                    child: Text('FREE', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w800, color: const Color(0xFF78350F))),
+                  ),
+                  const SizedBox(width: 6),
+                  Text('No annual fee', style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w500)),
+                ]),
+                const SizedBox(height: 4),
+                Text('Travel Forex Card', style: GoogleFonts.playfairDisplay(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.3)),
+                const SizedBox(height: 4),
+                Text('Lock rates before you fly · Use in 150+ currencies · Zero hidden charges', style: GoogleFonts.inter(fontSize: 11, color: Colors.white.withValues(alpha: 0.85), height: 1.4)),
+                const SizedBox(height: 12),
+                Row(children: [
+                  _forexBadge('USD · EUR · GBP'),
+                  const SizedBox(width: 8),
+                  _forexBadge('150+ Currencies'),
+                ]),
+              ])),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8, offset: const Offset(0, 2))],
+                ),
+                child: Column(children: [
+                  Text('Apply', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w800, color: const Color(0xFF92400E))),
+                  const SizedBox(height: 2),
+                  const Icon(Icons.arrow_forward_rounded, size: 14, color: Color(0xFFD97706)),
+                ]),
+              ),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+
+  Widget _forexBadge(String label) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: 0.15),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+    ),
+    child: Text(label, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white)),
+  );
+
   // ── International SIM card (Matrix Cellular) ─────────────────────────────
   Widget _simCardSection() {
     return GestureDetector(

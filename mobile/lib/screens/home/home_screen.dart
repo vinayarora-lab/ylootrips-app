@@ -278,6 +278,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           SliverToBoxAdapter(child: _dealsStrip()),
           SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
 
+          // ── Only on YlooTrips (unique features) ──────────────────────────
+          SliverToBoxAdapter(child: _uniqueFeaturesSection()),
+          SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
+
           // ── Trending ──────────────────────────────────────────────────────
           SliverToBoxAdapter(child: _sectionHeader('Top Destinations', 'Most booked this season', onMore: () => context.go('/trips'))),
           SliverToBoxAdapter(child: _trendingRow()),
@@ -286,6 +290,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           // ── Category tiles ────────────────────────────────────────────────
           SliverToBoxAdapter(child: _sectionHeader('Browse by Style', 'Find your perfect travel type')),
           SliverToBoxAdapter(child: _categoryGrid()),
+          SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
+
+          // ── Hidden Gems & Secret Places ───────────────────────────────────
+          SliverToBoxAdapter(child: _sectionHeader('Hidden Gems', '🗺️ Secret places only locals know', onMore: () => context.go('/trips'))),
+          SliverToBoxAdapter(child: _hiddenGemsSection()),
           SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
 
           // ── Trip segments ─────────────────────────────────────────────────
@@ -298,6 +307,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           SliverToBoxAdapter(child: _featuredPackages()),
           SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
 
+          // ── Best Time to Visit Guide ─────────────────────────────────────
+          SliverToBoxAdapter(child: _sectionHeader('Best Time to Visit', '📅 Month-by-month travel calendar', onMore: null)),
+          SliverToBoxAdapter(child: _bestTimeSection()),
+          SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
+
           // ── Events & Group bookings ───────────────────────────────────────
           SliverToBoxAdapter(child: _eventsSection()),
           SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
@@ -305,6 +319,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           // ── International trips ───────────────────────────────────────────────
           SliverToBoxAdapter(child: _sectionHeader('International Trips', 'Flight + Hotel + Visa · All-in price', onMore: () => context.go('/trips'))),
           SliverToBoxAdapter(child: _internationalTrips()),
+          SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
+
+          // ── Flight Booking Timing Guide ───────────────────────────────────
+          SliverToBoxAdapter(child: _sectionHeader('Flight Booking Guide', '✈️ When to book for the cheapest fares', onMore: null)),
+          SliverToBoxAdapter(child: _flightTimingGuide()),
           SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
 
           // ── International SIM card ────────────────────────────────────────
@@ -1933,6 +1952,228 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // UNIQUE FEATURES — Only on YlooTrips
+  // ══════════════════════════════════════════════════════════════════════════
+  Widget _uniqueFeaturesSection() {
+    final features = [
+      (
+        '🗺️', 'Hidden Gems', 'Secret spots locals love — no crowds, pure magic',
+        const Color(0xFF065F46), const Color(0xFF059669),
+        Icons.explore_rounded,
+        () => _scrollToSection('gems'),
+      ),
+      (
+        '📅', 'Best Time Guide', 'Know exactly when to visit every destination',
+        const Color(0xFF1E3A5F), const Color(0xFF1A73E8),
+        Icons.calendar_month_rounded,
+        () => _scrollToSection('time'),
+      ),
+      (
+        '✈️', 'Flight Price Tips', 'Book at the right time, save up to 40%',
+        const Color(0xFF7C2D12), const Color(0xFFEA580C),
+        Icons.savings_rounded,
+        () => _scrollToSection('flight'),
+      ),
+    ];
+
+    return Container(
+      color: Colors.white,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
+          child: Row(children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFF7C3AED), Color(0xFF4F46E5)]),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text('ONLY ON YLOOTRIPS', style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.8)),
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text('What makes us different', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: AppTheme.dark))),
+          ]),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 130,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            itemCount: features.length,
+            itemBuilder: (_, i) {
+              final f = features[i];
+              return GestureDetector(
+                onTap: f.$7,
+                child: Container(
+                  width: 180,
+                  margin: const EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [f.$4, f.$5], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: f.$5.withValues(alpha: 0.25), blurRadius: 12, offset: const Offset(0, 4))],
+                  ),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      Text(f.$1, style: const TextStyle(fontSize: 24)),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), shape: BoxShape.circle),
+                        child: Icon(f.$6, color: Colors.white, size: 14),
+                      ),
+                    ]),
+                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(f.$2, style: GoogleFonts.playfairDisplay(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
+                      const SizedBox(height: 4),
+                      Text(f.$3, style: GoogleFonts.inter(fontSize: 10, color: Colors.white.withValues(alpha: 0.85), height: 1.4)),
+                    ]),
+                  ]),
+                ),
+              );
+            },
+          ),
+        ),
+      ]),
+    );
+  }
+
+  void _scrollToSection(String key) {
+    _scrollCtrl.animateTo(
+      _scrollCtrl.position.maxScrollExtent * 0.5,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // HIDDEN GEMS
+  // ══════════════════════════════════════════════════════════════════════════
+  Widget _hiddenGemsSection() {
+    final gems = [
+      _GemData('Chopta, Uttarakhand', 'The Mini Switzerland of India', 'Oct–Jun', '₹8,000', 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600', 'Snow-covered meadows, Tungnath temple trek, zero crowds vs Shimla'),
+      _GemData('Ziro Valley, Arunachal', 'UNESCO Heritage Rice Fields', 'Sep–Nov', '₹12,000', 'https://images.unsplash.com/photo-1591135742467-db8bfd09fd4e?w=600', 'Apatani tribe culture, lush green valleys, music festival in September'),
+      _GemData('Dawki, Meghalaya', 'Crystal Clear River Boat Rides', 'Nov–Apr', '₹10,000', 'https://images.unsplash.com/photo-1618993895395-1c4438e38f25?w=600', 'Cleanest river in Asia, Bangladesh border village, Living root bridges nearby'),
+      _GemData('Majuli Island, Assam', "World's Largest River Island", 'Nov–Mar', '₹9,000', 'https://images.unsplash.com/photo-1602390459736-c3e8e9b82b86?w=600', 'Vaishnavite monasteries (satras), mask-making tradition, ferry from Jorhat'),
+      _GemData('Dhanushkodi, Tamil Nadu', "India's Ghost Town & Tip", 'Nov–Feb', '₹6,000', 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=600', 'Where Bay of Bengal meets Arabian Sea, abandoned town ruins, Ram Setu view'),
+      _GemData('Spiti Valley, HP', 'Cold Desert Monastery Land', 'Jun–Oct', '₹15,000', 'https://images.unsplash.com/photo-1613923736985-ccbc43a65c2b?w=600', 'Key Monastery, Chandratal Lake, one of highest inhabited villages on Earth'),
+    ];
+
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        itemCount: gems.length,
+        itemBuilder: (_, i) => _GemCard(gem: gems[i], onTap: () => context.go('/trips')),
+      ),
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // BEST TIME TO VISIT GUIDE
+  // ══════════════════════════════════════════════════════════════════════════
+  Widget _bestTimeSection() {
+    final destinations = [
+      _BestTimeData('Goa', '🏖️', 'Nov – Feb', 'Beach & Party Season', 'Avoid Jun–Sep (monsoon). Best: Christmas–New Year. Water sports from Oct.', const Color(0xFF0EA5E9)),
+      _BestTimeData('Kerala', '🌴', 'Sep – Mar', 'Backwaters & Wildlife', 'Post-monsoon greenery (Aug–Sep). Avoid peak summer. Houseboat best Dec–Feb.', const Color(0xFF059669)),
+      _BestTimeData('Rajasthan', '🏰', 'Oct – Mar', 'Desert & Forts', 'Summer is extreme (45°C). Pushkar Fair in Nov. Desert camping ideal Dec–Jan.', const Color(0xFFD97706)),
+      _BestTimeData('Ladakh', '⛰️', 'Jun – Sep', 'High Altitude Treks', 'Roads open June. Avoid winter (passes closed). Pangong Lake best July–Aug.', const Color(0xFF7C3AED)),
+      _BestTimeData('Andamans', '🐠', 'Oct – May', 'Coral & Beaches', 'Avoid June–Sep monsoon. Scuba diving best Nov–Apr. Havelock most beautiful Dec.', const Color(0xFF0891B2)),
+      _BestTimeData('Manali', '🎿', 'Oct–Mar & Jun–Sep', 'Snow or Adventure', 'Snow: Dec–Feb. Rohtang open Jun–Oct. Avoid Apr–May (slushy roads).', const Color(0xFF1D4ED8)),
+      _BestTimeData('Varanasi', '🛕', 'Oct – Mar', 'Spiritual & Cultural', 'Dev Deepawali in Nov (most beautiful). Avoid June–Aug heat. Ganga Aarti daily.', const Color(0xFFDC2626)),
+      _BestTimeData('Bali', '🌺', 'Apr – Oct', 'Dry Season', 'Avoid Nov–Mar monsoon. Ubud best Apr–June. Seminyak beach ideal Jul–Aug.', const Color(0xFFEC4899)),
+    ];
+
+    return Container(
+      color: Colors.white,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Month bar
+        Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0FDF4),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF86EFAC)),
+          ),
+          child: Row(children: [
+            const Icon(Icons.lightbulb_outline_rounded, color: Color(0xFF059669), size: 18),
+            const SizedBox(width: 8),
+            Expanded(child: Text('Pro tip: Book 60–90 days ahead for best prices. Last-minute travel costs 40% more.', style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF065F46), height: 1.4))),
+          ]),
+        ),
+        SizedBox(
+          height: 160,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            itemCount: destinations.length,
+            itemBuilder: (_, i) => _BestTimeCard(data: destinations[i], onTap: () => context.go('/trips')),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // FLIGHT BOOKING TIMING GUIDE
+  // ══════════════════════════════════════════════════════════════════════════
+  Widget _flightTimingGuide() {
+    final tips = [
+      _FlightTip(Icons.flight_rounded, 'Domestic Flights', 'Book 4–6 weeks ahead', 'Best days: Tuesday & Wednesday. Avoid booking on Friday–Sunday — prices spike 30%.', const Color(0xFF1D4ED8)),
+      _FlightTip(Icons.public_rounded, 'International Flights', 'Book 3–5 months ahead', 'Cheapest on Tuesdays & Wednesdays. Fly midweek (Tue–Thu) to save 20% vs weekends.', const Color(0xFF0891B2)),
+      _FlightTip(Icons.nightlight_round, 'Best Time of Day', '5 AM & Late Night', 'Early morning flights are 20% cheaper. Red-eye (midnight) flights save the most.', const Color(0xFF7C3AED)),
+      _FlightTip(Icons.trending_down_rounded, 'Cheapest Months to Fly', 'Jan–Feb & Sep–Oct', 'Post-holiday and shoulder season. Avoid May–June and December for domestic routes.', const Color(0xFF059669)),
+      _FlightTip(Icons.alarm_rounded, 'Last Minute Deals', '24–72 hours before', 'Airlines drop unsold seats. Use incognito mode. Clear cookies before searching.', const Color(0xFFDC2626)),
+      _FlightTip(Icons.compare_arrows_rounded, 'Round Trip vs One Way', 'Always compare both', 'Sometimes 2 one-way tickets are cheaper. Check both before booking.', const Color(0xFFD97706)),
+    ];
+
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Price calendar hint
+        Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [Color(0xFF1D4ED8), Color(0xFF0891B2)]),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(children: [
+            const Icon(Icons.savings_rounded, color: Colors.white, size: 28),
+            const SizedBox(width: 12),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Save up to 40% on flights', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
+              Text('Follow these 6 insider tips — used by frequent flyers & travel agents', style: GoogleFonts.inter(fontSize: 10, color: Colors.white70, height: 1.4)),
+            ])),
+            GestureDetector(
+              onTap: () => context.go('/flights'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                child: Text('Search', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF1D4ED8))),
+              ),
+            ),
+          ]),
+        ),
+        // Tip cards
+        SizedBox(
+          height: 148,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            itemCount: tips.length,
+            itemBuilder: (_, i) => _FlightTipCard(tip: tips[i]),
+          ),
+        ),
+      ]),
+    );
+  }
+
   Widget _sectionHeader(String title, String sub, {VoidCallback? onMore}) => Container(
     color: Colors.white,
     padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
@@ -2418,3 +2659,180 @@ class _CreditRow extends StatelessWidget {
     ]),
   );
 }
+
+// ── Data models ──────────────────────────────────────────────────────────────
+
+class _GemData {
+  final String name, tagline, bestTime, budgetFrom, image, localTip;
+  const _GemData(this.name, this.tagline, this.bestTime, this.budgetFrom, this.image, this.localTip);
+}
+
+class _BestTimeData {
+  final String name, emoji, months, season, tip;
+  final Color color;
+  const _BestTimeData(this.name, this.emoji, this.months, this.season, this.tip, this.color);
+}
+
+class _FlightTip {
+  final IconData icon;
+  final String title, subtitle, detail;
+  final Color color;
+  const _FlightTip(this.icon, this.title, this.subtitle, this.detail, this.color);
+}
+
+// ── Card widgets ─────────────────────────────────────────────────────────────
+
+class _GemCard extends StatelessWidget {
+  final _GemData gem;
+  final VoidCallback onTap;
+  const _GemCard({required this.gem, required this.onTap, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 180,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 10, offset: const Offset(0, 3)),
+        ]),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(children: [
+            // Image
+            Image.network(gem.image, width: 180, height: 240, fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(width: 180, height: 240, color: const Color(0xFFE5E7EB))),
+            // Gradient overlay
+            Container(
+              width: 180, height: 240,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Color(0xCC000000)],
+                  stops: [0.4, 1.0],
+                ),
+              ),
+            ),
+            // Secret badge
+            Positioned(top: 10, left: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: const Color(0xFF059669), borderRadius: BorderRadius.circular(20)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.lock_open_rounded, color: Colors.white, size: 10),
+                  const SizedBox(width: 3),
+                  Text('Hidden Gem', style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white)),
+                ]),
+              ),
+            ),
+            // Best time badge
+            Positioned(top: 10, right: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8)),
+                child: Text(gem.bestTime, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w600, color: Colors.white)),
+              ),
+            ),
+            // Bottom info
+            Positioned(bottom: 0, left: 0, right: 0,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(gem.name, style: GoogleFonts.playfairDisplay(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(gem.tagline, style: GoogleFonts.inter(fontSize: 10, color: Colors.white70), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 6),
+                  // Local tip
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(color: const Color(0xFF059669).withValues(alpha: 0.85), borderRadius: BorderRadius.circular(6)),
+                    child: Text('From ${gem.budgetFrom}/person', style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w600, color: Colors.white)),
+                  ),
+                ]),
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class _BestTimeCard extends StatelessWidget {
+  final _BestTimeData data;
+  final VoidCallback onTap;
+  const _BestTimeCard({required this.data, required this.onTap, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 170,
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: data.color.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: data.color.withValues(alpha: 0.2)),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Text(data.emoji, style: const TextStyle(fontSize: 22)),
+            const SizedBox(width: 8),
+            Expanded(child: Text(data.name, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w800, color: const Color(0xFF1C1C1C)))),
+          ]),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(color: data.color, borderRadius: BorderRadius.circular(20)),
+            child: Text(data.months, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white)),
+          ),
+          const SizedBox(height: 6),
+          Text(data.season, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: data.color)),
+          const SizedBox(height: 4),
+          Expanded(child: Text(data.tip, style: GoogleFonts.inter(fontSize: 10, color: const Color(0xFF6B7280), height: 1.4), maxLines: 3, overflow: TextOverflow.ellipsis)),
+        ]),
+      ),
+    );
+  }
+}
+
+class _FlightTipCard extends StatelessWidget {
+  final _FlightTip tip;
+  const _FlightTipCard({required this.tip, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 190,
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: tip.color.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: tip.color.withValues(alpha: 0.2)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(color: tip.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+            child: Icon(tip.icon, color: tip.color, size: 18),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Text(tip.title, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, color: const Color(0xFF1C1C1C)))),
+        ]),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(color: tip.color, borderRadius: BorderRadius.circular(20)),
+          child: Text(tip.subtitle, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white)),
+        ),
+        const SizedBox(height: 6),
+        Expanded(child: Text(tip.detail, style: GoogleFonts.inter(fontSize: 10, color: const Color(0xFF374151), height: 1.45), maxLines: 4, overflow: TextOverflow.ellipsis)),
+      ]),
+    );
+  }
+}
+

@@ -50,11 +50,18 @@ class _TripsScreenState extends State<TripsScreen> {
     final catMap = {
       'beach': 'beach', 'heritage': 'heritage',
       'honeymoon': 'honeymoon', 'adventure': 'adventure',
-      'international': 'international', 'all': 'all',
+      'international': 'international', 'domestic': 'domestic',
+      'offbeat': 'offbeat', 'all': 'all',
     };
     final initCat = widget.initialCategory;
     _selected = (initCat != null && catMap.containsKey(initCat)) ? catMap[initCat]! : 'all';
-    _searchQuery = widget.initialQuery ?? '';
+    // Trip type queries: family, group, solo, honeymoon map to search or category
+    final q = widget.initialQuery ?? '';
+    if (q == 'family') { _selected = 'domestic'; _searchQuery = ''; }
+    else if (q == 'group') { _selected = 'all'; _searchQuery = 'group'; }
+    else if (q == 'solo') { _selected = 'all'; _searchQuery = 'solo'; }
+    else if (q == 'honeymoon') { _selected = 'honeymoon'; _searchQuery = ''; }
+    else { _searchQuery = q; }
     _searchCtrl = TextEditingController(text: _searchQuery);
     AnalyticsService.screen('packages');
     _load();

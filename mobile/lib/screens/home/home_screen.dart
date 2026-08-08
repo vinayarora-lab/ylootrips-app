@@ -1021,14 +1021,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // ── Category grid ─────────────────────────────────────────────────────────
   Widget _categoryGrid() {
-    final categories = _rc.categories;
-    const catColors = [
-      Color(0xFFE0F2FE), Color(0xFFFCE7F3), Color(0xFFDCFCE7),
-      Color(0xFFFEF3C7), Color(0xFFEDE9FE), Color(0xFFFFEDD5),
-    ];
-    const catIconColors = [
-      Color(0xFF0369A1), Color(0xFFBE185D), Color(0xFF15803D),
-      Color(0xFFB45309), Color(0xFF6D28D9), Color(0xFFEA580C),
+    // Fixed category tiles with correct navigation — each opens its own filtered list
+    final cats = [
+      {'emoji': '🏖️', 'label': 'Beach', 'sub': 'Goa · Andamans · Kerala', 'id': 'beach', 'bg': const Color(0xFFE0F2FE), 'ic': const Color(0xFF0369A1)},
+      {'emoji': '💑', 'label': 'Honeymoon', 'sub': 'Bali · Maldives · Kashmir', 'id': 'honeymoon', 'bg': const Color(0xFFFCE7F3), 'ic': const Color(0xFFBE185D)},
+      {'emoji': '🏔️', 'label': 'Adventure', 'sub': 'Ladakh · Spiti · Manali', 'id': 'adventure', 'bg': const Color(0xFFDCFCE7), 'ic': const Color(0xFF15803D)},
+      {'emoji': '🏛️', 'label': 'Heritage', 'sub': 'Rajasthan · Varanasi', 'id': 'heritage', 'bg': const Color(0xFFFEF3C7), 'ic': const Color(0xFFB45309)},
+      {'emoji': '🌿', 'label': 'Offbeat', 'sub': 'Hidden gems · Secret spots', 'id': 'offbeat', 'bg': const Color(0xFFEDE9FE), 'ic': const Color(0xFF6D28D9)},
+      {'emoji': '🌍', 'label': 'International', 'sub': 'Dubai · Bali · Thailand', 'id': 'international', 'bg': const Color(0xFFFFEDD5), 'ic': const Color(0xFFEA580C)},
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1036,30 +1036,38 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         crossAxisCount: 3,
-        childAspectRatio: 1.1,
+        childAspectRatio: 0.95,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        children: List.generate(categories.length, (i) {
-          final c = categories[i];
-          final bg = catColors[i % catColors.length];
-          final ic = catIconColors[i % catIconColors.length];
+        children: cats.map((c) {
+          final bg = c['bg'] as Color;
+          final ic = c['ic'] as Color;
+          final id  = c['id'] as String;
           return GestureDetector(
-            onTap: () => context.go('/trips'),
+            onTap: () => context.go('/trips', extra: {'category': id}),
             child: Container(
               decoration: BoxDecoration(
                 color: bg,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: ic.withValues(alpha: 0.15)),
               ),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text(c['emoji'] as String? ?? '', style: const TextStyle(fontSize: 28)),
+                Text(c['emoji'] as String, style: const TextStyle(fontSize: 30)),
                 const SizedBox(height: 6),
-                Text(c['label'] as String? ?? '',
-                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: ic),
+                Text(c['label'] as String,
+                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w800, color: ic),
                     textAlign: TextAlign.center),
+                const SizedBox(height: 2),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(c['sub'] as String,
+                      style: GoogleFonts.inter(fontSize: 8.5, color: ic.withValues(alpha: 0.7)),
+                      textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+                ),
               ]),
             ),
           );
-        }),
+        }).toList(),
       ),
     );
   }
@@ -2864,5 +2872,12 @@ class _FlightTipCard extends StatelessWidget {
       ]),
     );
   }
+}
+
+class _SegData {
+  final String emoji, title, sub, query, badge, details;
+  final Color color, bg;
+  final IconData icon;
+  const _SegData(this.emoji, this.title, this.sub, this.query, this.color, this.bg, this.badge, this.icon, [this.details = '']);
 }
 

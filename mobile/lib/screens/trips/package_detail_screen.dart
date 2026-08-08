@@ -1181,5 +1181,3 @@ class _InfoTab extends StatelessWidget {
     ]),
   );
 }
-
-}

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -389,39 +390,63 @@ class _PackageDetailScreenState extends State<PackageDetailScreen>
     super.dispose();
   }
 
+  Widget _buildTabBarView(CurrencyProvider currency) => TabBarView(
+    controller: _tabCtrl,
+    children: [
+      ListView(padding: const EdgeInsets.only(bottom: 32), children: [
+        _OverviewTab(
+          description: description, highlights: highlights,
+          nights: nights, days: days, rating: rating,
+          reviews: reviews, currency: currency, price: price,
+        ),
+      ]),
+      ListView(padding: const EdgeInsets.only(bottom: 32), children: [
+        _ItineraryTab(itinerary: itinerary),
+      ]),
+      ListView(padding: const EdgeInsets.only(bottom: 32), children: [
+        const _InclusionsTab(),
+      ]),
+      ListView(padding: const EdgeInsets.only(bottom: 32), children: [
+        _InfoTab(slug: slug),
+      ]),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     final currency = context.watch<CurrencyProvider>();
+
+    // Web: simple layout (NestedScrollView has height issues on web)
+    if (kIsWeb) {
+      return Scaffold(
+        backgroundColor: AppTheme.cream,
+        bottomNavigationBar: _buildBottomBar(currency),
+        appBar: AppBar(
+          backgroundColor: AppTheme.primary,
+          foregroundColor: Colors.white,
+          title: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 20),
+            onPressed: () => GoRouter.of(context).pop(),
+          ),
+        ),
+        body: Column(children: [
+          _buildTabs(),
+          Expanded(child: _buildTabBarView(currency)),
+        ]),
+      );
+    }
+
+    // Mobile: full layout with collapsing hero image
     return Scaffold(
       backgroundColor: AppTheme.cream,
       bottomNavigationBar: _buildBottomBar(currency),
       body: NestedScrollView(
+        physics: const ClampingScrollPhysics(),
         headerSliverBuilder: (ctx, _) => [_buildHero()],
         body: Column(children: [
           _buildTabs(),
-          Expanded(
-            child: TabBarView(
-              controller: _tabCtrl,
-              children: [
-                ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-                  _OverviewTab(
-                    description: description, highlights: highlights,
-                    nights: nights, days: days, rating: rating,
-                    reviews: reviews, currency: currency, price: price,
-                  ),
-                ]),
-                ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-                  _ItineraryTab(itinerary: itinerary),
-                ]),
-                ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-                  const _InclusionsTab(),
-                ]),
-                ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-                  _InfoTab(slug: slug),
-                ]),
-              ],
-            ),
-          ),
+          Expanded(child: _buildTabBarView(currency)),
         ]),
       ),
     );

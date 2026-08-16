@@ -526,6 +526,7 @@ class _PackageDetailScreenState extends State<PackageDetailScreen>
         Tab(text: 'Overview'),
         Tab(text: 'Itinerary'),
         Tab(text: 'Inclusions'),
+        Tab(text: 'Info'),
       ],
     ),
   );

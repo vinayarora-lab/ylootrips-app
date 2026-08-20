@@ -390,150 +390,132 @@ class _PackageDetailScreenState extends State<PackageDetailScreen>
     super.dispose();
   }
 
-  Widget _buildTabBarView(CurrencyProvider currency) => TabBarView(
-    controller: _tabCtrl,
-    children: [
-      ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-        _OverviewTab(
-          description: description, highlights: highlights,
-          nights: nights, days: days, rating: rating,
-          reviews: reviews, currency: currency, price: price,
-        ),
-      ]),
-      ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-        _ItineraryTab(itinerary: itinerary),
-      ]),
-      ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-        const _InclusionsTab(),
-      ]),
-      ListView(padding: const EdgeInsets.only(bottom: 32), children: [
-        _InfoTab(slug: slug),
-      ]),
-    ],
-  );
-
   @override
   Widget build(BuildContext context) {
     final currency = context.watch<CurrencyProvider>();
 
-    // Web: simple layout (NestedScrollView has height issues on web)
-    if (kIsWeb) {
-      return Scaffold(
-        backgroundColor: AppTheme.cream,
-        bottomNavigationBar: _buildBottomBar(currency),
-        appBar: AppBar(
-          backgroundColor: AppTheme.primary,
-          foregroundColor: Colors.white,
-          title: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 20),
-            onPressed: () => GoRouter.of(context).pop(),
-          ),
-        ),
-        body: Column(children: [
-          _buildTabs(),
-          Expanded(child: _buildTabBarView(currency)),
-        ]),
-      );
-    }
-
-    // Mobile: full layout with collapsing hero image
     return Scaffold(
       backgroundColor: AppTheme.cream,
       bottomNavigationBar: _buildBottomBar(currency),
-      body: NestedScrollView(
-        physics: const ClampingScrollPhysics(),
-        headerSliverBuilder: (ctx, _) => [_buildHero()],
-        body: Column(children: [
-          _buildTabs(),
-          Expanded(child: _buildTabBarView(currency)),
-        ]),
-      ),
+      body: Column(children: [
+        // Hero image (fixed, no collapsing — works on all platforms)
+        _buildHeroFixed(),
+        // Pinned TabBar
+        _buildTabs(),
+        // Tab content fills remaining space
+        Expanded(
+          child: TabBarView(
+            controller: _tabCtrl,
+            children: [
+              ListView(padding: const EdgeInsets.only(bottom: 32), children: [
+                _OverviewTab(
+                  description: description, highlights: highlights,
+                  nights: nights, days: days, rating: rating,
+                  reviews: reviews, currency: currency, price: price,
+                ),
+              ]),
+              ListView(padding: const EdgeInsets.only(bottom: 32), children: [
+                _ItineraryTab(itinerary: itinerary),
+              ]),
+              ListView(padding: const EdgeInsets.only(bottom: 32), children: [
+                const _InclusionsTab(),
+              ]),
+              ListView(padding: const EdgeInsets.only(bottom: 32), children: [
+                _InfoTab(slug: slug),
+              ]),
+            ],
+          ),
+        ),
+      ]),
     );
   }
 
-  Widget _buildHero() => SliverAppBar(
-    expandedHeight: 300,
-    pinned: true,
-    backgroundColor: AppTheme.primary,
-    foregroundColor: Colors.white,
-    leading: Builder(builder: (ctx) => IconButton(
-      icon: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(color: Colors.black38, shape: BoxShape.circle),
-        child: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 16),
-      ),
-      onPressed: () => GoRouter.of(ctx).pop(),
-    )),
-    actions: [
-      IconButton(
-        icon: Icon(_wishlisted ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-            color: _wishlisted ? const Color(0xFFFF6B6B) : Colors.white),
-        onPressed: _toggleWishlist,
-        tooltip: _wishlisted ? 'Remove from wishlist' : 'Save to wishlist',
-      ),
-    ],
-    flexibleSpace: FlexibleSpaceBar(
-      background: Stack(fit: StackFit.expand, children: [
-        // Gallery carousel
+  Widget _buildHeroFixed() {
+    final statusBarH = MediaQuery.of(context).padding.top;
+    return SizedBox(
+      height: 220 + statusBarH,
+      child: Stack(fit: StackFit.expand, children: [
+        // Gallery
         PageView.builder(
           controller: _pageCtrl,
           itemCount: gallery.length,
           onPageChanged: (i) => setState(() => _imgIdx = i),
-          itemBuilder: (_, i) => CachedNetworkImage(
-            imageUrl: gallery[i],
-            fit: BoxFit.cover,
-            placeholder: (_, __) => Container(color: AppTheme.creamDark),
-            errorWidget: (_, __, ___) => Container(color: AppTheme.creamDark),
-          ),
+          itemBuilder: (_, i) => kIsWeb
+              ? Image.network(gallery[i], fit: BoxFit.cover)
+              : CachedNetworkImage(
+                  imageUrl: gallery[i], fit: BoxFit.cover,
+                  placeholder: (_, __) => Container(color: AppTheme.creamDark),
+                  errorWidget: (_, __, ___) => Container(color: AppTheme.creamDark),
+                ),
         ),
-        // Dark gradient
+        // Gradient
         const DecoratedBox(decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter, end: Alignment.bottomCenter,
-            colors: [Colors.transparent, Color(0xCC000000)],
-            stops: [0.4, 1.0],
+            colors: [Color(0x88000000), Colors.transparent, Color(0xCC000000)],
+            stops: [0.0, 0.4, 1.0],
           ),
         )),
-        // Badges top
-        Positioned(top: kToolbarHeight + 8, left: 16, right: 16,
+        // Back + wishlist buttons
+        Positioned(top: statusBarH + 8, left: 8, right: 8,
           child: Row(children: [
-            _PillBadge('★ $rating', bg: Colors.white, text: AppTheme.primary),
-            const SizedBox(width: 8),
-            _PillBadge('${nights}N/${days}D', bg: AppTheme.secondary, text: Colors.white),
+            IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(color: Colors.black38, shape: BoxShape.circle),
+                child: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 16),
+              ),
+              onPressed: () => GoRouter.of(context).pop(),
+            ),
             const Spacer(),
-            if (int.tryParse(discount) != null && int.parse(discount) > 0)
-              _PillBadge('$discount% OFF', bg: Colors.red, text: Colors.white),
+            IconButton(
+              icon: Icon(_wishlisted ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  color: _wishlisted ? const Color(0xFFFF6B6B) : Colors.white),
+              onPressed: _toggleWishlist,
+            ),
           ]),
         ),
-        // Title & destination bottom
+        // Badges + title
         Positioned(left: 16, right: 16, bottom: 16,
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              _PillBadge('★ $rating', bg: Colors.white, text: AppTheme.primary),
+              const SizedBox(width: 8),
+              _PillBadge('${nights}N/${days}D', bg: AppTheme.secondary, text: Colors.white),
+              const Spacer(),
+              if (int.tryParse(discount) != null && int.parse(discount) > 0)
+                _PillBadge('$discount% OFF', bg: Colors.red, text: Colors.white),
+            ]),
+            const SizedBox(height: 8),
             Row(children: [
               const Icon(Icons.location_on, size: 13, color: Colors.white70),
               const SizedBox(width: 4),
               Text(destination, style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
             ]),
             const SizedBox(height: 4),
-            Text(title, style: GoogleFonts.playfairDisplay(
-              fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, height: 1.2)),
-            const SizedBox(height: 8),
-            // Image dots
-            if (gallery.length > 1)
+            Text(title,
+              style: GoogleFonts.playfairDisplay(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+              maxLines: 2, overflow: TextOverflow.ellipsis,
+            ),
+            // Dot indicators
+            if (gallery.length > 1) ...[
+              const SizedBox(height: 8),
               Row(children: List.generate(gallery.length, (i) => AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                width: _imgIdx == i ? 16 : 6, height: 6,
                 margin: const EdgeInsets.only(right: 4),
+                width: _imgIdx == i ? 16 : 6, height: 6,
                 decoration: BoxDecoration(
                   color: _imgIdx == i ? Colors.white : Colors.white38,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ))),
+            ],
           ]),
         ),
       ]),
-    ),
-  );
+    );
+  }
+
 
   Widget _buildTabs() => Container(
     color: AppTheme.white,

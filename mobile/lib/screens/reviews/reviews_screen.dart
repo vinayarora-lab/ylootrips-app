@@ -1,13 +1,22 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import '../../config/app_config.dart';
 import '../../config/theme.dart';
 
-class ReviewsScreen extends StatelessWidget {
+class ReviewsScreen extends StatefulWidget {
   const ReviewsScreen({super.key});
+  @override
+  State<ReviewsScreen> createState() => _ReviewsScreenState();
+}
 
-  // Real reviews from ylootrips.com/reviews
-  static const _reviews = [
+class _ReviewsScreenState extends State<ReviewsScreen> {
+  List<Map<String, dynamic>> _reviews = [];
+  bool _loading = true;
+
+  // Fallback hardcoded reviews
+  static const _fallback = [
     {
       'name': 'Himanshu',
       'location': 'Ambala, Haryana',
@@ -198,6 +207,33 @@ class ReviewsScreen extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _fetchReviews();
+  }
+
+  Future<void> _fetchReviews() async {
+    try {
+      final res = await http.get(
+        Uri.parse('https://trip-backend-65232427280.asia-south1.run.app/api/testimonials'),
+      ).timeout(const Duration(seconds: 8));
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        final List raw = data is List ? data : (data['testimonials'] ?? data['reviews'] ?? []);
+        if (raw.isNotEmpty && mounted) {
+          setState(() {
+            _reviews = raw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+            _loading = false;
+          });
+          return;
+        }
+      }
+    } catch (_) {}
+    // fallback to hardcoded
+    if (mounted) setState(() { _reviews = List<Map<String, dynamic>>.from(_fallback); _loading = false; });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.cream,
@@ -268,12 +304,20 @@ class ReviewsScreen extends StatelessWidget {
         ),
 
         // ── Reviews list ─────────────────────────────────────────────────────
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (_, i) => _ReviewCard(review: _reviews[i]),
-            childCount: _reviews.length,
+        if (_loading)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          )
+        else
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (_, i) => _ReviewCard(review: _reviews[i]),
+              childCount: _reviews.length,
+            ),
           ),
-        ),
 
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ]),
@@ -297,9 +341,17 @@ class _ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = review['name'] as String;
-    final photo = review['photo'] as String? ?? '';
-    final photoUrl = photo.isNotEmpty ? '${AppConfig.siteUrl}$photo' : '';
+    // Support both API fields (userName/comment/userImage) and fallback fields (name/text/photo)
+    final name = (review['userName'] ?? review['name'] ?? 'Traveller') as String;
+    final text = (review['comment'] ?? review['text'] ?? '') as String;
+    final trip = (review['destination'] ?? review['trip'] ?? '') as String;
+    final rating = (review['rating'] as num?)?.toInt() ?? 5;
+    final location = (review['country'] ?? review['location'] ?? '') as String;
+    final date = (review['tripDate'] ?? review['date'] ?? '') as String;
+    final rawPhoto = (review['userImage'] ?? review['tripPhotoUrl'] ?? review['photo'] ?? '') as String;
+    final photoUrl = rawPhoto.isNotEmpty
+        ? (rawPhoto.startsWith('http') ? rawPhoto : '${AppConfig.siteUrl}$rawPhoto')
+        : '';
     final initials = name.split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join().toUpperCase();
 
     return Container(
@@ -343,20 +395,19 @@ class _ReviewCard extends StatelessWidget {
                 ),
               )),
               // Trip name overlay bottom-left
-              Positioned(left: 12, bottom: 10, child: Row(children: [
-                const Icon(Icons.location_on, size: 13, color: Colors.white70),
-                const SizedBox(width: 3),
-                Text(review['trip'] as String,
-                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
-              ])),
-              // Stars overlay top-right
+              if (trip.isNotEmpty)
+                Positioned(left: 12, bottom: 10, child: Row(children: [
+                  const Icon(Icons.location_on, size: 13, color: Colors.white70),
+                  const SizedBox(width: 3),
+                  Text(trip, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
+                ])),
               Positioned(top: 10, right: 10, child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(20)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   const Icon(Icons.star, color: Color(0xFFF59E0B), size: 13),
                   const SizedBox(width: 3),
-                  Text('5.0', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
+                  Text('$rating.0', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
                 ]),
               )),
             ]),
@@ -376,10 +427,11 @@ class _ReviewCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('${review['flag']}  $name',
+                Text(name,
                     style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: AppTheme.primary)),
-                Text('${review['location']}  ·  ${review['date']}',
-                    style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textGray)),
+                if (location.isNotEmpty || date.isNotEmpty)
+                  Text('${location.isNotEmpty ? location : ''}${location.isNotEmpty && date.isNotEmpty ? '  ·  ' : ''}${date.isNotEmpty ? date : ''}',
+                      style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textGray)),
               ])),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -396,7 +448,7 @@ class _ReviewCard extends StatelessWidget {
 
             // Review text
             Text(
-              '"${review['text']}"',
+              '"$text"',
               style: GoogleFonts.inter(fontSize: 13, color: AppTheme.charcoal, height: 1.65, fontStyle: FontStyle.italic),
             ),
 
@@ -404,9 +456,9 @@ class _ReviewCard extends StatelessWidget {
 
             // Star row
             Row(children: [
-              ...List.generate(5, (i) => const Icon(Icons.star, color: Color(0xFFF59E0B), size: 14)),
+              ...List.generate(rating, (i) => const Icon(Icons.star, color: Color(0xFFF59E0B), size: 14)),
               const SizedBox(width: 8),
-              Text('${review['rating']}.0 / 5.0',
+              Text('$rating.0 / 5.0',
                   style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textGray, fontWeight: FontWeight.w500)),
             ]),
           ]),

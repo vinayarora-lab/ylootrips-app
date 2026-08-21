@@ -3,8 +3,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
   CheckCircle, ChevronRight, Sparkles, Plane, Hotel,
-  Award, Lock, HeadphonesIcon, Users, TrendingUp,
-  ArrowRight, MessageCircle, Calendar, Phone, Star,
+  Award, Lock, HeadphonesIcon, TrendingUp,
+  ArrowRight, MessageCircle, Phone, Star, MapPin,
+  Shield, Clock, ThumbsUp,
 } from 'lucide-react';
 import InternationalTestimonials from '@/components/InternationalTestimonials';
 import HomeDestinations from './HomeDestinations';
@@ -49,7 +50,7 @@ const QUICK_ACTIONS = [
   { icon: Sparkles, label: 'AI Planner', sub: 'Free itinerary', href: '/trip-planner', bg: 'bg-gray-900',    iconColor: 'text-white' },
   { icon: Plane,    label: 'Flights',    sub: 'Best fares',     href: '/flights',      bg: 'bg-blue-600',    iconColor: 'text-white' },
   { icon: Hotel,    label: 'Hotels',     sub: '200+ stays',     href: '/hotels',       bg: 'bg-amber-500',   iconColor: 'text-white' },
-  { icon: Hotel,    label: 'Packages',   sub: '40+ trips',      href: '/trips',        bg: 'bg-emerald-600', iconColor: 'text-white' },
+  { icon: MapPin,   label: 'Packages',   sub: '40+ trips',      href: '/trips',        bg: 'bg-emerald-600', iconColor: 'text-white' },
 ];
 
 const STATS = [
@@ -136,7 +137,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-teal-900/20 to-black/85" />
           <div className="absolute bottom-0 left-0 right-0 p-5 pb-7">
             <p className="text-[#F5753A] text-[10px] font-black uppercase tracking-[0.2em] mb-2">
-              Trusted by 25,000+ travellers
+              Trusted by 25,000+ travellers · MSME Certified
             </p>
             <h1 className="font-playfair text-white text-[2rem] leading-[1.1] font-semibold mb-3">
               India & International<br />Tour Packages
@@ -146,6 +147,7 @@ export default function Home() {
                 {[1,2,3,4,5].map(i => <Star key={i} size={11} className="fill-amber-400 text-amber-400" />)}
               </div>
               <span className="text-white/80 text-[11px] font-semibold">4.9 · 2,400+ verified reviews</span>
+              <span className="text-white/50 text-[11px]">· from ₹9,999</span>
             </div>
           </div>
         </section>
@@ -157,13 +159,25 @@ export default function Home() {
               <Sparkles size={17} className="text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">YLOO AI Trip Planner</p>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">YLOO AI Trip Planner · Free</p>
               <p className="text-sm font-semibold text-gray-700 truncate">Where would you like to go?</p>
             </div>
             <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
               <ChevronRight size={15} className="text-gray-500" />
             </div>
           </Link>
+        </section>
+
+        {/* ── TRUST STRIP ────────────────────────────────────────────────── */}
+        <section className="mx-4 mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="grid grid-cols-4">
+            {STATS.map(({ value, label }, i) => (
+              <div key={label} className={`flex flex-col items-center justify-center py-4 ${i < 3 ? 'border-r border-gray-100' : ''}`}>
+                <span className="text-base font-black text-gray-900 leading-tight">{value}</span>
+                <span className="text-[9px] font-semibold text-gray-400 mt-0.5 text-center leading-tight px-1">{label}</span>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* ── QUICK ACTIONS ──────────────────────────────────────────────── */}
@@ -183,23 +197,42 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── TRUST STRIP ────────────────────────────────────────────────── */}
-        <section className="mx-4 mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="grid grid-cols-4">
-            {STATS.map(({ value, label }, i) => (
-              <div key={label} className={`flex flex-col items-center justify-center py-4 ${i < 3 ? 'border-r border-gray-100' : ''}`}>
-                <span className="text-base font-black text-gray-900 leading-tight">{value}</span>
-                <span className="text-[9px] font-semibold text-gray-400 mt-0.5 text-center leading-tight px-1">{label}</span>
+        {/* ── FEATURED DESTINATIONS ──────────────────────────────────────── */}
+        <HomeDestinations />
+
+        {/* ── CERTIFICATIONS (trust before reviews) ──────────────────────── */}
+        <section className="mt-8 mx-4 bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
+          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 text-center">
+            Verified & Certified Agency
+          </p>
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            {[
+              { icon: '🏛️', title: 'MSME',       sub: 'Govt. Registered'  },
+              { icon: '🔒', title: 'SSL 256-bit', sub: 'End-to-end secure' },
+              { icon: '💳', title: 'PCI-DSS',     sub: 'Payment certified' },
+              { icon: '📋', title: 'GST Reg.',    sub: 'Tax compliant'     },
+              { icon: '⭐', title: 'ISO Rated',   sub: '4.9 / 5.0'        },
+              { icon: '🛡️', title: 'Insured',    sub: 'Licensed ops'      },
+            ].map(({ icon, title, sub }) => (
+              <div key={title} className="flex flex-col items-center text-center">
+                <span className="text-2xl mb-1">{icon}</span>
+                <p className="text-[11px] font-bold text-gray-900">{title}</p>
+                <p className="text-[10px] text-gray-400 leading-tight">{sub}</p>
               </div>
             ))}
           </div>
+          {/* Money-back banner inside cert block */}
+          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 flex items-center gap-3">
+            <CheckCircle size={18} className="text-emerald-600 shrink-0" />
+            <div>
+              <p className="text-emerald-800 font-bold text-xs leading-tight">100% Money-Back Guarantee</p>
+              <p className="text-emerald-600 text-[10px] mt-0.5">Free cancellation up to 14 days before travel</p>
+            </div>
+          </div>
         </section>
 
-        {/* ── FEATURED DESTINATIONS (interactive — client component) ─────── */}
-        <HomeDestinations />
-
         {/* ── WHY YLOO ───────────────────────────────────────────────────── */}
-        <section className="mt-8 px-4">
+        <section className="mt-6 px-4">
           <div className="mb-4">
             <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">Why Choose Us</p>
             <h2 className="font-playfair text-2xl text-gray-900 font-semibold leading-tight">
@@ -217,14 +250,76 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="mt-3 bg-gray-900 rounded-2xl px-4 py-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-              <CheckCircle size={20} className="text-emerald-400" />
-            </div>
+        </section>
+
+        {/* ── REVIEWS ────────────────────────────────────────────────────── */}
+        <section className="mt-8">
+          <div className="flex items-end justify-between mb-4 px-4">
             <div>
-              <p className="text-white font-bold text-sm leading-tight">100% Money-Back Guarantee</p>
-              <p className="text-white/60 text-[11px] mt-0.5">Free cancellation up to 14 days before travel</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">Real Travellers</p>
+              <h2 className="font-playfair text-2xl text-gray-900 font-semibold leading-tight">
+                Real stories,<br />real results
+              </h2>
             </div>
+            <Link href="/reviews" className="text-xs font-bold text-gray-500 underline underline-offset-2">
+              2,400+ reviews
+            </Link>
+          </div>
+          <InternationalTestimonials />
+        </section>
+
+        {/* ── HOW IT WORKS ───────────────────────────────────────────────── */}
+        <section className="mt-8 px-4">
+          <div className="mb-4">
+            <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">Simple Process</p>
+            <h2 className="font-playfair text-2xl text-gray-900 font-semibold leading-tight">
+              Book in 3 easy steps
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {[
+              {
+                step: '01',
+                icon: Sparkles,
+                title: 'Tell us your dream trip',
+                sub: 'Use our free AI planner or WhatsApp us — destination, dates, budget. Done in 2 minutes.',
+                color: 'bg-amber-50 text-amber-600',
+                href: '/trip-planner',
+              },
+              {
+                step: '02',
+                icon: ThumbsUp,
+                title: 'We craft your itinerary',
+                sub: 'A dedicated expert builds your personalised package within 1 hour — flights, hotels, transfers included.',
+                color: 'bg-blue-50 text-blue-600',
+                href: '/contact',
+              },
+              {
+                step: '03',
+                icon: Shield,
+                title: 'Pay 25% & confirm',
+                sub: 'Secure your trip with just a 25% deposit. Balance due 30 days before travel. 100% refundable.',
+                color: 'bg-emerald-50 text-emerald-600',
+                href: '/trips',
+              },
+            ].map(({ step, icon: Icon, title, sub, color, href }) => (
+              <Link key={step} href={href} className="flex items-start gap-4 bg-white rounded-2xl px-4 py-4 border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
+                <div className={`w-11 h-11 rounded-2xl ${color} flex items-center justify-center shrink-0`}>
+                  <Icon size={20} />
+                </div>
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <p className="text-[10px] font-black text-gray-300 uppercase tracking-wider mb-0.5">Step {step}</p>
+                  <p className="text-sm font-bold text-gray-900 leading-tight">{title}</p>
+                  <p className="text-[11px] text-gray-400 mt-1 leading-snug">{sub}</p>
+                </div>
+                <ChevronRight size={16} className="text-gray-300 shrink-0 mt-3" />
+              </Link>
+            ))}
+          </div>
+          {/* urgency note */}
+          <div className="mt-3 flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3">
+            <Clock size={15} className="text-amber-600 shrink-0" />
+            <p className="text-amber-800 text-[11px] font-semibold">Our experts reply within 1 hour — WhatsApp or call us now</p>
           </div>
         </section>
 
@@ -253,45 +348,6 @@ export default function Home() {
               </div>
             </div>
           </Link>
-        </section>
-
-        {/* ── REVIEWS ────────────────────────────────────────────────────── */}
-        <section className="mt-8">
-          <div className="flex items-end justify-between mb-4 px-4">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">Social Proof</p>
-              <h2 className="font-playfair text-2xl text-gray-900 font-semibold leading-tight">
-                Real stories,<br />real travellers
-              </h2>
-            </div>
-            <Link href="/reviews" className="text-xs font-bold text-gray-500 underline underline-offset-2">
-              2,400+ reviews
-            </Link>
-          </div>
-          <InternationalTestimonials />
-        </section>
-
-        {/* ── CERTIFICATIONS ─────────────────────────────────────────────── */}
-        <section className="mt-8 mx-4 bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 text-center">
-            Verified & Certified
-          </p>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { icon: '🏛️', title: 'MSME',      sub: 'Govt. Registered'  },
-              { icon: '🔒', title: 'SSL 256-bit', sub: 'End-to-end secure' },
-              { icon: '💳', title: 'PCI-DSS',     sub: 'Payment certified' },
-              { icon: '📋', title: 'GST Reg.',    sub: 'Tax compliant'     },
-              { icon: '⭐', title: 'ISO Rated',   sub: '4.9 / 5.0'        },
-              { icon: '🛡️', title: 'Insured',    sub: 'Licensed ops'      },
-            ].map(({ icon, title, sub }) => (
-              <div key={title} className="flex flex-col items-center text-center">
-                <span className="text-2xl mb-1">{icon}</span>
-                <p className="text-[11px] font-bold text-gray-900">{title}</p>
-                <p className="text-[10px] text-gray-400 leading-tight">{sub}</p>
-              </div>
-            ))}
-          </div>
         </section>
 
         {/* ── CONCIERGE CTA ──────────────────────────────────────────────── */}
@@ -345,45 +401,35 @@ export default function Home() {
           </div>
         </section>
 
-
-        {/* ── APP LAUNCH ────────────────────────────────────────────────── */}
+        {/* ── APP DOWNLOAD ──────────────────────────────────────────────── */}
         <section className="px-4 mb-8">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0F172A] via-[#1E3A5F] to-[#006CE4]">
-            {/* Background glow */}
             <div className="absolute top-0 right-0 w-48 h-48 bg-amber-400/10 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl" />
-
             <div className="relative p-5">
-              {/* Launch badge */}
               <div className="flex items-center gap-2 mb-4">
-                <span className="inline-flex items-center gap-1.5 bg-amber-400 text-amber-900 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full">
-                  <span className="w-1.5 h-1.5 bg-amber-900 rounded-full animate-pulse" />
-                  Launching August 2026
+                <span className="inline-flex items-center gap-1.5 bg-emerald-400 text-emerald-900 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full">
+                  <span className="w-1.5 h-1.5 bg-emerald-900 rounded-full animate-pulse" />
+                  Now Live on Play Store
                 </span>
               </div>
-
-              {/* Heading */}
               <h2 className="font-playfair text-white text-2xl font-bold leading-tight mb-2">
                 YlooTrips App —<br />
                 <span className="text-amber-400">Your All-in-One</span> Travel Companion
               </h2>
               <p className="text-white/70 text-sm leading-relaxed mb-5">
-                We are putting everything a traveller needs into one app — flights, hotels, AI trip planner, hidden gems, forex card, eSIM, bookings and more. No agent, no hassle.
+                Flights, hotels, AI trip planner, hidden gems, cashback rewards and full booking management — all in one place.
               </p>
-
-              {/* Feature pills */}
               <div className="flex flex-wrap gap-2 mb-5">
-                {['✈️ Flights', '🏨 Hotels', '🤖 AI Planner', '🗺️ Hidden Gems', '📅 Best Time Guide', '💳 Forex Card', '📶 eSIM', '🎒 Bookings'].map((f) => (
+                {['✈️ Flights', '🏨 Hotels', '🤖 AI Planner', '🗺️ Hidden Gems', '💰 WanderLoot Cash', '🎒 Bookings'].map((f) => (
                   <span key={f} className="bg-white/10 border border-white/20 text-white/90 text-[11px] font-medium px-3 py-1 rounded-full">{f}</span>
                 ))}
               </div>
-
-              {/* Stats row */}
               <div className="grid grid-cols-3 gap-3 mb-5">
                 {[
-                  { v: '10,000+', l: 'Happy Travellers' },
-                  { v: '4.9 ★', l: 'Average Rating' },
-                  { v: '₹10Cr+', l: 'Customer Savings' },
+                  { v: '25,000+', l: 'Happy Travellers' },
+                  { v: '4.9 ★',   l: 'Average Rating'   },
+                  { v: '₹10Cr+',  l: 'Customer Savings'  },
                 ].map(({ v, l }) => (
                   <div key={l} className="bg-white/10 rounded-2xl p-3 text-center">
                     <p className="text-white font-black text-base leading-none">{v}</p>
@@ -391,20 +437,15 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-
-              {/* Early access CTA */}
               <div className="bg-white/10 border border-white/20 rounded-2xl p-4 mb-4">
-                <p className="text-amber-400 text-xs font-bold uppercase tracking-wide mb-1">🎁 Early Access Offer</p>
-                <p className="text-white text-sm font-semibold mb-1">Be among the first 1,000 users</p>
-                <p className="text-white/60 text-xs leading-relaxed">Get ₹500 WanderLoot cashback + priority customer support + lifetime 10% off on all bookings — exclusively for early adopters.</p>
+                <p className="text-amber-400 text-xs font-bold uppercase tracking-wide mb-1">🎁 App-Only Offer</p>
+                <p className="text-white text-sm font-semibold mb-1">Download & get ₹500 WanderLoot cashback</p>
+                <p className="text-white/60 text-xs leading-relaxed">Exclusive cashback credited instantly on first login. Use on any booking.</p>
               </div>
-
-              {/* Buttons */}
               <div className="flex gap-3">
                 <a
                   href="https://play.google.com/store/apps/details?id=com.ylootrips.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target="_blank" rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 bg-white rounded-2xl py-3.5 active:scale-[0.97] transition-transform"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -419,42 +460,13 @@ export default function Home() {
                   href="/contact"
                   className="flex-1 flex items-center justify-center gap-2 bg-amber-400 rounded-2xl py-3.5 active:scale-[0.97] transition-transform"
                 >
-                  <span className="text-amber-900 text-sm font-black">Get Early Access</span>
+                  <span className="text-amber-900 text-sm font-black">WhatsApp Us</span>
                 </Link>
               </div>
-
-              {/* Trust note */}
               <p className="text-white/40 text-[10px] text-center mt-3">
-                🔒 New app · Reviews growing · Fully verified & IATA registered
+                🔒 MSME Certified · GST Registered · 4.9★ Rated
               </p>
             </div>
-          </div>
-        </section>
-
-        {/* ── SERVICES ───────────────────────────────────────────────────── */}
-        <section className="px-4 mb-8">
-          <div className="mb-4">
-            <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">Everything You Need</p>
-            <h2 className="font-playfair text-2xl text-gray-900 font-semibold">Our Services</h2>
-          </div>
-          <div className="space-y-3">
-            {[
-              { icon: Calendar,  label: 'Custom Itineraries', sub: 'Tailored to your style, pace & budget',  href: '/contact', color: 'bg-indigo-100 text-indigo-600' },
-              { icon: Plane,     label: 'Flight Bookings',    sub: 'Best fares across 50+ airlines',         href: '/flights', color: 'bg-blue-100 text-blue-600'   },
-              { icon: Hotel,     label: 'Hotel Reservations', sub: '200+ curated properties across India',   href: '/hotels',  color: 'bg-amber-100 text-amber-600' },
-              { icon: Users,     label: 'Group Travel',       sub: 'Corporate & group trips — 20% off',      href: '/contact', color: 'bg-emerald-100 text-emerald-600' },
-            ].map(({ icon: Icon, label, sub, href, color }) => (
-              <Link key={label} href={href} className="flex items-center gap-4 bg-white rounded-2xl px-4 py-4 border border-gray-100 shadow-sm active:scale-[0.98] transition-transform">
-                <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center shrink-0`}>
-                  <Icon size={19} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-900">{label}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5 truncate">{sub}</p>
-                </div>
-                <ChevronRight size={16} className="text-gray-300 shrink-0" />
-              </Link>
-            ))}
           </div>
         </section>
 

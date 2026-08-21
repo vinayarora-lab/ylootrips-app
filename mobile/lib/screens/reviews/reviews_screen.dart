@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import '../../config/app_config.dart';
 import '../../config/theme.dart';
 
@@ -38,28 +36,10 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchReviews();
-  }
-
-  Future<void> _fetchReviews() async {
-    try {
-      final res = await http.get(
-        Uri.parse('https://trip-backend-65232427280.asia-south1.run.app/api/testimonials'),
-      ).timeout(const Duration(seconds: 8));
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        final List raw = data is List ? data : (data['testimonials'] ?? data['reviews'] ?? []);
-        if (raw.isNotEmpty && mounted) {
-          setState(() {
-            _reviews = raw.map((e) => Map<String, dynamic>.from(e as Map)).toList();
-            _loading = false;
-          });
-          return;
-        }
-      }
-    } catch (_) {}
-    // fallback to hardcoded
-    if (mounted) setState(() { _reviews = List<Map<String, dynamic>>.from(_fallback); _loading = false; });
+    // Use the same 15 hardcoded reviews as the website homepage (InternationalTestimonials.tsx)
+    // API is skipped — backend has different reviews that don't match the website
+    _reviews = List<Map<String, dynamic>>.from(_fallback);
+    _loading = false;
   }
 
   @override

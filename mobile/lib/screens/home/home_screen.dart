@@ -365,6 +365,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           SliverToBoxAdapter(child: _forexCardSection()),
           SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
 
+          // ── Credentials bar (trust before reviews) ───────────────────────
+          SliverToBoxAdapter(child: _credentialsBar()),
+          SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
+
           // ── Why YlooTrips vs competitors ─────────────────────────────────────
           SliverToBoxAdapter(child: _sectionHeader('Why Choose YlooTrips?', 'Compare with top travel brands')),
           SliverToBoxAdapter(child: _whyUsSection()),
@@ -375,8 +379,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           SliverToBoxAdapter(child: _reviewsStrip()),
           SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
 
-          // ── Credentials bar ───────────────────────────────────────────────
-          SliverToBoxAdapter(child: _credentialsBar()),
+          // ── How it works ──────────────────────────────────────────────────
+          SliverToBoxAdapter(child: _howItWorksSection()),
+          SliverToBoxAdapter(child: Container(height: 8, color: const Color(0xFFF3F4F6))),
 
           // ── Trust + CTA ───────────────────────────────────────────────────
           SliverToBoxAdapter(child: _trustCTA()),
@@ -1887,6 +1892,98 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         },
       ),
       ),
+    );
+  }
+
+  // ── How it works (3 steps) ────────────────────────────────────────────────
+  Widget _howItWorksSection() {
+    final steps = [
+      (
+        '01',
+        Icons.auto_awesome_rounded,
+        'Tell us your dream trip',
+        'Use our free AI planner or WhatsApp us — destination, dates, budget. Done in 2 minutes.',
+        const Color(0xFFFEF3C7),
+        const Color(0xFFD97706),
+        '/trip-planner',
+      ),
+      (
+        '02',
+        Icons.thumb_up_alt_rounded,
+        'We craft your itinerary',
+        'A dedicated expert builds your personalised package within 1 hour — flights, hotels, transfers included.',
+        const Color(0xFFDBEAFE),
+        const Color(0xFF2563EB),
+        '/contact',
+      ),
+      (
+        '03',
+        Icons.shield_rounded,
+        'Pay 25% & confirm',
+        'Secure your trip with just a 25% deposit. Balance due 30 days before travel. 100% refundable.',
+        const Color(0xFFD1FAE5),
+        const Color(0xFF059669),
+        '/trips',
+      ),
+    ];
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('SIMPLE PROCESS', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w800, color: const Color(0xFFD97706), letterSpacing: 1.2)),
+            const SizedBox(height: 4),
+            Text('Book in 3 easy steps', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w800, color: const Color(0xFF111827), letterSpacing: -0.3)),
+          ]),
+        ),
+        ...steps.map((s) => GestureDetector(
+          onTap: () => context.push(s.$7),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFAFAFB),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+            ),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(color: s.$5, borderRadius: BorderRadius.circular(12)),
+                child: Icon(s.$2, color: s.$6, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Step ${s.$1}', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, color: const Color(0xFF9CA3AF), letterSpacing: 0.5)),
+                const SizedBox(height: 2),
+                Text(s.$3, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF111827), letterSpacing: -0.2)),
+                const SizedBox(height: 4),
+                Text(s.$4, style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF6B7280), height: 1.4)),
+              ])),
+              const Icon(Icons.chevron_right_rounded, color: Color(0xFFD1D5DB), size: 20),
+            ]),
+          ),
+        )),
+        // Urgency note
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFEF3C7),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFFDE68A)),
+          ),
+          child: Row(children: [
+            const Icon(Icons.access_time_rounded, size: 16, color: Color(0xFFD97706)),
+            const SizedBox(width: 8),
+            Expanded(child: Text(
+              'Our experts reply within 1 hour — WhatsApp or call us now',
+              style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF92400E)),
+            )),
+          ]),
+        ),
+      ]),
     );
   }
 
